@@ -1,0 +1,67 @@
+{% extends "admin/index.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+    #content-main { position: relative; }
+    .master-management-banner {
+        background: linear-gradient(90deg, #1e293b 0%, #0f172a 100%);
+        border: 1px solid rgba(59, 130, 246, 0.4);
+        border-radius: 8px;
+        padding: 12px 20px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    .master-management-banner h2 {
+        margin: 0;
+        color: #fff;
+        font-size: 1.05rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+    }
+    .master-management-banner p {
+        margin: 0;
+        color: #94a3b8;
+        font-size: 0.75rem;
+        opacity: 0.9;
+    }
+    .btn-master {
+        background: #3b82f6;
+        color: white !important;
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-weight: 700;
+        font-size: 0.8rem;
+        text-decoration: none !important;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        flex-shrink: 0;
+    }
+    .btn-master:hover {
+        background: #2563eb;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="master-management-banner">
+    <div>
+        <h2>🚀 마스터 관리 시스템 (SCM Console)</h2>
+        <p>전 지점 공급망 및 재고 현황을 한눈에 파악하고 제어하는 마스터 관제 시스템으로 이동합니다.</p>
+    </div>
+    <a href="{% url 'super_admin' %}" class="btn-master">
+        <span>SCM 콘솔 접속하기</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+    </a>
+</div>
+
+{{ block.super }}
+{% endblock %}

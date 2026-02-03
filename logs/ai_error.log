@@ -1,0 +1,4 @@
+[2026-02-02 12:56:21] Connection Error: GenerativeModel.__init__() got an unexpected keyword argument 'transport'
+[2026-02-02 12:59:32] Connection Error: GenerativeModel.__init__() got an unexpected keyword argument 'transport'
+[2026-02-02 12:59:57] Connection Error: GenerativeModel.__init__() got an unexpected keyword argument 'transport'
+[2026-02-02 12:59:58] Connection Error: GenerativeModel.__init__() got an unexpected keyword argument 'transport'

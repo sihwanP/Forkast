@@ -1,0 +1,121 @@
+{% extends 'platform_ui/base.html' %}
+{% load static humanize %}
+
+{% block title %}메뉴 성과 분석 - Forkast{% endblock %}
+
+{% block content %}
+    <section class="pt-24 pb-12 px-6">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="flex flex-col md:flex-row items-end justify-between mb-10 pb-6 border-b border-white/10">
+                <div>
+                     <h1 class="text-3xl font-extrabold text-white flex items-center gap-3 mb-2">
+                        <span class="text-4xl">🍽</span> 메뉴 퍼포먼스
+                    </h1>
+                    <p class="text-gray-400">어떤 메뉴가 효자 상품인지, 어떤 메뉴가 전략 수정이 필요한지 확인하세요.</p>
+                </div>
+                 <div class="flex gap-2">
+                    <span class="px-3 py-1 rounded-lg bg-orange-500/20 text-orange-400 text-sm font-bold border border-orange-500/30">🔥 Hot: 치즈볼</span>
+                    <span class="px-3 py-1 rounded-lg bg-blue-500/20 text-blue-400 text-sm font-bold border border-blue-500/30">❄️ Cool: 매운 윙</span>
+                </div>
+            </div>
+
+            <!-- Menu Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Top Performers -->
+                <div class="glass p-8 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/5">
+                    <h3 class="text-xl font-bold mb-6 text-orange-400 flex items-center gap-2">
+                        <span>🏆</span> 베스트 셀러 (Top 5)
+                    </h3>
+                    <div class="space-y-4">
+                        {% for i in "12345" %}
+                        <div class="flex items-center justify-between p-4 rounded-xl bg-white/5 hover:bg-white/10 transition group cursor-pointer">
+                            <div class="flex items-center gap-4">
+                                <div class="w-8 h-8 rounded-full bg-orange-500 text-white flex items-center justify-center font-bold">{{ forloop.counter }}</div>
+                                <div>
+                                    <div class="font-bold text-white group-hover:text-orange-300 transition">황금 올리브 치킨</div>
+                                    <div class="text-xs text-gray-500">주문수: {{ 150|add:forloop.counter }}건</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-bold text-white">₩ 3,500,000</div>
+                                <div class="text-xs text-green-400">▲ 12%</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Analysis Chart -->
+                <div class="glass p-8 rounded-2xl">
+                     <h3 class="text-xl font-bold mb-6 text-blue-400 flex items-center gap-2">
+                        <span>🧩</span> 카테고리별 매출 비중
+                    </h3>
+                    <div id="menuPieChart" class="h-80 w-full"></div>
+                </div>
+            </div>
+            
+            <!-- Detailed Table Section -->
+            <div class="mt-8 glass p-8 rounded-2xl">
+                <h3 class="text-xl font-bold mb-6 text-white">상세 메뉴 분석표</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-gray-400 text-sm border-b border-gray-700">
+                                <th class="py-3 px-4">순위</th>
+                                <th class="py-3 px-4">메뉴명</th>
+                                <th class="py-3 px-4">카테고리</th>
+                                <th class="py-3 px-4">판매량</th>
+                                <th class="py-3 px-4">매출액</th>
+                                <th class="py-3 px-4">AI 추천</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm">
+                            <tr class="border-b border-gray-800 hover:bg-white/5 transition">
+                                <td class="py-4 px-4 font-bold">1</td>
+                                <td class="py-4 px-4">치즈볼 세트</td>
+                                <td class="py-4 px-4"><span class="px-2 py-0.5 bg-gray-700 rounded text-xs">사이드</span></td>
+                                <td class="py-4 px-4">450</td>
+                                <td class="py-4 px-4 font-bold">₩ 2,250,000</td>
+                                <td class="py-4 px-4 text-green-400 font-bold">가격 인상 가능 (유력)</td>
+                            </tr>
+                            <tr class="border-b border-gray-800 hover:bg-white/5 transition">
+                                <td class="py-4 px-4 font-bold">2</td>
+                                <td class="py-4 px-4">양념치킨</td>
+                                <td class="py-4 px-4"><span class="px-2 py-0.5 bg-gray-700 rounded text-xs">메인</span></td>
+                                <td class="py-4 px-4">320</td>
+                                <td class="py-4 px-4 font-bold">₩ 5,400,000</td>
+                                <td class="py-4 px-4 text-yellow-400 font-bold">세트 구성 추천</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    Highcharts.chart('menuPieChart', {
+        chart: { type: 'pie', backgroundColor: 'transparent' },
+        title: { text: null },
+        series: [{
+            name: '매출 비중',
+            data: [
+                { name: '치킨 (메인)', y: 65, color: '#f97316' },
+                { name: '사이드', y: 20, color: '#eab308' },
+                { name: '음료/주류', y: 15, color: '#3b82f6' }
+            ]
+        }],
+        plotOptions: {
+            pie: {
+                dataLabels: { enabled: true, color: 'white', format: '{point.name}: {point.percentage:.1f}%' },
+                borderWidth: 0
+            }
+        },
+        credits: { enabled: false }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,652 @@
+{% extends 'platform_ui/base.html' %}
+{% load static humanize %}
+
+{% block title %}포카스트 대시보드{% endblock %}
+
+{% block content %}
+    <!-- 2. Hero Section -->
+    <section class="section relative overflow-hidden flex items-end pb-20 min-h-screen">
+        <!-- Main Video -->
+        <video class="hero-video absolute top-0 left-0 w-full h-full object-cover z-[-1]" autoplay muted loop playsinline>
+            <source src="{% static 'videos/hero.mp4' %}" type="video/mp4">
+            <div class="bg-gray-900 w-full h-full"></div>
+        </video>
+        <!-- Cinematic Gradient Overlay -->
+        <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent z-0"></div>
+
+        <div class="relative z-10 max-w-7xl mx-auto w-full px-6 flex flex-col lg:flex-row items-end gap-12 animate-fade-in-up">
+
+            <!-- Left: Main Title -->
+            <div class="flex-1 text-left lg:mb-4">
+                <span class="inline-block py-1 px-3 rounded-full bg-blue-500/20 text-blue-400 text-sm font-bold mb-4 border border-blue-500/30">포카스트 AI 솔루션</span>
+                <h1 class="text-5xl lg:text-7xl font-bold mb-6 text-white drop-shadow-lg leading-[1.6]">
+                    AI 기반<br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-green-400">데일리 매출 예측</span>
+                </h1>
+                <p class="text-lg text-gray-300 max-w-lg drop-shadow-md">
+                    당신의 비즈니스 데이터를 실시간으로 분석하여,<br>오늘의 성공 전략과 따뜻한 감성 케어를 제공합니다.
+                </p>
+            </div>
+
+            <!-- Right: Real-time Data Cards -->
+            <div class="w-full lg:w-auto flex-none">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Revenue -->
+                    <a href="{% url 'sales_dashboard' %}" class="block glass p-5 rounded-xl border-l-4 border-blue-500 hover:bg-white/5 transition cursor-pointer relative z-[100] hover:scale-105">
+                        <h3 class="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">오늘 예상 매출 (AI)</h3>
+                        <p id="prediction-value" class="text-2xl font-bold text-white">
+                            {% if prediction_display %}₩ {{ prediction_display|intcomma }}{% else %}<span class="animate-pulse">분석중...</span>{% endif %}
+                        </p>
+                        <div id="prediction-status" class="mt-2 text-xs text-blue-300 flex items-center gap-1"><span>📈</span> <span>실시간 분석 중</span></div>
+                    </a>
+                    <!-- Weather -->
+                    <div class="glass p-5 rounded-xl border-l-4 border-yellow-500">
+                        <h3 class="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">현재 날씨 임팩트</h3>
+                        <p id="weather-cond" class="text-2xl font-bold text-white">{% if weather_obj %}{{ weather_obj.condition }}{% else %}<span class="animate-pulse">--</span>{% endif %}</p>
+                        <div class="mt-2 text-xs text-yellow-300 flex items-center gap-1"><span>🌡️</span> <span id="weather-temp">{% if weather_obj %}{{ weather_obj.temperature }}°{% else %}--{% endif %}</span></div>
+                    </div>
+                    <!-- Inventory -->
+                    <a href="{% url 'inventory' %}" class="block glass p-5 rounded-xl border-l-4 border-green-500 hover:bg-white/5 transition cursor-pointer relative z-10">
+                        <h3 class="text-gray-400 text-xs uppercase font-bold tracking-wider mb-1">재고 상태</h3>
+                        <p class="text-2xl font-bold text-white">{% if "부족" in inventory_ctx %}주의{% else %}안정적{% endif %}</p>
+                        <div class="mt-2 text-xs text-green-300 truncate max-w-[140px]">{{ inventory_ctx|default:"데이터 없음" }}</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. Service Explanation Video -->
+    <section class="section py-20 bg-gray-800">
+        <div class="max-w-7xl mx-auto w-full flex flex-col md:flex-row items-center gap-16 px-6">
+            <div class="w-full md:w-1/2">
+                <div data-src="{% static 'videos/service.mp4' %}" onclick="openVideoModal(this.dataset.src)"
+                    class="aspect-video bg-gray-700 rounded-xl overflow-hidden shadow-2xl flex items-center justify-center relative group cursor-pointer hover:ring-4 ring-blue-500/50 transition">
+                    <video class="w-full h-full object-cover pointer-events-none">
+                        <source src="{% static 'videos/service.mp4' %}" type="video/mp4">
+                    </video>
+                    <div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 flex items-center justify-center transition">
+                        <div class="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:scale-110 transition border border-white/30">
+                            <span class="text-4xl text-white ml-2">▶</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="w-full md:w-1/2 text-left">
+                <h2 class="text-4xl lg:text-5xl font-bold mb-8 leading-[2.0]">AI가 분석하는<br>초개인화 비즈니스 전략</h2>
+                <p class="text-lg lg:text-xl text-gray-300">Forkast의 AI는 단순한 통계가 아닙니다. 실시간으로 변화하는 시장 상황을 읽고, 당신의 매장에 딱 맞는 전략을 제시합니다.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. Promo Video -->
+    <section class="section py-20 bg-gray-900">
+        <div class="max-w-7xl mx-auto w-full text-center px-6">
+            <h2 class="text-4xl font-bold mb-12">성공하는 사장님들의 비밀</h2>
+            <div data-src="{% static 'videos/promo.mp4' %}" onclick="openVideoModal(this.dataset.src)"
+                class="aspect-video bg-gray-800 rounded-xl overflow-hidden shadow-2xl mx-auto max-w-5xl flex items-center justify-center relative cursor-pointer group hover:ring-4 ring-blue-500/50 transition">
+                <video class="w-full h-full object-cover pointer-events-none">
+                    <source src="{% static 'videos/promo.mp4' %}" type="video/mp4">
+                </video>
+                <div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 flex items-center justify-center transition">
+                    <div class="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:scale-110 transition border border-white/30">
+                        <span class="text-5xl text-white ml-2">▶</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. AI Sales Analysis -->
+    <section class="section py-20 bg-gray-800">
+        <div class="max-w-7xl mx-auto w-full px-6">
+            <h2 class="text-4xl font-bold mb-12 text-center">실시간 매출 분석 및 흐름 예측</h2>
+            
+            <div class="mb-8 flex justify-between items-end border-b border-gray-700 pb-4">
+                <div>
+                    <h3 class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-300">오늘 실시간 분석</h3>
+                    <p class="text-gray-400 mt-1 text-sm">실시간 데이터를 기반으로 한 AI 매출 통찰력</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <input type="file" id="csvUploadInput" accept=".csv" class="hidden" onchange="uploadCSV(this)">
+                    <button onclick="document.getElementById('csvUploadInput').click()" 
+                        class="group relative px-6 py-3 rounded-xl bg-blue-600 hover:bg-blue-500 transition-all shadow-lg hover:shadow-blue-500/30 overflow-hidden">
+                        <div class="absolute inset-0 bg-white/20 group-hover:translate-x-full transition-transform duration-500 ease-out -translate-x-full skew-x-12"></div>
+                        <span class="relative font-bold text-white flex items-center gap-2"><span>📂</span> 데이터 업로드</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+                <!-- Chart Area -->
+                <div class="glass p-1 rounded-2xl bg-gradient-to-br from-white/10 to-transparent relative shadow-2xl">
+                    <div class="bg-gray-900/80 backdrop-blur-xl rounded-xl p-6 h-96 flex flex-col relative text-center">
+                        <div id="salesChartContainer" class="w-full h-full"></div>
+                        <div id="chart-overlay-msg" class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 transition-opacity">
+                            <span class="text-white/20 text-4xl font-bold">데이터 수신 대기중...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analysis Dashboard -->
+                <div class="flex flex-col gap-6">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="glass bg-gray-800/50 p-5 rounded-2xl border border-white/5 relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 p-3 opacity-20 group-hover:scale-110 transition-transform text-4xl">💰</div>
+                            <h4 class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">총 매출</h4>
+                            <p class="text-3xl font-black text-white" id="stat-total-revenue">-</p>
+                        </div>
+                        <div class="glass bg-gray-800/50 p-5 rounded-2xl border border-white/5 relative overflow-hidden group">
+                            <div class="absolute top-0 right-0 p-3 opacity-20 group-hover:scale-110 transition-transform text-4xl">⏱️</div>
+                            <h4 class="text-gray-400 text-xs font-bold uppercase tracking-widest mb-2">총 주문</h4>
+                            <p class="text-3xl font-black text-white" id="stat-total-orders">-</p>
+                        </div>
+                    </div>
+
+                    <div class="glass p-6 rounded-2xl border border-blue-500/30 bg-gradient-to-b from-blue-900/20 to-gray-900/50 relative shadow-lg">
+                        <h3 class="flex items-center gap-2 font-bold text-xl text-blue-300 mb-4"><span class="animate-pulse">🤖</span> AI 분석 리포트</h3>
+                        <p id="ai-analysis-text" class="text-gray-300 text-base font-light">
+                            {% if ai_sales_analysis %}{{ ai_sales_analysis|linebreaksbr }}{% else %}<span class="text-gray-500 italic">데이터를 업로드하면 AI가 분석을 시작합니다...</span>{% endif %}
+                        </p>
+                    </div>
+
+                    <div class="relative group">
+                        <div class="absolute -inset-1 bg-gradient-to-r from-amber-400 to-orange-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                        <div class="relative bg-gray-900/80 backdrop-blur-xl p-6 rounded-2xl border border-amber-500/30 flex items-start gap-5">
+                            <div class="bg-amber-500/20 p-3 rounded-full shrink-0"><span class="text-3xl">💌</span></div>
+                            <div class="flex-1">
+                                <h4 class="text-xs font-bold text-amber-400 uppercase mb-2 tracking-widest flex items-center gap-2">오늘의 힐링 메시지 <span class="h-px flex-1 bg-amber-500/30"></span></h4>
+                                <p id="center-cheer-msg" class="text-amber-100/90 italic text-lg font-serif">
+                                    <span class="text-sm text-gray-400 not-italic font-sans">AI가 따뜻한 위로를 준비하고 있습니다...</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-bold mb-6 text-left border-l-4 border-purple-500 pl-4 flex justify-between items-center">
+                <span>과거 매출 및 흐름 분석</span>
+                <div class="flex items-center gap-2">
+                    <input type="file" id="pastCsvUploadInput" accept=".csv" class="hidden" onchange="uploadPastCSV(this)">
+                    <button onclick="document.getElementById('pastCsvUploadInput').click()" class="text-sm bg-purple-600 hover:bg-purple-500 px-4 py-2 rounded-lg transition flex items-center gap-2"><span>📂</span> 과거 데이터 업로드</button>
+                </div>
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div class="glass p-8 rounded-xl h-96 flex items-center justify-center bg-gray-900/50 relative">
+                    <div id="pastSalesChart" class="w-full h-full"></div>
+                </div>
+                <div class="space-y-6">
+                    <div class="glass p-8 rounded-xl border-l-4 border-purple-500">
+                        <h3 class="font-bold text-2xl mb-4">📉 AI 과거 분석</h3>
+                        <p id="past-analysis-text" class="text-gray-300 text-lg"><span class="animate-pulse">데이터를 분석하고 있습니다...</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. Decision Making Infographic -->
+    <section class="section py-20 bg-gray-800">
+        <h2 class="text-4xl font-bold mb-12 text-center">의사결정 대시보드</h2>
+        <div class="max-w-7xl mx-auto w-full glass p-12 rounded-2xl px-6">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-8">
+                <div>
+                    <h3 class="text-2xl font-bold">오늘의 AI 추천 액션</h3>
+                    <p class="text-gray-400">데이터 기반으로 가장 확률 높은 성공 전략을 선택하세요.</p>
+                </div>
+                <div class="text-right">
+                    <span class="text-sm text-gray-400">신뢰도</span>
+                    <div class="text-3xl font-bold text-green-400">92%</div>
+                </div>
+            </div>
+            
+            <div class="flex gap-4 items-center justify-center h-64 bg-gray-900/50 rounded-xl mb-8">
+                <div id="decision-sales" onclick="selectDecision('sales')" class="text-center p-4 cursor-pointer transition transform hover:scale-105 opacity-100">
+                    <div class="w-32 h-32 rounded-full border-8 border-blue-500 flex items-center justify-center text-xl font-bold mb-2 transition-all shadow-[0_0_20px_rgba(59,130,246,0.2)]">매출</div>
+                    <span class="text-gray-400 text-sm font-bold">목표 달성 유력</span>
+                </div>
+                <div id="decision-profit" onclick="selectDecision('profit')" class="text-center p-4 cursor-pointer transition transform hover:scale-105 opacity-100">
+                    <div class="w-32 h-32 rounded-full border-8 border-yellow-500 flex items-center justify-center text-xl font-bold mb-2 transition-all shadow-[0_0_20px_rgba(234,179,8,0.2)]">이익</div>
+                    <span class="text-gray-400 text-sm font-bold">마진율 25% 예상</span>
+                </div>
+                <div id="decision-customer" onclick="selectDecision('customer')" class="text-center p-4 cursor-pointer transition transform hover:scale-105 opacity-100">
+                    <div class="w-32 h-32 rounded-full border-8 border-green-500 flex items-center justify-center text-xl font-bold mb-2 transition-all shadow-[0_0_20px_rgba(34,197,94,0.2)]">고객</div>
+                    <span class="text-gray-400 text-sm font-bold">만족도 최상</span>
+                </div>
+            </div>
+
+            <div class="flex justify-between items-center gap-4">
+                <button onclick="openAppliedModal()" class="bg-gray-700 hover:bg-gray-600 px-6 py-3 rounded-lg font-bold transition flex items-center gap-2 border border-gray-600"><span>📋</span> 적용사항</button>
+                <div class="flex gap-4">
+                    <button class="bg-gray-600 hover:bg-gray-500 px-6 py-3 rounded-lg font-bold">보류</button>
+                    <button onclick="executeStrategy()" id="btn-execute-strategy" class="bg-blue-600 hover:bg-blue-500 px-6 py-3 rounded-lg font-bold transition flex items-center gap-2"><span>🚀</span> 전략 승인 및 실행</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 9. Strategy Section -->
+    <section class="section py-20 bg-slate-800/50">
+        <h2 class="text-4xl font-bold mb-12 text-center text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-500">최적 운영 전략 제안 (AI)</h2>
+        <div id="strategy-container" class="max-w-6xl mx-auto w-full px-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="glass p-8 rounded-2xl animate-pulse">
+                <div class="h-12 w-12 bg-gray-700 rounded-full mb-6"></div>
+                <div class="h-6 w-3/4 bg-gray-700 rounded mb-3"></div>
+                <div class="h-4 w-full bg-gray-700 rounded mb-6"></div>
+            </div>
+             <div class="glass p-8 rounded-2xl animate-pulse">
+                <div class="h-12 w-12 bg-gray-700 rounded-full mb-6"></div>
+                <div class="h-6 w-3/4 bg-gray-700 rounded mb-3"></div>
+                <div class="h-4 w-full bg-gray-700 rounded mb-6"></div>
+            </div>
+             <div class="glass p-8 rounded-2xl animate-pulse">
+                <div class="h-12 w-12 bg-gray-700 rounded-full mb-6"></div>
+                <div class="h-6 w-3/4 bg-gray-700 rounded mb-3"></div>
+                <div class="h-4 w-full bg-gray-700 rounded mb-6"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer (Dashboard Only) -->
+    <footer class="mt-20 border-t border-slate-700/50 bg-slate-900/50 backdrop-blur-sm py-12 px-6 lg:px-12">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            <!-- Brand -->
+            <div class="md:col-span-2">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">포카스트 AI (Forkast AI)</span>
+                </div>
+                <p class="text-gray-400 mb-4 max-w-sm">
+                    AI 기반 데일리 매출 예측 및 매장 관리 솔루션.<br>
+                    데이터로 증명하는 성공, 포카스트와 함께하세요.
+                </p>
+                <div class="flex gap-4">
+                    <a href="#" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-gray-400 hover:bg-blue-600 hover:text-white transition">🐦</a>
+                    <a href="#" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-gray-400 hover:bg-blue-600 hover:text-white transition">📘</a>
+                    <a href="#" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-gray-400 hover:bg-blue-600 hover:text-white transition">📸</a>
+                </div>
+            </div>
+
+            <!-- Links 1 -->
+            <div>
+                <h4 class="font-bold text-white mb-4">서비스</h4>
+                <ul class="space-y-2 text-gray-400">
+                    <li><a href="{% url 'sales_dashboard' %}" class="hover:text-blue-400 transition">매출 분석</a></li>
+                    <li><a href="{% url 'analytics_forecast' %}" class="hover:text-blue-400 transition">AI 예측</a></li>
+                    <li><a href="{% url 'analytics_menu' %}" class="hover:text-blue-400 transition">메뉴 인사이트</a></li>
+                    <li><a href="{% url 'settings' %}" class="hover:text-blue-400 transition">요금제 안내</a></li>
+                </ul>
+            </div>
+
+            <!-- Links 2 -->
+            <div>
+                <h4 class="font-bold text-white mb-4">고객 지원</h4>
+                <ul class="space-y-2 text-gray-400">
+                    <li><a href="#" class="hover:text-blue-400 transition">공지사항</a></li>
+                    <li><a href="#" class="hover:text-blue-400 transition">자주 묻는 질문</a></li>
+                    <li><a href="#" class="hover:text-blue-400 transition">1:1 문의하기</a></li>
+                    <li><a href="#" class="hover:text-blue-400 transition">API 문서</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-500">
+            <div class="text-center md:text-left">
+                <p class="mb-2">
+                    (주)포카스트 | 대표이사: 김환희 | 사업자등록번호: 123-45-67890<br>
+                    주소: 서울특별시 강남구 테헤란로 427 위워크타워 3층 | 통신판매업신고: 2026-서울강남-00123
+                </p>
+                <p>Copyright © 2026 Forkast Corp. All rights reserved.</p>
+            </div>
+            <div class="flex gap-6">
+                <a href="#" class="hover:text-white transition">이용약관</a>
+                <a href="#" class="hover:text-white transition font-bold">개인정보처리방침</a>
+                <a href="#" class="hover:text-white transition">운영정책</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <div id="modal-container"></div>
+    <div id="applied-modal" class="fixed inset-0 z-[200] hidden items-center justify-center">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeAppliedModal()"></div>
+        <div class="relative glass bg-gray-900 border border-gray-700 p-8 rounded-2xl max-w-2xl w-full mx-4 shadow-2xl transform transition-all scale-95 opacity-0 modal-content">
+            <button onclick="closeAppliedModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold mb-6 flex items-center gap-3"><span>📋</span> 현재 적용된 전략 목록</h3>
+            <div class="bg-gray-800/50 rounded-xl p-6 min-h-[200px] max-h-[400px] overflow-y-auto custom-scrollbar">
+                <ul id="applied-list" class="space-y-4"><li class="text-gray-500 text-center py-8">아직 적용된 전략이 없습니다.</li></ul>
+            </div>
+            <div class="flex justify-end mt-6 gap-3">
+                <button onclick="undoLastStrategy()" class="px-6 py-3 bg-red-600/80 hover:bg-red-500 rounded-lg text-white font-bold transition flex items-center gap-2"><span>↩️</span> 실행 취소</button>
+                <button onclick="closeAppliedModal()" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg text-white font-bold transition">확인</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="decision-modal" class="fixed inset-0 z-[200] hidden items-center justify-center">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeDecisionModal()"></div>
+        <div class="relative glass bg-gray-900 border border-gray-700 p-8 md:p-12 rounded-2xl max-w-2xl w-full mx-4 shadow-2xl transform transition-all scale-95 opacity-0 modal-content">
+            <button onclick="closeDecisionModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">&times;</button>
+            <div class="flex items-center gap-4 mb-6">
+                <span id="dm-icon" class="text-6xl"></span>
+                <div><span id="dm-category" class="text-blue-400 font-bold uppercase tracking-wider text-sm"></span><h3 id="dm-title" class="text-3xl font-bold mt-1"></h3></div>
+            </div>
+            <div id="dm-content" class="bg-gray-800/50 p-6 rounded-xl border border-gray-700/50 mb-8 text-gray-300 text-lg leading-relaxed whitespace-pre-line"></div>
+            <div class="flex justify-end gap-4">
+                <button onclick="closeDecisionModal()" class="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg text-white font-bold transition">닫기</button>
+                <button id="btn-apply-decision" onclick="applyDecisionStrategy()" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg text-white font-bold transition flex items-center gap-2"><span>🚀</span> 전략 적용하기</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="video-modal" class="fixed inset-0 z-[300] hidden items-center justify-center bg-black/90">
+         <div class="absolute inset-0" onclick="closeVideoModal()"></div>
+         <div class="relative w-full max-w-5xl aspect-video bg-black rounded-xl overflow-hidden shadow-2xl">
+             <button onclick="closeVideoModal()" class="absolute top-4 right-4 text-white text-3xl z-50 hover:text-red-500 transition">&times;</button>
+             <video id="modal-video-player" class="w-full h-full" controls>
+                 <source src="" type="video/mp4">
+             </video>
+         </div>
+    </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Video Modal
+    function openVideoModal(src) {
+        const modal = document.getElementById('video-modal');
+        const video = document.getElementById('modal-video-player');
+        video.src = src;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        video.play();
+    }
+    function closeVideoModal() {
+        const modal = document.getElementById('video-modal');
+        const video = document.getElementById('modal-video-player');
+        video.pause();
+        video.src = '';
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    // --- CSV & Chart Logic (Simplified Copy) ---
+    // (Pasted logic from index_v2.html)
+    
+     function uploadCSV(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // UI Feedback
+            const btn = input.nextElementSibling;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span>⏳</span> 분석 중...';
+            btn.disabled = true;
+
+            fetch('/api/upload-csv/', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    if(document.getElementById('ai-analysis-text')) document.getElementById('ai-analysis-text').innerText = data.analysis;
+                    if(document.getElementById('center-cheer-msg')) document.getElementById('center-cheer-msg').innerText = data.cheer_msg;
+                    
+                    if(document.getElementById('stat-total-revenue')) document.getElementById('stat-total-revenue').innerText = data.total_revenue.toLocaleString() + '원';
+                    if(document.getElementById('stat-total-orders')) document.getElementById('stat-total-orders').innerText = data.total_orders.toLocaleString() + '건';
+
+                    updateSalesChart(data.labels, data.data); 
+                    
+                    const overlay = document.getElementById('chart-overlay-msg');
+                    if(overlay) overlay.style.opacity = '0';
+
+                    alert('분석이 완료되었습니다!');
+                } else {
+                    alert('오류: ' + data.message);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('업로드 중 오류가 발생했습니다.');
+            })
+            .finally(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                input.value = ''; 
+            });
+        }
+
+        function uploadPastCSV(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('file', file);
+            const btn = input.nextElementSibling;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span>⏳</span> 비교 중...';
+            btn.disabled = true;
+
+            fetch('/api/upload-past-csv/', { method: 'POST', body: formData })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    let html = data.analysis.replace(/\*\*(.*?)\*\*/g, '<b class="text-purple-300">$1</b>');
+                    html = html.replace(/\n/g, '<br>');
+                    document.getElementById('past-analysis-text').innerHTML = html;
+                    updatePastChart(data.pie_labels, data.pie_data);
+                    alert('비교 분석이 완료되었습니다.');
+                } else {
+                    alert('오류: ' + data.message);
+                }
+            })
+            .finally(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                input.value = '';
+            });
+        }
+        
+    // Charts
+    function updateSalesChart(labels, data) {
+         // Transform data for Highcharts Area 3D
+         Highcharts.chart('salesChartContainer', {
+             chart: {
+                 type: 'area',
+                 backgroundColor: 'rgba(0,0,0,0)',
+                 options3d: {
+                     enabled: true,
+                     alpha: 15,
+                     beta: 15,
+                     depth: 50,
+                     viewDistance: 25
+                 }
+             },
+             title: { text: null },
+             xAxis: {
+                 categories: labels,
+                 labels: { style: { color: '#9ca3af' } },
+                 gridLineColor: 'rgba(255,255,255,0.1)'
+             },
+             yAxis: {
+                 title: { text: null },
+                 labels: { style: { color: '#9ca3af' } },
+                 gridLineColor: 'rgba(255,255,255,0.1)'
+             },
+             plotOptions: {
+                 area: {
+                     depth: 25,
+                     marker: { enabled: false },
+                     states: { hover: { lineWidth: 1 } },
+                     threshold: null
+                 }
+             },
+             series: [{
+                 name: '실시간 매출',
+                 data: data,
+                 color: '#3b82f6',
+                 fillColor: {
+                     linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                     stops: [
+                         [0, 'rgba(59, 130, 246, 0.5)'],
+                         [1, 'rgba(59, 130, 246, 0)']
+                     ]
+                 },
+                 lineColor: '#60a5fa'
+             }],
+             credits: { enabled: false },
+             legend: { enabled: false }
+         });
+    }
+
+    function updatePastChart(labels, data) {
+         Highcharts.chart('pastSalesChart', {
+            chart: { 
+                type: 'pie', 
+                backgroundColor: 'transparent', 
+                options3d: { 
+                    enabled: true, 
+                    alpha: 45, 
+                    beta: 0 
+                } 
+            },
+            title: { text: null },
+            accessibility: { point: { valueSuffix: '%' } },
+            plotOptions: { 
+                pie: { 
+                    allowPointSelect: true, 
+                    cursor: 'pointer', 
+                    depth: 35, 
+                    dataLabels: { 
+                        enabled: true, 
+                        format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                        style: { color: '#e5e7eb' }
+                    } 
+                } 
+            },
+            series: [{ 
+                type: 'pie', 
+                name: '매출 비중', 
+                data: labels.map((l, i) => [l, data[i]]) 
+            }],
+            credits: { enabled: false }
+        });
+    }
+
+    // Decision & Strategy
+    let selectedDecision = null;
+    let appliedStrategies = [];
+    const strategiesData = {
+            'sales': [
+                { icon: '📢', title: '긴급 타임 세일', summary: '오후 2시~4시 해피아워 15% 할인', score: 92, category: '매출 부스팅', detail: '유동 인구가 많지만 방문율이 떨어지는 오후 2시부터 4시 사이에 "해피아워 15% 할인" 이벤트를 진행하세요.' },
+                { icon: '🍰', title: '객단가 상승 세트', summary: '아메리카노 + 케이크 1인 세트 출시', score: 88, category: '메뉴 최적화', detail: '디저트 판매량이 저조합니다. 인기 음료인 아메리카노와 케이크를 묶은 "1인 달콤 세트"를 출시하세요.' },
+                { icon: '🛵', title: '배달 앱 깃발 최적화', summary: '주문 밀집 지역 깃발 재배치', score: 85, category: '배달 마케팅', detail: '효율이 낮은 A구역의 깃발을 주문량이 증가하는 C구역으로 이동시키세요.' }
+            ],
+            'profit': [
+                { icon: '🥛', title: '재고 소진 프로모션', summary: '유통기한 임박 우유 활용 라떼 할인', score: 94, category: '재고 관리', detail: '유통기한 임박 우유 소진을 위해 "오늘의 라떼" 10% 할인을 진행하세요.' },
+                { icon: '👥', title: '인력 효율화', summary: '15:00~16:00 파트타임 휴게 시간', score: 89, category: '인건비 최적화', detail: '해당 시간대 매출 대비 인건비 비중이 높습니다. 브레이크 타임을 활용하세요.' },
+                { icon: '⚡', title: '에너지 절약', summary: '피크타임 전력 제어', score: 82, category: '운영 비용', detail: '피크타임 전력 소모를 막기 위해 AI 자동 제어 시스템을 가동하세요.' }
+            ],
+            'customer': [
+                { icon: '👑', title: '단골 우대 캠페인', summary: '휴면 VIP 쿠폰 발송', score: 95, category: 'CRM 마케팅', detail: '최근 미방문 VIP 고객에게 "웰컴 백 무료 커피" 쿠폰을 발송하세요.' },
+                { icon: '⭐', title: '리뷰 이벤트', summary: '포토 리뷰 시 쿠키 증정', score: 90, category: '바이럴 마케팅', detail: '영수증 포토 리뷰 인증 시 수제 쿠키를 제공하여 리뷰 수를 늘리세요.' },
+                { icon: '🎂', title: '생일 축하', summary: '생일 고객 조각 케이크', score: 88, category: '감동 경영', detail: '이번 주 생일 고객에게 조각 케이크를 선물하세요.' }
+            ]
+    };
+
+    function selectDecision(type) {
+        selectedDecision = type;
+        const types = ['sales', 'profit', 'customer'];
+        types.forEach(t => {
+            const el = document.getElementById(`decision-${t}`);
+            if(t === type) { el.classList.add('scale-110'); el.classList.remove('opacity-50'); el.querySelector('div').classList.add('ring-4', 'ring-white'); }
+            else { el.classList.remove('scale-110'); el.classList.add('opacity-50'); el.querySelector('div').classList.remove('ring-4', 'ring-white'); }
+        });
+    }
+
+    function executeStrategy() {
+        if(!selectedDecision) { alert('전략을 선택해주세요.'); return; }
+        const btn = document.getElementById('btn-execute-strategy');
+        btn.disabled = true; btn.innerHTML = '분석 중...';
+        setTimeout(() => {
+            btn.disabled = false; btn.innerHTML = '🚀 전략 승인 및 실행';
+            openDecisionModal(selectedDecision);
+        }, 800);
+    }
+    
+    function openDecisionModal(type) {
+         const modal = document.getElementById('decision-modal');
+         const d = strategiesData[type][0]; // Demo: Show first strategy
+         
+         document.getElementById('dm-icon').innerText = {sales:'💰', profit:'⚖️', customer:'💖'}[type];
+         document.getElementById('dm-category').innerText = {sales:'매출 성장', profit:'비용 절감', customer:'고객 만족'}[type];
+         document.getElementById('dm-title').innerText = d.category; 
+         document.getElementById('dm-content').innerText = "AI 추천 전략:\n" + d.title + "\n\n" + d.detail;
+
+         modal.classList.remove('hidden'); modal.classList.add('flex');
+         setTimeout(() => { modal.querySelector('.modal-content').classList.remove('scale-95', 'opacity-0'); modal.querySelector('.modal-content').classList.add('scale-100', 'opacity-100'); }, 10);
+    }
+    function closeDecisionModal() {
+        document.getElementById('decision-modal').classList.add('hidden');
+        document.getElementById('decision-modal').classList.remove('flex');
+    }
+    function applyDecisionStrategy() {
+        closeDecisionModal();
+        alert('전략이 적용되었습니다!');
+        // Ideally update UI here
+    }
+    function openAppliedModal() { document.getElementById('applied-modal').classList.remove('hidden'); document.getElementById('applied-modal').classList.add('flex'); }
+    function closeAppliedModal() { document.getElementById('applied-modal').classList.add('hidden'); document.getElementById('applied-modal').classList.remove('flex'); }
+    function undoLastStrategy() { alert('취소할 내역이 없습니다.'); }
+    
+    function updateOperationalStrategies(type) {
+         // Logic to update strategy container (omitted for brevity, can be added if crucial)
+    }
+
+    function openStrategyModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
+    function closeStrategyModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
+
+    // Init Logic
+    fetch("{% url 'dashboard_stats_api' %}")
+        .then(r=>r.json())
+        .then(d=>{
+            if(d.status==='success'){
+                 document.getElementById('prediction-value').innerText = '₩ ' + Number(d.prediction).toLocaleString();
+                 if(d.weather.condition) {
+                     document.getElementById('weather-cond').innerText = d.weather.condition;
+                     document.getElementById('weather-temp').innerText = d.weather.temp + '°';
+                 }
+                 document.getElementById('ai-analysis-text').innerText = d.analysis;
+                 
+                 // Update strategies
+                 const container = document.getElementById('strategy-container');
+                 const modalContainer = document.getElementById('modal-container');
+                 container.innerHTML = '';
+                 d.strategies.forEach((s,i) => {
+                     const mid = `modal-${i}`;
+                     container.insertAdjacentHTML('beforeend', `
+                        <div onclick="openStrategyModal('${mid}')" class="glass p-8 rounded-2xl cursor-pointer hover:bg-white/5 transition transform hover:-translate-y-2 group relative overflow-hidden">
+                             <div class="text-5xl mb-6">${s.icon}</div>
+                             <h3 class="text-2xl font-bold mb-3">${s.title}</h3>
+                             <p class="text-gray-400 mb-6">${s.summary}</p>
+                             <div class="flex items-center gap-2"><div class="flex-1 h-2 bg-gray-700 rounded-full overflow-hidden"><div class="h-full bg-blue-500" style="width:${s.score}%"></div></div><span class="text-sm text-blue-400 font-bold">${s.score}점</span></div>
+                        </div>
+                     `);
+                     modalContainer.insertAdjacentHTML('beforeend', `
+                        <div id="${mid}" class="fixed inset-0 z-[100] hidden items-center justify-center">
+                            <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeStrategyModal('${mid}')"></div>
+                             <div class="relative glass bg-gray-900 border border-gray-700 p-8 rounded-2xl max-w-2xl w-full mx-4 shadow-2xl modal-content">
+                                <button onclick="closeStrategyModal('${mid}')" class="absolute top-4 right-4 text-gray-400">&times;</button>
+                                <h3 class="text-3xl font-bold mb-4">${s.title}</h3>
+                                <p class="text-gray-300 leading-relaxed">${s.detail}</p>
+                            </div>
+                        </div>
+                     `);
+                 });
+            }
+        });
+</script>
+{% endblock %}

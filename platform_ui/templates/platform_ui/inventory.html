@@ -1,0 +1,421 @@
+{% load static %}
+{% load humanize %}
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forkast - 재고 관리</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                fontFamily: { sans: ['Outfit', 'sans-serif'] },
+                extend: {
+                    colors: {
+                        background: '#0f172a',
+                        surface: '#1e293b',
+                        primary: '#3b82f6',
+                        secondary: '#64748b',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f172a;
+            color: white;
+        }
+
+        .glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-good {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .status-low {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .status-over {
+            background: rgba(234, 179, 8, 0.2);
+            color: #facc15;
+            border: 1px solid rgba(234, 179, 8, 0.3);
+        }
+
+        /* Modal Animation */
+        .modal {
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen p-6">
+
+    <!-- Header -->
+    <header class="flex justify-between items-center mb-10 max-w-7xl mx-auto">
+        <div class="flex items-center gap-4">
+            <a href="{% url 'dashboard' %}" class="glass p-3 rounded-full hover:bg-white/10 transition">
+                <i class="fa-solid fa-arrow-left text-xl"></i>
+            </a>
+            <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">재고
+                관리 (Inventory)</h1>
+        </div>
+        <button onclick="openModal()"
+            class="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg font-bold shadow-lg shadow-blue-500/30 transition flex items-center gap-2">
+            <i class="fa-solid fa-plus"></i> 새 항목 추가
+        </button>
+    </header>
+
+    <!-- Content -->
+    <main class="max-w-7xl mx-auto">
+        <div class="glass rounded-xl overflow-hidden">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-white/5 border-b border-white/10 text-gray-400 uppercase text-sm">
+                        <th class="p-6">상품명</th>
+                        <th class="p-6">현재 재고</th>
+                        <th class="p-6">적정 재고</th>
+                        <th class="p-6">상태</th>
+                        <th class="p-6 text-right">관리</th>
+                    </tr>
+                </thead>
+                <tbody id="inventory-table-body" class="divide-y divide-white/5">
+                    {% for item in inventory_items %}
+                    <tr class="hover:bg-white/5 transition group">
+                        <td class="p-6 font-semibold">{{ item.item_name }}</td>
+                        <td class="p-6 font-mono text-xl">{{ item.current_stock }}</td>
+                        <td class="p-6 text-gray-400">{{ item.optimal_stock }}</td>
+                        <td class="p-6">
+                            {% if item.status == 'GOOD' %}
+                            <span class="status-badge status-good">적정</span>
+                            {% elif item.status == 'LOW' %}
+                            <span class="status-badge status-low">부족 (발주필요)</span>
+                            {% else %}
+                            <span class="status-badge status-over">과잉</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-6 text-right opacity-50 group-hover:opacity-100 transition">
+                            <button
+                                onclick="editItem({{ item.id }}, '{{ item.item_name }}', {{ item.current_stock }}, {{ item.optimal_stock }})"
+                                class="text-blue-400 hover:text-blue-300 mr-4">
+                                <i class="fa-solid fa-pen"></i>
+                            </button>
+                            <button onclick="openOrderModal({{ item.id }}, '{{ item.item_name|escapejs }}')"
+                                class="text-green-400 hover:text-green-300 mr-4" title="발주">
+                                <i class="fa-solid fa-truck"></i>
+                            </button>
+                            <button onclick="deleteItem({{ item.id }})" class="text-red-400 hover:text-red-300">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="p-12 text-center text-gray-500">
+                            등록된 재고가 없습니다. '새 항목 추가' 버튼을 눌러 시작하세요.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if pending_orders %}
+        <div class="mt-8 glass rounded-xl overflow-hidden p-6">
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-yellow-400"></i> 입고 대기 현황 (Pending Orders)
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {% for order in pending_orders %}
+                <div class="bg-white/5 p-4 rounded-lg border border-white/10 flex justify-between items-center">
+                    <div>
+                        <div class="font-bold text-lg">{{ order.item.item_name }}</div>
+                        <div class="text-sm text-gray-400">
+                            {{ order.created_at|date:"Y-m-d H:i" }} 요청
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <div class="text-xl font-mono text-yellow-400 font-bold">
+                            +{{ order.quantity }}
+                        </div>
+                        <button onclick="confirmOrder({{ order.id }})"
+                            class="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded-lg text-sm font-bold transition shadow-lg shadow-blue-500/20">
+                            입고 확인
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </main>
+
+    <!-- Modal -->
+    <div id="itemModal" class="modal fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+        <div class="glass w-full max-w-md p-8 rounded-2xl border border-gray-700 shadow-2xl transform transition-all scale-95"
+            id="modalContent">
+            <h2 id="modalTitle" class="text-2xl font-bold mb-6">새 항목 추가</h2>
+            <form id="inventoryForm">
+                <input type="hidden" id="itemId">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">상품명</label>
+                        <input type="text" id="itemName"
+                            class="w-full bg-gray-900/50 border border-gray-600 rounded-lg p-3 focus:border-blue-500 focus:outline-none transition"
+                            placeholder="예: 원두" required>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">현재 재고</label>
+                            <input type="number" id="currentStock"
+                                class="w-full bg-gray-900/50 border border-gray-600 rounded-lg p-3 focus:border-blue-500 focus:outline-none transition"
+                                placeholder="0" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm text-gray-400 mb-1">적정 재고</label>
+                            <input type="number" id="optimalStock"
+                                class="w-full bg-gray-900/50 border border-gray-600 rounded-lg p-3 focus:border-blue-500 focus:outline-none transition"
+                                placeholder="0" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3 mt-8">
+                    <button type="button" onclick="closeModal()"
+                        class="px-5 py-2 rounded-lg hover:bg-white/10 transition">취소</button>
+                    <button type="submit"
+                        class="px-5 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg font-bold shadow-lg shadow-blue-500/20 transition">저장하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order Modal -->
+    <div id="orderModal" class="modal fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+        <div class="glass w-full max-w-sm p-8 rounded-2xl border border-gray-700 shadow-2xl transform transition-all scale-95"
+            id="orderModalContent">
+            <h2 class="text-2xl font-bold mb-2">📦 빠른 발주</h2>
+            <p id="orderItemName" class="text-gray-400 mb-6 font-medium">상품명</p>
+
+            <form id="orderForm">
+                <input type="hidden" id="orderItemId">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm text-gray-400 mb-1">발주 수량</label>
+                        <input type="number" id="orderQuantity"
+                            class="w-full bg-gray-900/50 border border-gray-600 rounded-lg p-3 focus:border-green-500 focus:outline-none transition text-xl font-bold"
+                            placeholder="10" value="10" min="1" required>
+                        <p class="text-xs text-gray-500 mt-2">* V1 버전에서는 발주 시 즉시 재고가 입고됩니다.</p>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3 mt-8">
+                    <button type="button" onclick="closeOrderModal()"
+                        class="px-5 py-2 rounded-lg hover:bg-white/10 transition">취소</button>
+                    <button type="submit"
+                        class="px-5 py-2 bg-green-600 hover:bg-green-500 rounded-lg font-bold shadow-lg shadow-green-500/20 transition flex items-center gap-2">
+                        <i class="fa-solid fa-paper-plane"></i> 발주하기
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('itemModal');
+        const modalContent = document.getElementById('modalContent');
+        const form = document.getElementById('inventoryForm');
+
+        // Order Modal Elements
+        const orderModal = document.getElementById('orderModal');
+        const orderModalContent = document.getElementById('orderModalContent');
+        const orderForm = document.getElementById('orderForm');
+
+        function openModal() {
+            document.getElementById('modalTitle').innerText = '새 항목 추가';
+            document.getElementById('itemId').value = '';
+            document.getElementById('itemName').value = '';
+            document.getElementById('currentStock').value = '';
+            document.getElementById('optimalStock').value = '';
+
+            modal.classList.add('active');
+            modalContent.classList.remove('scale-95');
+            modalContent.classList.add('scale-100');
+        }
+
+        function closeModal() {
+            modal.classList.remove('active');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+        }
+
+        function editItem(id, name, current, optimal) {
+            document.getElementById('modalTitle').innerText = '재고 수정';
+            document.getElementById('itemId').value = id;
+            document.getElementById('itemName').value = name;
+            document.getElementById('currentStock').value = current;
+            document.getElementById('optimalStock').value = optimal;
+
+            modal.classList.add('active');
+            modalContent.classList.remove('scale-95');
+            modalContent.classList.add('scale-100');
+        }
+
+        // --- Order Logic ---
+        function openOrderModal(id, name) {
+            document.getElementById('orderItemId').value = id;
+            document.getElementById('orderItemName').innerText = name + " 발주 신청";
+            document.getElementById('orderQuantity').value = 10; // Default
+
+            orderModal.classList.add('active');
+            orderModalContent.classList.remove('scale-95');
+            orderModalContent.classList.add('scale-100');
+
+            // Auto focus
+            setTimeout(() => document.getElementById('orderQuantity').select(), 100);
+        }
+
+        function closeOrderModal() {
+            orderModal.classList.remove('active');
+            orderModalContent.classList.remove('scale-100');
+            orderModalContent.classList.add('scale-95');
+        }
+
+        orderForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('orderItemId').value;
+            const quantity = document.getElementById('orderQuantity').value;
+
+            try {
+                const response = await fetch("{% url 'order_api' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ item_id: id, quantity: quantity })
+                });
+
+                if (response.ok) {
+                    alert('발주가 신청되었습니다.\n하단 [입고 대기 현황]에서 입고를 확정해주세요.');
+                    location.reload();
+                } else {
+                    const res = await response.json();
+                    alert('발주 실패: ' + (res.message || '알 수 없는 오류'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('통신 오류가 발생했습니다.');
+            }
+        });
+
+        async function confirmOrder(orderId) {
+            if (!confirm('물품이 입고되었습니까?\n확인 시 재고가 증가합니다.')) return;
+
+            try {
+                const response = await fetch("{% url 'order_api' %}", {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ order_id: orderId })
+                });
+
+                if (response.ok) {
+                    alert('입고가 완료되었습니다! (재고 반영됨)');
+                    location.reload();
+                } else {
+                    const res = await response.json();
+                    alert('처리 실패: ' + (res.message || '오류'));
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('통신 오류가 발생했습니다.');
+            }
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('itemId').value;
+            const data = {
+                id: id ? id : null,
+                item_name: document.getElementById('itemName').value,
+                current_stock: document.getElementById('currentStock').value,
+                optimal_stock: document.getElementById('optimalStock').value
+            };
+
+            try {
+                const response = await fetch("{% url 'inventory_api' %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('저장에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('오류가 발생했습니다.');
+            }
+        });
+
+        async function deleteItem(id) {
+            if (!confirm('정말 삭제하시겠습니까?')) return;
+
+            try {
+                const response = await fetch("{% url 'inventory_api' %}", {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify({ id: id })
+                });
+
+                if (response.ok) {
+                    location.reload();
+                } else {
+                    alert('삭제에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('오류가 발생했습니다.');
+            }
+        }
+    </script>
+</body>
+
+</html>

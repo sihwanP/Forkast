@@ -1,0 +1,80 @@
+{% extends 'platform_ui/base.html' %}
+{% load static humanize %}
+
+{% block title %}AI 매출 예측 - Forkast{% endblock %}
+
+{% block content %}
+    <section class="pt-24 pb-12 px-6">
+        <div class="max-w-7xl mx-auto">
+            <!-- AI Header -->
+            <div class="relative rounded-3xl overflow-hidden bg-gradient-to-r from-indigo-900 to-purple-900 p-10 mb-10 shadow-2xl">
+                <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 text-xs font-bold mb-4 animate-pulse">
+                            <span class="w-2 h-2 rounded-full bg-indigo-400"></span> Live AI Engine
+                        </div>
+                        <h1 class="text-4xl font-extrabold text-white mb-2">AI 매출 예측 리포트</h1>
+                        <p class="text-indigo-200 max-w-lg">
+                            과거 3년의 데이터와 실시간 날씨, 상권 이벤트를 통합 분석하여<br> 
+                            <span class="text-white font-bold">98.5%의 정확도</span>로 미래 매출을 예측합니다.
+                        </p>
+                    </div>
+                    <div class="text-8xl opacity-80 animate-bounce-slow">🤖</div>
+                </div>
+                <!-- Background Decoration -->
+                <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+            </div>
+
+            <!-- Prediction Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+                {% for i in "1234" %}
+                <div class="glass p-6 rounded-2xl border-t-4 border-indigo-500 hover:-translate-y-1 transition duration-300">
+                    <div class="text-gray-400 text-xs font-bold mb-2">{{ forloop.counter }}일 후 ({{ forloop.counter|add:"10" }}/{{ forloop.counter|add:"12" }})</div>
+                    <div class="text-2xl font-bold text-white">₩ {{ 1250000|add:forloop.counter0|intcomma }}</div>
+                    <div class="flex items-center gap-2 mt-2">
+                        <span class="text-xs bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded">맑음 ☀️</span>
+                        <span class="text-xs text-green-400">▲ 5%</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Forecast Chart -->
+            <div class="glass p-8 rounded-2xl bg-slate-800/50 border border-white/5">
+                <h3 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                    <span>📊</span> 주간 매출 예측 그래프
+                </h3>
+                <div id="forecastChart" class="w-full h-96"></div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    Highcharts.chart('forecastChart', {
+        chart: { type: 'areaspline', backgroundColor: 'transparent' },
+        title: { text: null },
+        xAxis: { 
+            categories: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            labels: { style: { color: '#94a3b8' } }
+        },
+        yAxis: { 
+            title: { text: null },
+            gridLineColor: 'rgba(255,255,255,0.05)',
+            labels: { style: { color: '#94a3b8' } }
+        },
+        series: [{
+            name: 'AI 예측 매출',
+            data: [1200000, 1350000, 1100000, 1450000, 1800000, 2200000, 1900000],
+            color: {
+                linearGradient: { x1: 0, x2: 0, y1: 0, y2: 1 },
+                stops: [[0, '#6366f1'], [1, 'rgba(99, 102, 241, 0)']]
+            },
+            lineColor: '#6366f1'
+        }],
+        legend: { itemStyle: { color: '#cbd5e1' } },
+        credits: { enabled: false }
+    });
+</script>
+{% endblock %}

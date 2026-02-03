@@ -1,0 +1,105 @@
+{% extends 'platform_ui/base.html' %}
+{% load static humanize %}
+
+{% block title %}배달 플랫폼 분석 - Forkast{% endblock %}
+
+{% block content %}
+    <section class="pt-24 pb-12 px-6">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-teal-900 to-emerald-900 rounded-3xl p-8 mb-10 border border-teal-500/30 relative overflow-hidden">
+                <div class="relative z-10">
+                    <h1 class="text-4xl font-extrabold text-white mb-4 flex items-center gap-3">
+                        <span>🛵</span> 배달 플랫폼 통합 분석
+                    </h1>
+                    <p class="text-teal-200">배달의민족, 요기요, 쿠팡이츠 데이터를 한눈에 비교하고 수수료를 절감하세요.</p>
+                </div>
+                <!-- Background Icon -->
+                <div class="absolute right-0 bottom-0 text-9xl opacity-10 transform translate-y-4">📦</div>
+            </div>
+
+            <!-- Platform Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <!-- Baemin -->
+                <div class="glass p-6 rounded-2xl border-t-4 border-teal-400 hover:-translate-y-1 transition duration-300">
+                    <h3 class="text-lg font-bold text-white mb-1">배달의민족</h3>
+                    <p class="text-3xl font-bold text-teal-400">58% <span class="text-sm font-normal text-gray-400">점유율</span></p>
+                    <div class="mt-4 flex justify-between text-sm text-gray-400 border-t border-gray-700 pt-3">
+                        <span>주문 수</span>
+                        <span class="text-white">128건</span>
+                    </div>
+                </div>
+                 <!-- Yogiyo -->
+                <div class="glass p-6 rounded-2xl border-t-4 border-red-500 hover:-translate-y-1 transition duration-300">
+                    <h3 class="text-lg font-bold text-white mb-1">요기요</h3>
+                    <p class="text-3xl font-bold text-red-500">24% <span class="text-sm font-normal text-gray-400">점유율</span></p>
+                     <div class="mt-4 flex justify-between text-sm text-gray-400 border-t border-gray-700 pt-3">
+                        <span>주문 수</span>
+                        <span class="text-white">52건</span>
+                    </div>
+                </div>
+                 <!-- Coupang Eats -->
+                <div class="glass p-6 rounded-2xl border-t-4 border-blue-500 hover:-translate-y-1 transition duration-300">
+                    <h3 class="text-lg font-bold text-white mb-1">쿠팡이츠</h3>
+                    <p class="text-3xl font-bold text-blue-500">18% <span class="text-sm font-normal text-gray-400">점유율</span></p>
+                     <div class="mt-4 flex justify-between text-sm text-gray-400 border-t border-gray-700 pt-3">
+                        <span>주문 수</span>
+                        <span class="text-white">39건</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analysis Section -->
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Delivery Time Analysis -->
+                <div class="lg:w-2/3 glass p-8 rounded-2xl">
+                    <h3 class="text-xl font-bold text-white mb-6">플랫폼별 평균 배달 시간 & 만족도</h3>
+                    <!-- Mock Visual Bar -->
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex justify-between mb-2 text-sm text-gray-300">
+                                <span>배달의민족 (28분)</span>
+                                <span>⭐ 4.8</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-teal-500 h-2 rounded-full" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div>
+                             <div class="flex justify-between mb-2 text-sm text-gray-300">
+                                <span>요기요 (35분)</span>
+                                <span>⭐ 4.5</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-red-500 h-2 rounded-full" style="width: 70%"></div>
+                            </div>
+                        </div>
+                        <div>
+                             <div class="flex justify-between mb-2 text-sm text-gray-300">
+                                <span>쿠팡이츠 (22분)</span>
+                                <span>⭐ 4.9</span>
+                            </div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-blue-500 h-2 rounded-full" style="width: 92%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-8 bg-blue-500/10 p-4 rounded-xl border border-blue-500/20 text-sm text-blue-200">
+                        ⚡ <b>Insight:</b> 쿠팡이츠의 배달 속도가 가장 빠르며 고객 만족도 또한 가장 높습니다.
+                    </div>
+                </div>
+
+                <!-- Fees -->
+                <div class="lg:w-1/3 glass p-8 rounded-2xl bg-gradient-to-b from-gray-800 to-gray-900">
+                    <h3 class="text-xl font-bold text-white mb-6">예상 수수료 지출</h3>
+                    <div class="text-4xl font-extrabold text-white mb-2">₩ 458,000</div>
+                    <div class="text-sm text-gray-500 mb-8">지난 달 대비 -2% (절감됨)</div>
+                    <button class="w-full py-3 bg-slate-700 hover:bg-slate-600 rounded-xl font-bold text-white transition">
+                        수수료 상세 내역서 다운로드
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </section>
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends 'platform_ui/base.html' %}
+{% load static humanize %}
+
+{% block title %}설정 - Forkast{% endblock %}
+
+{% block content %}
+    <section class="pt-24 pb-12 px-6">
+        <div class="max-w-4xl mx-auto">
+             <!-- Header -->
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-12 h-12 bg-gray-700/50 rounded-xl flex items-center justify-center text-2xl text-gray-300 border border-gray-600">
+                    ⚙️
+                </div>
+                <h1 class="text-3xl font-extrabold text-white">서비스 설정</h1>
+            </div>
+
+            <div class="space-y-8">
+                <!-- Business Goals -->
+                <div class="glass p-8 rounded-2xl">
+                    <h3 class="text-xl font-bold text-white mb-6 border-b border-gray-700 pb-4">🎯 목표 설정</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-gray-400 text-xs font-bold uppercase mb-2">이번 달 목표 매출</label>
+                            <div class="relative">
+                                <input type="text" value="30,000,000" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white focus:border-blue-500 outline-none transition font-bold text-lg">
+                                <span class="absolute right-4 top-3.5 text-gray-500 font-bold">원</span>
+                            </div>
+                        </div>
+                         <div>
+                            <label class="block text-gray-400 text-xs font-bold uppercase mb-2">영업 시간</label>
+                            <div class="flex gap-2">
+                                <input type="time" value="11:00" class="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white w-full">
+                                <span class="self-center text-gray-500">~</span>
+                                <input type="time" value="23:00" class="bg-slate-900 border border-slate-700 rounded-lg px-4 py-3 text-white w-full">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications Settings -->
+                <div class="glass p-8 rounded-2xl">
+                     <h3 class="text-xl font-bold text-white mb-6 border-b border-gray-700 pb-4">🔔 알림 수신 설정</h3>
+                     <div class="space-y-4">
+                        <label class="flex items-center justify-between cursor-pointer p-4 rounded-xl hover:bg-white/5 bg-slate-800/50 border border-white/5 transition group">
+                            <div class="flex items-center gap-4">
+                                <span class="text-2xl opacity-50 group-hover:opacity-100 transition">📉</span>
+                                <div>
+                                    <div class="font-bold text-white">매출 급감 알림</div>
+                                    <div class="text-xs text-gray-400">예상 매출보다 10% 이상 하락 시 즉시 알림</div>
+                                </div>
+                            </div>
+                            <div class="relative w-12 h-6 bg-blue-600 rounded-full transition-colors"><div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-md"></div></div>
+                        </label>
+
+                        <label class="flex items-center justify-between cursor-pointer p-4 rounded-xl hover:bg-white/5 bg-slate-800/50 border border-white/5 transition group">
+                            <div class="flex items-center gap-4">
+                                <span class="text-2xl opacity-50 group-hover:opacity-100 transition">📦</span>
+                                <div>
+                                    <div class="font-bold text-white">재고 부족 알림</div>
+                                    <div class="text-xs text-gray-400">안전 재고 이하로 떨어지면 알림</div>
+                                </div>
+                            </div>
+                            <div class="relative w-12 h-6 bg-blue-600 rounded-full transition-colors"><div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-md"></div></div>
+                        </label>
+                    </div>
+                </div>
+
+                 <!-- Account -->
+                <div class="glass p-8 rounded-2xl">
+                    <h3 class="text-xl font-bold text-white mb-6 border-b border-gray-700 pb-4">👤 계정 관리</h3>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center font-bold text-white text-xl">F</div>
+                            <div>
+                                <div class="font-bold text-white">Forkast Admin</div>
+                                <div class="text-xs text-gray-400">admin@forkast.ai</div>
+                            </div>
+                        </div>
+                        <button class="text-gray-400 hover:text-white text-sm font-bold border border-gray-600 px-4 py-2 rounded-lg hover:border-gray-500 transition">로그아웃</button>
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-4">
+                    <button class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-xl font-bold shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition transform hover:-translate-y-1">
+                        변경사항 저장하기
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

@@ -1,0 +1,549 @@
+{% extends 'platform_ui/base.html' %}
+{% load static humanize %}
+
+{% block title %}SCM ERP Console - Forkast AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    :root {
+        --erp-bg: #f8fafc;
+        --erp-card: #ffffff;
+        --erp-border: #e2e8f0;
+        --erp-primary: #2563eb;
+        --erp-primary-hover: #1d4ed8;
+        --erp-text-main: #0f172a;
+        --erp-text-muted: #64748b;
+        --erp-accent: #3b82f6;
+        --erp-success: #10b981;
+        --erp-warning: #f59e0b;
+        --erp-danger: #ef4444;
+    }
+
+    body {
+        background-color: var(--erp-bg);
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--erp-text-main);
+        letter-spacing: -0.01em;
+    }
+
+    .erp-card {
+        background: var(--erp-card);
+        border: 1px solid var(--erp-border);
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .erp-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08);
+    }
+
+    .erp-table thead {
+        background-color: #f1f5f9;
+        border-bottom: 2px solid var(--erp-border);
+    }
+
+    .erp-table th {
+        color: var(--erp-text-muted);
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 1.25rem 1.5rem;
+    }
+
+    .erp-table td {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--erp-border);
+        font-size: 0.9375rem;
+        color: var(--erp-text-main);
+    }
+
+    /* Zebra Striping */
+    .erp-table tbody tr:nth-child(even) {
+        background-color: #f8fafc;
+    }
+
+    .erp-table tbody tr:hover {
+        background-color: #f1f5f9;
+    }
+
+    .erp-btn-primary {
+        background-color: var(--erp-primary);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.625rem;
+        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+    }
+
+    .erp-btn-primary:hover {
+        background-color: var(--erp-primary-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+    }
+
+    .status-badge {
+        padding: 0.375rem 1rem;
+        border-radius: 10px;
+        font-size: 0.8125rem;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .status-approved { background-color: #ecfdf5; color: #059669; border: 1px solid #10b98133; }
+    .status-pending { background-color: #fffbeb; color: #d97706; border: 1px solid #f59e0b33; }
+    .status-low { background-color: #fef2f2; color: #dc2626; border: 1px solid #ef444433; }
+
+    /* Custom Forms */
+    .erp-input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        background-color: white;
+        border: 1px solid var(--erp-border);
+        border-radius: 12px;
+        font-size: 0.9375rem;
+        color: var(--erp-text-main);
+        transition: all 0.2s;
+        outline: none;
+    }
+
+    .erp-input:focus {
+        border-color: var(--erp-primary);
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.4s ease-out forwards;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<main class="min-h-screen pt-24 pb-12 px-6 lg:px-10">
+    <div class="max-w-[1700px] mx-auto">
+        
+        <!-- ERP Header Row -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div>
+                <nav class="flex text-sm text-slate-500 mb-2 gap-2 font-medium">
+                    <span>Admin</span>
+                    <span>/</span>
+                    <span class="text-blue-600 font-bold">SCM Master Console</span>
+                </nav>
+                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
+                    <span class="w-2 h-8 bg-blue-600 rounded-full"></span>
+                    ERP 시스템 통합 관제 센터
+                </h1>
+            </div>
+            
+            <div class="flex items-center gap-4 bg-white p-2 rounded-2xl border border-slate-200 shadow-sm">
+                <div class="px-4 py-2 border-r border-slate-100">
+                    <div class="text-[10px] text-slate-400 font-bold uppercase mb-0.5">시스템 관리자</div>
+                    <div class="text-sm font-bold text-slate-800">{{ admin_user }}</div>
+                </div>
+                <a href="{% url 'super_admin_logout' %}" class="px-4 py-2 text-red-500 hover:bg-red-50 font-bold text-sm rounded-xl transition-all">
+                    로그아웃
+                </a>
+            </div>
+        </div>
+
+        <!-- KPI Row: ERP Style -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+            <div class="erp-card p-6 border-l-4 border-l-red-500">
+                <div class="text-slate-500 text-xs font-bold uppercase mb-2">재고 부족 품목</div>
+                <div class="flex items-end justify-between">
+                    <div class="text-3xl font-black text-slate-900">{{ low_stock_count }} <span class="text-sm font-medium text-slate-400">Items</span></div>
+                    <div class="p-2 bg-red-50 rounded-lg text-red-600"><svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" /></svg></div>
+                </div>
+            </div>
+            <div class="erp-card p-6 border-l-4 border-l-blue-500">
+                <div class="text-slate-500 text-xs font-bold uppercase mb-2">미처리 수주 건수</div>
+                <div class="flex items-end justify-between">
+                    <div class="text-3xl font-black text-slate-900">{{ pending_orders_count }} <span class="text-sm font-medium text-slate-400">Orders</span></div>
+                    <div class="p-2 bg-blue-50 rounded-lg text-blue-600"><svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 2m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+                </div>
+            </div>
+            <div class="erp-card p-6 border-l-4 border-l-indigo-500">
+                <div class="text-slate-500 text-xs font-bold uppercase mb-2">총 등록 지점</div>
+                <div class="flex items-end justify-between">
+                    <div class="text-3xl font-black text-slate-900">{{ members|length }} <span class="text-sm font-medium text-slate-400">Stores</span></div>
+                    <div class="p-2 bg-indigo-50 rounded-lg text-indigo-600"><svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg></div>
+                </div>
+            </div>
+            <div class="erp-card p-6 border-l-4 border-l-emerald-500">
+                <div class="text-slate-500 text-xs font-bold uppercase mb-2">DB 동기화 상태</div>
+                <div class="flex items-end justify-between">
+                    <div class="text-3xl font-black text-slate-900">정상 <span class="text-sm font-medium text-slate-400">Sync</span></div>
+                    <div class="p-2 bg-emerald-50 rounded-lg text-emerald-600"><svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions Toolbar -->
+        <div class="erp-card p-6 mb-10 flex flex-wrap items-center justify-between gap-6">
+            <div class="flex items-center gap-6">
+                <h3 class="font-bold text-slate-700 border-r border-slate-200 pr-6 mr-2">통합 물류 제어</h3>
+                <div class="flex gap-3">
+                    <button onclick="openLogisticsModal('modal-inbound')" class="erp-btn-primary bg-slate-800 hover:bg-slate-900">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" /></svg>
+                        실시간 입고 등록
+                    </button>
+                    <button onclick="openLogisticsModal('modal-order')" class="erp-btn-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                        수주 수동 접수
+                    </button>
+                    <button onclick="openLogisticsModal('modal-procure')" class="erp-btn-primary bg-indigo-600 hover:bg-indigo-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                        본사 발주 실행
+                    </button>
+                    <button onclick="openLogisticsModal('modal-statement')" class="erp-btn-primary bg-amber-600 hover:bg-amber-700">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        거래명세서 관리
+                    </button>
+                </div>
+            </div>
+            
+            <form class="relative">
+                <input type="text" name="product_name" placeholder="상품 코드/명칭 검색" class="pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm w-64 focus:bg-white focus:ring-2 focus:ring-blue-500/20 outline-none transition-all">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            </form>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+            
+            <!-- Inventory Table Card -->
+            <div class="erp-card overflow-hidden">
+                <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-white">
+                    <h3 class="text-lg font-bold text-slate-800">재고 현황 마스터</h3>
+                    <span class="text-xs font-medium text-slate-500">실시간 연동 중</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full erp-table">
+                        <thead>
+                            <tr>
+                                <th>품목명</th>
+                                <th>현재고</th>
+                                <th>목표</th>
+                                <th>상태</th>
+                                <th class="text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in inventory %}
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="font-bold">{{ item.item_name }}</td>
+                                <td class="font-mono text-blue-600">{{ item.current_stock|intcomma }}</td>
+                                <td class="text-slate-500">{{ item.optimal_stock|intcomma }}</td>
+                                <td>
+                                    {% if item.status == 'LOW' %}
+                                    <span class="status-badge bg-red-100 text-red-600">부족</span>
+                                    {% elif item.status == 'OVER' %}
+                                    <span class="status-badge bg-amber-100 text-amber-600">과잉</span>
+                                    {% else %}
+                                    <span class="status-badge bg-emerald-100 text-emerald-600">적정</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-right">
+                                    <form method="POST" class="inline-flex items-center gap-2">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="update_inventory" value="true">
+                                        <input type="hidden" name="item_id" value="{{ item.id }}">
+                                        <input type="number" name="current_stock" value="{{ item.current_stock }}" class="w-16 px-2 py-1 text-xs border border-slate-200 rounded focus:ring-1 focus:ring-blue-500 outline-none">
+                                        <button type="submit" class="text-blue-600 hover:text-blue-800 font-bold text-xs underline">수정</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Branch Authorization Card -->
+            <div class="erp-card overflow-hidden">
+                <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-white">
+                    <h3 class="text-lg font-bold text-slate-800">지점 권한 관리</h3>
+                    <button onclick="document.getElementById('branch-reg-form').classList.toggle('hidden')" class="text-blue-600 hover:underline text-sm font-bold">+ 지점 신규 등록</button>
+                </div>
+                
+                <!-- Registration Form (Hidden by default) -->
+                <div id="branch-reg-form" class="hidden p-6 bg-slate-50 border-b border-slate-100">
+                    <form method="POST" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {% csrf_token %}
+                        <input type="hidden" name="add_member" value="true">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1.5">지점 명칭</label>
+                            <input type="text" name="name" required placeholder="예: 강남본점" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1.5">액세스 키</label>
+                            <div class="flex gap-2">
+                                <input type="text" name="master_key" id="master_key_input" required class="flex-grow px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-mono text-slate-900 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all">
+                                <button type="button" onclick="generateKey()" class="px-3 py-2 bg-slate-200 text-slate-700 text-xs font-bold rounded-lg whitespace-nowrap">자동 생성</button>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 text-right">
+                            <button type="submit" class="erp-btn-primary">해당 지점 등록 완료</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full erp-table">
+                        <thead>
+                            <tr>
+                                <th>지점 정보</th>
+                                <th>액세스 키</th>
+                                <th>승인 상태</th>
+                                <th class="text-right">권한 제어</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for member in members %}
+                            <tr class="hover:bg-slate-50 transition-colors">
+                                <td class="font-bold text-slate-800">{{ member.name }}</td>
+                                <td><code class="text-xs bg-slate-100 px-2 py-1 rounded">{{ member.master_key }}</code></td>
+                                <td>
+                                    {% if member.is_approved %}
+                                    <span class="status-badge status-approved">승인 완료</span>
+                                    {% else %}
+                                    <span class="status-badge status-pending">승인 대기</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-right flex items-center justify-end gap-3">
+                                    <form method="POST">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="toggle_permission" value="true">
+                                        <input type="hidden" name="member_id" value="{{ member.id }}">
+                                        {% if member.is_approved %}
+                                        <button type="submit" class="text-amber-600 hover:text-amber-800 text-xs font-bold border border-amber-200 bg-amber-50 px-3 py-1.5 rounded-lg">권한 중지</button>
+                                        {% else %}
+                                        <button type="submit" class="text-emerald-500 hover:text-emerald-700 text-xs font-bold border border-emerald-200 bg-emerald-50 px-3 py-1.5 rounded-lg">권한 승인</button>
+                                        {% endif %}
+                                    </form>
+                                    <form method="POST" onsubmit="return confirm('정말 삭제하시겠습니까?');">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="delete_member" value="true">
+                                        <input type="hidden" name="member_id" value="{{ member.id }}">
+                                        <button type="submit" class="text-slate-400 hover:text-red-500"><svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Recent Orders/Logistics Table -->
+            <div class="erp-card xl:col-span-2 overflow-hidden mb-12">
+                <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-white">
+                    <h3 class="text-lg font-bold text-slate-800">최근 물류 및 수주 이력</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full erp-table">
+                        <thead>
+                            <tr>
+                                <th>일시</th>
+                                <th>품목</th>
+                                <th>유형/수량</th>
+                                <th>처리 상태</th>
+                                <th class="text-right">관리</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for order in orders|slice:":15" %}
+                            <tr class="hover:bg-slate-50">
+                                <td class="text-slate-500 text-xs">{{ order.created_at|date:"Y-m-d H:i" }}</td>
+                                <td class="font-bold">{{ order.item.item_name }}</td>
+                                <td>
+                                    <span class="text-xs font-bold text-slate-400 uppercase">수주:</span> 
+                                    <span class="font-mono font-bold">{{ order.quantity|intcomma }}</span>
+                                </td>
+                                <td>
+                                    {% if order.status == 'PENDING' %}
+                                    <span class="status-badge bg-blue-100 text-blue-600">처리 대기</span>
+                                    {% elif order.status == 'COMPLETED' %}
+                                    <span class="status-badge bg-emerald-100 text-emerald-600">처리 완료</span>
+                                    {% else %}
+                                    <span class="status-badge bg-slate-100 text-slate-500">{{ order.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-right">
+                                    <form method="POST" class="inline-block">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                                        {% if order.status == 'PENDING' %}
+                                        <button type="submit" name="confirm_order" value="true" class="text-blue-600 hover:underline text-xs font-bold px-2 py-1">입고 승인</button>
+                                        {% endif %}
+                                        <button type="submit" name="delete_order" value="true" class="text-red-400 hover:text-red-600 text-xs font-bold px-2 py-1">삭제</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</main>
+
+<!-- Modals (Restyled for ERP) -->
+<div id="logistics-modal-overlay" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+    <!-- Modal Container -->
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in duration-200">
+        
+        <!-- Inbound -->
+        <div id="modal-inbound" class="logistics-modal hidden">
+            <div class="px-6 py-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <h2 class="font-bold text-slate-800">실시간 입고 등록</h2>
+                <button onclick="closeLogisticsModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+            </div>
+            <form method="POST" class="p-6 space-y-5">
+                {% csrf_token %}
+                <input type="hidden" name="action_type" value="reg_inbound">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">대상 품목</label>
+                    <select name="item_id" required class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-500/20">
+                        <option value="" disabled selected>입고 품목을 선택하세요</option>
+                        {% for item in inventory %}
+                        <option value="{{ item.id }}">{{ item.item_name }} (현재 : {{ item.current_stock }})</option>
+                        {% empty %}
+                        <option value="" disabled>등록된 품목이 없습니다</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">입고 수량</label>
+                    <input type="number" name="quantity" required placeholder="0" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-lg font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500/20">
+                </div>
+                <button type="submit" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-600/20 transition-all">물류 입고 확정</button>
+            </form>
+        </div>
+
+        <!-- Similar blocks for other modals... (Consolidated for brevity in the tool call) -->
+        <!-- Order Modal -->
+        <div id="modal-order" class="logistics-modal hidden">
+            <div class="px-6 py-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <h2 class="font-bold text-slate-800">수주 내역 수동 등록</h2>
+                <button onclick="closeLogisticsModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+            </div>
+            <form method="POST" class="p-6 space-y-5">
+                {% csrf_token %}
+                <input type="hidden" name="action_type" value="reg_order">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">수주 품목</label>
+                    <select name="item_id" required class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-500/20">
+                        <option value="" disabled selected>수주 품목을 선택하세요</option>
+                        {% for item in inventory %}
+                        <option value="{{ item.id }}">{{ item.item_name }}</option>
+                        {% empty %}
+                        <option value="" disabled>등록된 품목이 없습니다</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">수주 수량</label>
+                    <input type="number" name="quantity" required placeholder="0" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-lg font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500/20">
+                </div>
+                <button type="submit" class="w-full py-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-600/20 transition-all">수주 내역 저장</button>
+            </form>
+        </div>
+
+        <div id="modal-procure" class="logistics-modal hidden">
+            <div class="px-6 py-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <h2 class="font-bold text-slate-800">본사 발주 실행</h2>
+                <button onclick="closeLogisticsModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+            </div>
+            <form method="POST" class="p-6 space-y-5">
+                {% csrf_token %}
+                <input type="hidden" name="action_type" value="reg_procure">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">발주 항목</label>
+                    <select name="item_id" required class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-500/20">
+                        <option value="" disabled selected>발주 품목을 선택하세요</option>
+                        {% for item in inventory %}
+                        <option value="{{ item.id }}">{{ item.item_name }}</option>
+                        {% empty %}
+                        <option value="" disabled>등록된 품목이 없습니다</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">발주 수량</label>
+                    <input type="number" name="quantity" required placeholder="0" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-lg font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500/20">
+                </div>
+                <button type="submit" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl">발주 프로세스 실행</button>
+            </form>
+        </div>
+
+        <div id="modal-statement" class="logistics-modal hidden">
+            <div class="px-6 py-5 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                <h2 class="font-bold text-slate-800">거래명세서 관리</h2>
+                <button onclick="closeLogisticsModal()" class="text-slate-400 hover:text-slate-600">✕</button>
+            </div>
+            <form method="POST" class="p-6 space-y-5">
+                {% csrf_token %}
+                <input type="hidden" name="action_type" value="reg_statement">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">거래처/지점명</label>
+                    <input type="text" name="target_name" required placeholder="업체명 입력" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 outline-none focus:ring-2 focus:ring-blue-500/20">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide">총액 (KRW)</label>
+                    <input type="number" name="total_amount" required placeholder="0" class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-lg font-bold text-slate-900 outline-none focus:ring-2 focus:ring-blue-500/20">
+                </div>
+                <button type="submit" class="w-full py-4 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-xl">명세 기록 저장</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    function generateKey() {
+        const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        let key = '';
+        for (let i = 0; i < 6; i++) {
+            key += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        document.getElementById('master_key_input').value = key;
+    }
+
+    function openLogisticsModal(modalId) {
+        document.getElementById('logistics-modal-overlay').classList.remove('hidden');
+        document.querySelectorAll('.logistics-modal').forEach(m => m.classList.add('hidden'));
+        document.getElementById(modalId).classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeLogisticsModal() {
+        document.getElementById('logistics-modal-overlay').classList.add('hidden');
+        document.body.style.overflow = 'auto';
+    }
+
+    // Close on overlay click
+    document.getElementById('logistics-modal-overlay').addEventListener('click', function(e) {
+        if (e.target === this) closeLogisticsModal();
+    });
+</script>
+{% endblock %}
+{% endblock %}
