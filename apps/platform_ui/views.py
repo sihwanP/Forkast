@@ -431,9 +431,8 @@ def super_admin(request):
             order_id = request.POST.get('order_id')
             Order.objects.filter(id=order_id).delete()
 
-        # --- LOGISTICS INTEGRATION HANDLERS (Oracle Synced) ---
-        from django.db import connection
-        # GET Actions (from Admin links)
+        # --- LOGISTICS INTEGRATION HANDLERS ---
+        # GET Actions (from sidebar cancel buttons)
         cancel_id = request.GET.get('cancel_logistics')
         if cancel_id:
             model_type = request.GET.get('model')
@@ -521,13 +520,6 @@ def super_admin(request):
                     quantity=qty,
                     reason="외부 발주 입고 (Purchase Order)"
                 )
-                
-                # 4. Oracle Sync: Update Inventory in Oracle (Procurement)
-                with connection.cursor() as cursor:
-                    cursor.execute(
-                        "UPDATE PLATFORM_UI_INVENTORY SET CURRENT_STOCK = :stock WHERE ID = :id",
-                        {'stock': item.current_stock, 'id': item.id}
-                    )
         
         elif action_type == 'reg_order':
             item_id = request.POST.get('item_id')
@@ -535,13 +527,6 @@ def super_admin(request):
             if item_id and qty > 0:
                 item = Inventory.objects.get(id=item_id)
                 order = Order.objects.create(item=item, quantity=qty, status='PENDING')
-                
-                # Oracle Sync: Insert Order into Oracle
-                with connection.cursor() as cursor:
-                    cursor.execute(
-                        "INSERT INTO PLATFORM_UI_ORDER (ITEM_ID, QUANTITY, STATUS, CREATED_AT) VALUES (:item_id, :qty, 'PENDING', CURRENT_TIMESTAMP)",
-                        {'item_id': item.id, 'qty': qty}
-                    )
 
         elif action_type == 'reg_statement':
             target = request.POST.get('target_name')

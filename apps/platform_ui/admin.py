@@ -535,9 +535,9 @@ class OutboundAdmin(BaseErpAdmin):
     """
     출고 관리 (배송 현황) 전용 페이지
     """
-    list_display = ('id', 'order_ref', 'driver_name', 'status_timeline', 'scheduled_at')
+    list_display = ('id', 'product_name', 'order_ref', 'driver_name', 'status_timeline', 'scheduled_at')
     list_filter = ('status',)
-    search_fields = ('order__item__item_name', 'driver_name')
+    search_fields = ('order__item__item_name', 'product_name', 'driver_name')
     change_list_template = 'admin/logistics_master_detail.html'
     actions = [export_to_csv, cancel_delivery]
 

@@ -297,6 +297,7 @@ class Delivery(models.Model):
     ]
     
     order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name='delivery', verbose_name="연관 주문")
+    product_name = models.CharField(max_length=100, blank=True, null=True, verbose_name="상품명")
     driver_name = models.CharField(max_length=100, blank=True, null=True, verbose_name="배송원 성함")
     vehicle_info = models.CharField(max_length=100, blank=True, null=True, verbose_name="차량 정보")
     delivery_address = models.TextField(verbose_name="배송지")
@@ -307,6 +308,11 @@ class Delivery(models.Model):
     class Meta:
         verbose_name = "배송 관리"
         verbose_name_plural = "배송/물류 관리"
+
+    def save(self, *args, **kwargs):
+        if self.order and self.order.item and not self.product_name:
+            self.product_name = self.order.item.item_name
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Delivery for Order #{self.order.id} - {self.get_status_badge_text()}"
