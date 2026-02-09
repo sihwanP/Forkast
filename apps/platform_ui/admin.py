@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from django.urls import reverse
 from django.http import HttpResponse
 import csv
 from .models import (
@@ -197,13 +196,6 @@ class InventoryMovementAdmin(BaseErpAdmin):
         return format_html('<span style="background:{}; color:white; padding:2px 6px; border-radius:4px; font-weight:bold; font-size:11px;">{}</span>', color, label)
     type_badge.short_description = "유형"
 
-    def cancel_row_action(self, obj):
-        return format_html(
-            '<a class="button" href="{}?cancel_logistics={}&model=inbound" style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; padding:2px 6px; font-size:11px;">취소</a>',
-            reverse('super_admin'), obj.id
-        )
-    cancel_row_action.short_description = "조작"
-
 # ==========================================
 # 3. POS & LOGS
 # ==========================================
@@ -262,15 +254,39 @@ class MemberAdmin(BaseErpAdmin):
 class AdminConfigAdmin(BaseErpAdmin):
     list_display = ('key', 'updated_at')
 
+# ==========================================
+# Helper: 재고 상태 자동 재계산
+# ==========================================
+def recalculate_inventory_status(product):
+    """재고 비율에 따라 상태(LOW/GOOD/OVER) 자동 재계산."""
+    if product.optimal_stock > 0:
+        ratio = product.current_stock / product.optimal_stock
+    else:
+        ratio = 1.0
+    if ratio < 0.3:
+        product.status = 'LOW'
+    elif ratio > 1.5:
+        product.status = 'OVER'
+    else:
+        product.status = 'GOOD'
+    product.save()
+
+# ==========================================
 # Custom Actions for Logistics
+# ==========================================
 def confirm_delivery_receipt(modeladmin, request, queryset):
-    """Confirm delivery receipt and update inventory."""
+    """입고 확인: 재고 증가 + 상태 자동 재계산."""
     from .models import InventoryMovement
     count = 0
     for order in queryset.filter(status='PENDING'):
         order.status = 'COMPLETED'
         order.save()
-        # Create inventory movement for audit trail
+        # 재고 증가
+        product = order.item
+        product.current_stock += order.quantity
+        product.save()
+        recalculate_inventory_status(product)
+        # 입출고 이력 기록
         InventoryMovement.objects.create(
             type='IN',
             product=order.item,
@@ -282,27 +298,67 @@ def confirm_delivery_receipt(modeladmin, request, queryset):
 confirm_delivery_receipt.short_description = "선택 항목 입고 확인"
 
 def cancel_order(modeladmin, request, queryset):
-    """Cancel selected orders."""
-    count = queryset.filter(status='PENDING').update(status='CANCELLED')
+    """주문 취소: 완료된 주문은 재고 원복 + 배송 취소 + 상태 재계산."""
+    from .models import InventoryMovement, Delivery
+    count = 0
+    for order in queryset.exclude(status='CANCELLED'):
+        if order.status == 'COMPLETED':
+            # 재고 원복
+            product = order.item
+            if order.type == 'SALES':  # 출고였으므로 재고 복원
+                product.current_stock += order.quantity
+            else:  # 입고였으므로 재고 차감
+                product.current_stock -= order.quantity
+            product.save()
+            recalculate_inventory_status(product)
+            # 연관 배송 취소
+            Delivery.objects.filter(order=order).exclude(status='CANCELLED').update(status='CANCELLED')
+        order.status = 'CANCELLED'
+        order.save()
+        count += 1
     modeladmin.message_user(request, f'{count}건의 주문이 취소되었습니다.')
 cancel_order.short_description = "선택 항목 주문 취소"
 
+def approve_sales_order(modeladmin, request, queryset):
+    """수주 승인: Delivery 자동 생성 + 재고 차감 + 이력 기록."""
+    from .models import InventoryMovement, Delivery
+    from django.utils import timezone
+    count = 0
+    for order in queryset.filter(status='PENDING'):
+        order.status = 'COMPLETED'
+        order.save()
+        # 재고 차감 (출고)
+        product = order.item
+        product.current_stock -= order.quantity
+        product.save()
+        recalculate_inventory_status(product)
+        # 배송 자동 생성
+        Delivery.objects.get_or_create(
+            order=order,
+            defaults={
+                'delivery_address': order.branch_name or '지점 배송',
+                'status': 'SCHEDULED',
+                'scheduled_at': timezone.now()
+            }
+        )
+        # 입출고 이력 기록
+        InventoryMovement.objects.create(
+            type='OUT',
+            product=order.item,
+            quantity=order.quantity,
+            reason=f'수주 승인 및 배송 예약 (Order #{order.id})'
+        )
+        count += 1
+    modeladmin.message_user(request, f'{count}건의 수주가 승인되었습니다. 배송이 자동 생성되었습니다.')
+approve_sales_order.short_description = "선택 수주 승인 (배송 자동 생성)"
+
 @admin.register(Order)
 class OrderAdmin(BaseErpAdmin):
-    list_display = ('id', 'product_name', 'quantity', 'status_badge', 'created_at', 'delivery_link', 'cancel_row_action')
+    list_display = ('id', 'product_name', 'quantity', 'status_badge', 'created_at', 'delivery_link')
     list_editable = ('quantity',)
-    list_filter = ('status',)
+    list_filter = ('status', 'type')
     change_list_template = 'admin/logistics_master_detail.html'
-    actions = [export_to_csv, confirm_delivery_receipt, cancel_order]
-
-    def cancel_row_action(self, obj):
-        if obj.status != 'CANCELLED':
-            return format_html(
-                '<a class="button" href="{}?cancel_logistics={}&model=order" style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; padding:2px 6px; font-size:11px;">주문취소</a>',
-                reverse('super_admin'), obj.id
-            )
-        return "-"
-    cancel_row_action.short_description = "조작"
+    actions = [export_to_csv, approve_sales_order, confirm_delivery_receipt, cancel_order]
 
     def status_badge(self, obj):
         colors = {'PENDING': '#f59e0b', 'COMPLETED': '#10b981', 'CANCELLED': '#ef4444'}
@@ -311,9 +367,12 @@ class OrderAdmin(BaseErpAdmin):
     status_badge.short_description = "상태"
 
     def delivery_link(self, obj):
-        if hasattr(obj, 'delivery'):
-            return format_html('<a href="../delivery/{}/change/?_popup=1" target="erp-detail-frame" style="color:#3b82f6; text-decoration:underline;">{}</a>', 
-                               obj.delivery.id, obj.delivery.get_status_display())
+        try:
+            if obj.delivery:
+                return format_html('<a href="../delivery/{}/change/?_popup=1" target="erp-detail-frame" style="color:#3b82f6; text-decoration:underline;">{}</a>', 
+                                   obj.delivery.id, obj.delivery.get_status_display())
+        except Delivery.DoesNotExist:
+            pass
         return "N/A"
     delivery_link.short_description = "배송 정보"
     
@@ -377,21 +436,12 @@ class SalesOrderAdmin(BaseErpAdmin):
     """
     수주 관리 (가맹점 주문) 전용 페이지
     """
-    list_display = ('id', 'branch_name', 'product_name', 'quantity', 'status_badge', 'created_at', 'delivery_action', 'cancel_row_action')
+    list_display = ('id', 'branch_name', 'product_name', 'quantity', 'status_badge', 'created_at', 'delivery_action')
     list_editable = ('quantity',)
     list_filter = ('status', 'branch_name')
     search_fields = ('branch_name', 'item__item_name', 'product_name')
     change_list_template = 'admin/logistics_master_detail.html'
-    actions = [export_to_csv, confirm_delivery_receipt, cancel_order]
-
-    def cancel_row_action(self, obj):
-        if obj.status != 'CANCELLED':
-            return format_html(
-                '<a class="button" href="{}?cancel_logistics={}&model=order" style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; padding:2px 6px; font-size:11px;">수취거부/취소</a>',
-                reverse('super_admin'), obj.id
-            )
-        return "-"
-    cancel_row_action.short_description = "취소"
+    actions = [export_to_csv, approve_sales_order, cancel_order]
 
     def get_queryset(self, request):
         return super().get_queryset(request).filter(type='SALES')
@@ -406,70 +456,75 @@ class SalesOrderAdmin(BaseErpAdmin):
     status_badge.short_description = "진행 상태"
 
     def delivery_action(self, obj):
+        try:
+            if obj.status == 'COMPLETED' and obj.delivery:
+                return format_html(
+                    '<a href="/admin/platform_ui/outbound/{}/change/" style="color:#3b82f6;">배송 #{}</a>',
+                    obj.delivery.id, obj.delivery.id
+                )
+        except Delivery.DoesNotExist:
+            pass
         if obj.status == 'PENDING':
-            return format_html(
-                '<a class="button" href="{}?auto_approve={}" style="padding:4px 8px; font-size:11px;">승인/출고</a>',
-                reverse('super_admin'), obj.id
-            )
-        elif hasattr(obj, 'delivery'):
-             return format_html(
-                '<a href="/admin/platform_ui/outbound/{}/change/" style="color:#3b82f6;">Detail #{}</a>',
-                obj.delivery.id, obj.delivery.id
-            )
+            return format_html('<span style="color:#f59e0b; font-weight:bold;">승인 대기 (체크 후 액션 사용)</span>')
         return "-"
-    delivery_action.short_description = "관리"
+    delivery_action.short_description = "배송 관리"
 
 @admin.register(PurchaseOrder)
 class PurchaseOrderAdmin(BaseErpAdmin):
     """
     발주 관리 (공급사 발주) 전용 페이지
     """
-    list_display = ('id', 'product_name', 'quantity', 'status_badge', 'created_at', 'cancel_row_action')
+    list_display = ('id', 'product_name', 'quantity', 'status_badge', 'created_at')
     list_editable = ('quantity',)
     list_filter = ('status',)
     change_list_template = 'admin/logistics_master_detail.html'
-    actions = [export_to_csv]
-
-    def cancel_row_action(self, obj):
-        if obj.status != 'CANCELLED':
-            return format_html(
-                '<a class="button" href="{}?cancel_logistics={}&model=order" style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; padding:2px 6px; font-size:11px;">발주취소</a>',
-                reverse('super_admin'), obj.id
-            )
-        return "-"
-    cancel_row_action.short_description = "취소"
+    actions = [export_to_csv, confirm_delivery_receipt, cancel_order]
 
     def get_queryset(self, request):
         return super().get_queryset(request).filter(type='PURCHASE')
     
     def status_badge(self, obj):
+        colors = {'PENDING': '#f59e0b', 'COMPLETED': '#10b981', 'CANCELLED': '#ef4444'}
+        labels = {'PENDING': '입고 대기', 'COMPLETED': '입고 완료', 'CANCELLED': '발주 취소'}
         return format_html(
-            '<span style="background:#e0e7ff; color:#4338ca; padding:4px 8px; border-radius:4px; font-weight:bold;">{}</span>',
-            obj.get_status_display()
+            '<span style="color:{}; font-weight:bold;">{}</span>',
+            colors.get(obj.status, '#4338ca'), labels.get(obj.status, obj.get_status_display())
         )
     status_badge.short_description = "상태"
+
+def cancel_inbound(modeladmin, request, queryset):
+    """입고 취소: 재고 원복 + 상태 재계산."""
+    count = 0
+    for move in queryset:
+        product = move.product
+        product.current_stock -= move.quantity
+        product.save()
+        recalculate_inventory_status(product)
+        move.delete()
+        count += 1
+    modeladmin.message_user(request, f'{count}건의 입고가 취소되었습니다. 재고가 원복되었습니다.')
+cancel_inbound.short_description = "선택 입고 취소 (재고 원복)"
+
+def cancel_delivery(modeladmin, request, queryset):
+    """배송 취소."""
+    count = queryset.exclude(status='CANCELLED').update(status='CANCELLED')
+    modeladmin.message_user(request, f'{count}건의 배송이 취소되었습니다.')
+cancel_delivery.short_description = "선택 배송 취소"
 
 @admin.register(Inbound)
 class InboundAdmin(BaseErpAdmin):
     """
     입고 관리 (본사 입고) 전용 페이지
     """
-    list_display = ('created_at', 'product_name', 'quantity', 'reason', 'status_label', 'cancel_row_action')
+    list_display = ('created_at', 'product_name', 'quantity', 'reason', 'status_label')
     list_editable = ('quantity',)
     list_filter = ('created_at',)
     search_fields = ('product__item_name', 'product_name')
     change_list_template = 'admin/logistics_master_detail.html'
-    actions = [export_to_csv, confirm_delivery_receipt]
+    actions = [export_to_csv, cancel_inbound]
 
     def get_queryset(self, request):
         return super().get_queryset(request).filter(type='IN')
-
-    def cancel_row_action(self, obj):
-        return format_html(
-            '<a class="button" href="{}?cancel_logistics={}&model=inbound" style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; padding:2px 6px; font-size:11px;">입고취소</a>',
-            reverse('super_admin'), obj.id
-        )
-    cancel_row_action.short_description = "취소"
 
     def status_label(self, obj):
         return format_html('<span style="color:#16a34a; font-weight:bold;">입고 완료</span>')
@@ -480,20 +535,11 @@ class OutboundAdmin(BaseErpAdmin):
     """
     출고 관리 (배송 현황) 전용 페이지
     """
-    list_display = ('id', 'order_ref', 'driver_name', 'status_timeline', 'scheduled_at', 'cancel_row_action')
+    list_display = ('id', 'order_ref', 'driver_name', 'status_timeline', 'scheduled_at')
     list_filter = ('status',)
     search_fields = ('order__item__item_name', 'driver_name')
     change_list_template = 'admin/logistics_master_detail.html'
-    actions = [export_to_csv]
-
-    def cancel_row_action(self, obj):
-        if obj.status != 'CANCELLED':
-            return format_html(
-                '<a class="button" href="{}?cancel_logistics={}&model=delivery" style="background:#fee2e2; color:#dc2626; border:1px solid #fca5a5; padding:2px 6px; font-size:11px;">출고취소</a>',
-                reverse('super_admin'), obj.id
-            )
-        return "-"
-    cancel_row_action.short_description = "취소"
+    actions = [export_to_csv, cancel_delivery]
 
     def order_ref(self, obj):
         return format_html('<b>Order #{}</b><br>{}', obj.order.id, obj.order.item.item_name)
