@@ -1,0 +1,32 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block extrastyle %}
+  {{ block.super }}
+  <style>
+    /* Logistics Specific Styles */
+    #changelist table thead th {
+        background-color: #f1f5f9;
+        color: #334155;
+        border-bottom: 2px solid #cbd5e1;
+    }
+    #changelist table tbody tr:nth-child(even) {
+        background-color: #f8fafc;
+    }
+    #changelist .paginator {
+        border-top: 1px solid #cbd5e1;
+        padding-top: 10px;
+    }
+  </style>
+{% endblock %}
+
+{% block content_title %}
+    <h1 style="margin-bottom: 20px; font-weight: 800; font-size: 1.5rem; color: #1e293b;">
+        {{ cl.opts.verbose_name_plural|capfirst }}
+    </h1>
+    {% if cl.opts.verbose_name == "수주 관리 (Sales Order)" %}
+        <div style="background: #eff6ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bfdbfe; color: #1e40af;">
+            <i class="fa-solid fa-circle-info"></i> <strong>수주 관리 도움말:</strong> 가맹점에서 들어온 주문 내역입니다. '승인' 상태로 변경하면 출고 지시가 생성됩니다.
+        </div>
+    {% endif %}
+{% endblock %}

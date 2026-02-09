@@ -1,0 +1,133 @@
+{% extends 'platform_ui/base.html' %}
+{% load static %}
+
+{% block title %}회원가입 - Forkast AI{% endblock %}
+
+{% block extra_css %}
+<style>
+    .register-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    }
+    .register-card {
+        width: 100%;
+        max-width: 420px;
+        background: rgba(30, 41, 59, 0.8);
+        backdrop-filter: blur(20px);
+        border-radius: 24px;
+        padding: 3rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
+    .register-input {
+        width: 100%;
+        padding: 1rem 1.25rem;
+        background: rgba(15, 23, 42, 0.6);
+        border: 2px solid rgba(71, 85, 105, 0.5);
+        border-radius: 12px;
+        color: #f1f5f9;
+        font-size: 1rem;
+        transition: all 0.3s;
+        outline: none;
+    }
+    .register-input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+    }
+    .register-input::placeholder {
+        color: #64748b;
+    }
+    .register-btn {
+        width: 100%;
+        padding: 1rem;
+        background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        color: white;
+        font-weight: 700;
+        font-size: 1rem;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    }
+    .register-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(59, 130, 246, 0.5);
+    }
+    .error-list {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 12px;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .error-list li {
+        color: #fca5a5;
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="register-container">
+    <div class="register-card">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-black text-white mb-2">회원가입</h1>
+            <p class="text-slate-400">Forkast AI 서비스에 가입하세요</p>
+        </div>
+
+        {% if form.errors %}
+        <ul class="error-list list-disc list-inside">
+            {% for field in form %}
+                {% for error in field.errors %}
+                    <li>{{ field.label }}: {{ error }}</li>
+                {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+
+        <form method="POST" class="space-y-5">
+            {% csrf_token %}
+            
+            <div>
+                <label class="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-wider">사용자명</label>
+                <input type="text" name="username" class="register-input" placeholder="아이디를 입력하세요" required 
+                       value="{{ form.username.value|default:'' }}">
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-wider">이메일</label>
+                <input type="email" name="email" class="register-input" placeholder="이메일을 입력하세요"
+                       value="{{ form.email.value|default:'' }}">
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-wider">비밀번호</label>
+                <input type="password" name="password1" class="register-input" placeholder="비밀번호를 입력하세요" required>
+            </div>
+
+            <div>
+                <label class="block text-sm font-bold text-slate-400 mb-2 uppercase tracking-wider">비밀번호 확인</label>
+                <input type="password" name="password2" class="register-input" placeholder="비밀번호를 다시 입력하세요" required>
+            </div>
+
+            <button type="submit" class="register-btn mt-6">
+                <i class="fa-solid fa-user-plus mr-2"></i> 가입하기
+            </button>
+        </form>
+
+        <div class="mt-8 text-center">
+            <p class="text-slate-500">이미 계정이 있으신가요?</p>
+            <a href="{% url 'verify_admin' %}" class="text-blue-400 hover:text-blue-300 font-bold transition">로그인하기</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

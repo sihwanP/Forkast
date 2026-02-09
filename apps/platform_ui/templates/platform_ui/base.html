@@ -1,0 +1,540 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}포카스트 - 지능형 매출 예측 솔루션{% endblock %}</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#0f172a',
+                        primary: '#3b82f6',
+                        secondary: '#6366f1',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* LIGHT MODE (Default) - Dark fonts on light background */
+        :root {
+            --bg-main: #FAF7F2;
+            --bg-card: #ffffff;
+            --bg-sidebar: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        /* DARK MODE - Light fonts on dark background */
+        body.dark-mode {
+            --bg-main: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.8);
+            --bg-sidebar: #0f172a;
+            --text-primary: #f8fafc;
+            --text-secondary: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body { 
+            font-family: 'Noto Sans KR', sans-serif; 
+            background-color: var(--bg-main); 
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+            height: 100vh !important;
+            overflow: hidden !important; /* 전체 스크롤 방지 */
+        }
+
+        /* Apply text colors globally */
+        h1, h2, h3, h4, h5, h6 { color: var(--text-primary); }
+        p, span, a, li { color: var(--text-secondary); }
+        .text-muted { color: var(--text-muted) !important; }
+
+        /* LIGHT MODE: Force all text to be dark */
+        body:not(.dark-mode) * {
+            color: inherit;
+        }
+        body:not(.dark-mode) h1, body:not(.dark-mode) h2, body:not(.dark-mode) h3,
+        body:not(.dark-mode) h4, body:not(.dark-mode) h5, body:not(.dark-mode) h6 {
+            color: #0f172a !important;
+        }
+        body:not(.dark-mode) p, body:not(.dark-mode) span, body:not(.dark-mode) div,
+        body:not(.dark-mode) a, body:not(.dark-mode) li, body:not(.dark-mode) label {
+            color: #334155 !important;
+        }
+        
+        /* Override Tailwind text colors for theme compatibility */
+        body:not(.dark-mode) .text-white { color: #0f172a !important; }
+        body:not(.dark-mode) .text-slate-100, 
+        body:not(.dark-mode) .text-slate-200,
+        body:not(.dark-mode) .text-slate-300,
+        body:not(.dark-mode) .text-slate-400,
+        body:not(.dark-mode) .text-slate-500,
+        body:not(.dark-mode) .text-gray-300,
+        body:not(.dark-mode) .text-gray-400,
+        body:not(.dark-mode) .text-gray-500 { color: #475569 !important; }
+
+        /* Preserve colored elements */
+        body:not(.dark-mode) .text-blue-400,
+        body:not(.dark-mode) .text-blue-500,
+        body:not(.dark-mode) .text-blue-600 { color: #2563eb !important; }
+        body:not(.dark-mode) .text-red-400,
+        body:not(.dark-mode) .text-red-500,
+        body:not(.dark-mode) .text-red-600 { color: #dc2626 !important; }
+        body:not(.dark-mode) .text-green-400,
+        body:not(.dark-mode) .text-green-500,
+        body:not(.dark-mode) .text-green-600 { color: #16a34a !important; }
+        body:not(.dark-mode) .text-amber-400,
+        body:not(.dark-mode) .text-amber-500,
+        body:not(.dark-mode) .text-amber-600 { color: #d97706 !important; }
+        
+        /* Button text exceptions */
+        body:not(.dark-mode) .bg-blue-500 a,
+        body:not(.dark-mode) .bg-blue-600 a,
+        body:not(.dark-mode) .bg-blue-600 span,
+        body:not(.dark-mode) .bg-blue-600 *,
+        body:not(.dark-mode) .btn-primary *,
+        body:not(.dark-mode) button[class*="bg-blue"] * { color: white !important; }
+
+        /* Dark mode text overrides - Ensure all text is readable */
+        body.dark-mode .text-slate-600,
+        body.dark-mode .text-slate-700,
+        body.dark-mode .text-slate-800,
+        body.dark-mode .text-slate-900,
+        body.dark-mode .text-gray-600,
+        body.dark-mode .text-gray-700,
+        body.dark-mode .text-gray-800,
+        body.dark-mode .text-gray-900 { color: #f1f5f9 !important; }
+
+        /* Ensure secondary/muted text is still visible in dark mode */
+        body.dark-mode .text-slate-400,
+        body.dark-mode .text-slate-500,
+        body.dark-mode .text-gray-400,
+        body.dark-mode .text-gray-500,
+        body.dark-mode [class*="text-slate-400"],
+        body.dark-mode [class*="text-slate-500"],
+        body.dark-mode [class*="text-gray-400"],
+        body.dark-mode [class*="text-gray-500"] { color: #cbd5e1 !important; }
+
+        /* Ensure headings are always bright white in dark mode */
+        body.dark-mode h1, body.dark-mode h2, body.dark-mode h3,
+        body.dark-mode h4, body.dark-mode h5, body.dark-mode h6 {
+            color: #ffffff !important;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+        }
+
+        /* Paragraph text in dark mode - ensure good contrast */
+        body.dark-mode p, body.dark-mode span, body.dark-mode div {
+            color: #e2e8f0;
+        }
+
+        /* Font size improvements for readability */
+        body { font-size: 16px; line-height: 1.7; }
+        p, span, li { font-size: 1rem; }
+        .text-sm { font-size: 0.9rem !important; }
+        .text-xs { font-size: 0.8rem !important; }
+        .text-base { font-size: 1rem !important; }
+        .text-lg { font-size: 1.15rem !important; }
+
+        /* Background overrides for dark mode */
+        body.dark-mode .bg-white { background-color: #1e293b !important; border-color: #334155 !important; }
+        body.dark-mode .bg-slate-50 { background-color: #0f172a !important; border-color: #1e293b !important; }
+        body.dark-mode .bg-gray-50 { background-color: #111827 !important; border-color: #1f2937 !important; }
+
+        /* LIGHT MODE: Override dark backgrounds to light ones */
+        body:not(.dark-mode) .bg-slate-900,
+        body:not(.dark-mode) .bg-gray-900 { background-color: #FAF7F2 !important; }
+        body:not(.dark-mode) .bg-slate-800,
+        body:not(.dark-mode) .bg-gray-800 { background-color: #f1f5f9 !important; }
+        body:not(.dark-mode) .bg-slate-700,
+        body:not(.dark-mode) .bg-gray-700 { background-color: #e2e8f0 !important; }
+        
+        /* Light mode gradient backgrounds */
+        body:not(.dark-mode) .bg-gradient-to-r.from-slate-800,
+        body:not(.dark-mode) [class*="from-slate-800"][class*="to-slate-700"] {
+            background: linear-gradient(to right, #e2e8f0, #f1f5f9) !important;
+        }
+        body:not(.dark-mode) .bg-gradient-to-t { background: linear-gradient(to top, #FAF7F2, transparent) !important; }
+        body:not(.dark-mode) .from-gray-900 { --tw-gradient-from: #FAF7F2 !important; }
+        body:not(.dark-mode) .via-gray-900\/60 { --tw-gradient-via: rgba(250, 247, 242, 0.6) !important; }
+        
+        /* Light mode sidebar and switch button */
+        body:not(.dark-mode) .bg-slate-900\/80,
+        body:not(.dark-mode) .bg-slate-900\/50,
+        body:not(.dark-mode) .bg-slate-900\/95 { 
+            background-color: rgba(255, 255, 255, 0.95) !important;
+        }
+        /* FORCE SIDEBAR DARK IN LIGHT MODE */
+        #sidebar {
+            background-color: #1e293b !important;
+            border-right: 1px solid #334155 !important;
+        }
+        #sidebar * {
+            color: #ffffff !important; /* Force all text inside sidebar to be white */
+        }
+        #sidebar .text-slate-400, #sidebar .text-slate-500 {
+            color: #cbd5e1 !important; /* Slightly dimmed white for secondary text */
+        }
+        body:not(.dark-mode) .border-slate-700,
+        body:not(.dark-mode) .border-slate-600,
+        body:not(.dark-mode) .border-slate-600\/50 { 
+            border-color: #e2e8f0 !important;
+        }
+        
+        /* Light mode card backgrounds */
+        body:not(.dark-mode) .glass-panel,
+        body:not(.dark-mode) .glass,
+        body:not(.dark-mode) .bg-slate-800 { 
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            border-color: #e2e8f0 !important;
+        }
+
+
+        .glass {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+        }
+        .sidebar-active {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-main); }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        /* Global Image & Media Refinements */
+        img, video {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        img:hover, video:hover {
+            transform: scale(1.01);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            filter: brightness(1.05);
+        }
+        .glass-panel img, .glass img {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="overflow-x-hidden leading-[1.6] dark-mode">
+
+
+    <!-- Sidebar -->
+    <aside class="fixed inset-y-0 left-0 w-64 bg-slate-900 border-r border-slate-700 z-50 transition-transform duration-300 transform -translate-x-full lg:translate-x-0 flex flex-col" id="sidebar" style="background-color: #1e293b !important;">
+        <div class="p-6 flex items-center justify-between border-b border-slate-700/50 shrink-0">
+            <a href="{% url 'dashboard' %}" class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500 hover:opacity-80 transition cursor-pointer">
+                Forkast AI
+            </a>
+            <button class="lg:hidden text-gray-400 hover:text-white" onclick="toggleSidebar()">✕</button>
+        </div>
+
+        <nav class="px-4 space-y-2 mt-6 flex-1 overflow-y-auto min-h-0">
+            {% if request.resolver_match.url_name == 'super_admin' %}
+            <!-- ERP Sidebar (Super Admin) -->
+            
+            <!-- Group 1: Incoming Flow (유입 관리) -->
+            <div class="pt-2 pb-2 text-xs font-black text-blue-500 uppercase tracking-wider px-4 flex items-center gap-2">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i> 유입 관리
+            </div>
+            <div class="space-y-1 mb-6 relative">
+                 <!-- Decorative Line -->
+                 <div class="absolute left-4 top-2 bottom-2 w-0.5 bg-blue-500/20 rounded-full"></div>
+                 
+                 <a href="/admin/platform_ui/salesorder/" class="ml-4 flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition group">
+                    <span class="w-6 h-6 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+                    <span class="font-bold">수주 관리 (Sales Order)</span>
+                </a>
+                <a href="/admin/platform_ui/inbound/" class="ml-4 flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition group">
+                    <span class="w-6 h-6 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition"><i class="fa-solid fa-boxes-packing"></i></span>
+                    <span class="font-bold">입고 관리 (Inbound)</span>
+                </a>
+            </div>
+
+            <!-- Group 2: Outgoing Flow (유출 관리) -->
+            <div class="pt-2 pb-2 text-xs font-black text-rose-500 uppercase tracking-wider px-4 flex items-center gap-2">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> 유출 관리
+            </div>
+            <div class="space-y-1 mb-6 relative">
+                 <!-- Decorative Line -->
+                 <div class="absolute left-4 top-2 bottom-2 w-0.5 bg-rose-500/20 rounded-full"></div>
+
+                <a href="/admin/platform_ui/outbound/" class="ml-4 flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition group">
+                    <span class="w-6 h-6 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-500 group-hover:bg-rose-500 group-hover:text-white transition"><i class="fa-solid fa-truck-ramp-box"></i></span>
+                    <span class="font-bold">출고 관리 (Outbound)</span>
+                </a>
+                 <a href="/admin/platform_ui/purchaseorder/" class="ml-4 flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition group">
+                    <span class="w-6 h-6 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-500 group-hover:bg-rose-500 group-hover:text-white transition"><i class="fa-solid fa-cart-shopping"></i></span>
+                    <span class="font-bold">발주 관리 (Purchase Order)</span>
+                </a>
+            </div>
+            
+            <!-- Group 3: Analysis & Settings -->
+            <div class="pt-4 border-t border-slate-700/50 mt-4">
+                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition group">
+                    <span class="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition"><i class="fa-solid fa-microchip"></i></span>
+                    <span class="font-bold">AI 분석 터미널</span>
+                </a>
+                 <a href="{% url 'settings' %}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition group">
+                    <span class="w-8 h-8 rounded-lg bg-slate-500/10 flex items-center justify-center text-slate-400 group-hover:bg-slate-500 group-hover:text-white transition"><i class="fa-solid fa-sliders"></i></span>
+                    <span class="font-bold">설정 / 마스터 관리</span>
+                </a>
+            </div>
+            {% else %}
+            <!-- Store Dashboard Sidebar -->
+            <a href="{% url 'dashboard' %}" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl hover:bg-white/5 text-slate-400 hover:text-white transition group {% if request.resolver_match.url_name == 'dashboard' %}sidebar-active shadow-lg shadow-blue-500/10{% endif %}">
+                <span class="w-8 h-8 flex items-center justify-center text-lg {% if request.resolver_match.url_name == 'dashboard' %}text-white{% else %}text-blue-500 group-hover:scale-110{% endif %} transition"><i class="fa-solid fa-chart-pie"></i></span>
+                <span class="font-bold">매장 전체 현황</span>
+            </a>
+
+            <!-- Analytics -->
+            <div class="pt-8 pb-3 text-base font-black text-slate-500 uppercase tracking-[0.2em] px-5 text-center">데이터 심층 분석</div>
+            
+            <a href="{% url 'analytics_sales' %}" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition group {% if request.resolver_match.url_name == 'analytics_sales' %}sidebar-active{% endif %}">
+                <span class="w-8 h-8 flex items-center justify-center text-slate-400 group-hover:text-blue-400 transition"><i class="fa-solid fa-chart-line"></i></span>
+                <span class="font-bold">매출 상세 분석</span>
+            </a>
+            
+            <a href="{% url 'analytics_forecast' %}" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition group {% if request.resolver_match.url_name == 'analytics_forecast' %}sidebar-active{% endif %}">
+                <span class="w-8 h-8 flex items-center justify-center text-slate-400 group-hover:text-indigo-400 transition"><i class="fa-solid fa-brain"></i></span>
+                <span class="font-bold">AI 매출 예측</span>
+            </a>
+            
+            <a href="{% url 'analytics_menu' %}" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition group {% if request.resolver_match.url_name == 'analytics_menu' %}sidebar-active{% endif %}">
+                <span class="w-8 h-8 flex items-center justify-center text-slate-400 group-hover:text-emerald-400 transition"><i class="fa-solid fa-utensils"></i></span>
+                <span class="font-bold">메뉴 판매 분석</span>
+            </a>
+            
+            <a href="{% url 'analytics_time' %}" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition group {% if request.resolver_match.url_name == 'analytics_time' %}sidebar-active{% endif %}">
+                <span class="w-8 h-8 flex items-center justify-center text-slate-400 group-hover:text-amber-400 transition"><i class="fa-solid fa-clock-rotate-left"></i></span>
+                <span class="font-bold">방문 시간 분석</span>
+            </a>
+            
+            <a href="{% url 'analytics_delivery' %}" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition group {% if request.resolver_match.url_name == 'analytics_delivery' %}sidebar-active{% endif %}">
+                <span class="w-8 h-8 flex items-center justify-center text-slate-400 group-hover:text-rose-400 transition"><i class="fa-solid fa-motorcycle"></i></span>
+                <span class="font-bold">배달 성과 분석</span>
+            </a>
+
+            <!-- 관리 메뉴 -->
+            <div class="pt-5 pb-5 text-base font-black text-slate-500 uppercase tracking-[0.2em] px-5 text-center">시스템 통합 관리</div>
+            
+             <a href="{% url 'notifications' %}" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition group {% if request.resolver_match.url_name == 'notifications' %}sidebar-active{% endif %}">
+                <span class="w-8 h-8 flex items-center justify-center text-slate-400 group-hover:text-red-400 transition"><i class="fa-solid fa-bell"></i></span>
+                <span class="font-bold">뉴럴 알림 센터</span>
+                <span class="ml-auto bg-red-500 text-white text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-lg shadow-lg shadow-red-500/30">3</span>
+            </a>
+            
+            <a href="{% url 'settings' %}" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-100 hover:text-white transition group {% if request.resolver_match.url_name == 'settings' %}sidebar-active{% endif %}">
+                <span class="w-8 h-8 flex items-center justify-center text-slate-100 group-hover:text-slate-200 transition"><i class="fa-solid fa-gear"></i></span>
+                <span class="font-bold">환경 설정</span>
+            </a>
+            
+            <a href="/admin/" class="flex items-center gap-5 px-5 py-4 rounded-xl hover:bg-white/5 text-slate-100 hover:text-white transition group">
+                <span class="w-8 h-8 flex items-center justify-center text-slate-100 group-hover:text-blue-500 transition"><i class="fa-solid fa-lock text-xl"></i></span>
+                <span class="font-bold text-base">관리자 대시보드</span>
+            </a>
+            {% endif %}
+        </nav>
+        
+        <script>
+            // Force high contrast for sidebar elements
+            document.addEventListener('DOMContentLoaded', () => {
+                const sidebarLinks = document.querySelectorAll('#sidebar a');
+                sidebarLinks.forEach(link => {
+                    link.classList.remove('text-slate-400');
+                    link.classList.add('text-slate-100');
+                    link.style.color = '#f1f5f9'; // Force via embedded style
+                    link.style.fontWeight = '600';
+                    link.style.textShadow = '0 1px 2px rgba(0,0,0,0.8)'; // Strong shadow
+                });
+                
+                // Headers
+                const headers = document.querySelectorAll('#sidebar .uppercase');
+                headers.forEach(header => {
+                    header.classList.remove('text-slate-500');
+                    header.classList.add('text-white');
+                    header.style.color = '#ffffff';
+                    header.style.opacity = '1';
+                    header.style.textShadow = '0 1px 2px rgba(0,0,0,0.8)';
+                });
+            });
+        </script>
+
+        
+        <div class="w-full p-4 border-t border-slate-700 bg-slate-900/80 backdrop-blur-xl shrink-0">
+            <!-- Page Switch (Premium Design - 3 Way) -->
+            <div class="relative bg-gradient-to-r from-slate-800 to-slate-700 rounded-2xl p-1.5 mb-4 shadow-lg border border-slate-600/50">
+                <div id="page-switch-bg" 
+                     class="absolute top-1.5 h-[calc(100%-12px)] bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl transition-all duration-300 ease-out shadow-[0_0_20px_rgba(59,130,246,0.5)]" 
+                     style="width: calc(33.33% - 4px); left: {% if request.resolver_match.url_name == 'super_admin' %}4px{% elif '/admin/' in request.path %}calc(66.66% - 2px){% else %}calc(33.33% + 2px){% endif %};"></div>
+                
+                <div class="relative flex text-base font-extrabold">
+                    <a href="{% url 'super_admin' %}" 
+                       class="flex-1 flex flex-col items-center justify-center gap-4 py-4 rounded-xl transition-all duration-300 z-10 {% if request.resolver_match.url_name == 'super_admin' %}text-white shadow-sm{% else %}text-slate-400 hover:text-white hover:bg-white/5{% endif %}">
+                        <i class="fa-solid fa-building-columns text-xl"></i>
+                        <span>본사</span>
+                    </a>
+                    <a href="{% url 'dashboard' %}" 
+                       class="flex-1 flex flex-col items-center justify-center gap-4 py-4 rounded-xl transition-all duration-300 z-10 {% if request.resolver_match.url_name != 'super_admin' and not '/admin/' in request.path %}text-white shadow-sm{% else %}text-slate-400 hover:text-white hover:bg-white/5{% endif %}">
+                        <i class="fa-solid fa-server text-xl"></i>
+                        <span>사이트</span>
+                    </a>
+                    <a href="/admin/" 
+                       class="flex-1 flex flex-col items-center justify-center gap-4 py-4 rounded-xl transition-all duration-300 z-10 {% if '/admin/' in request.path %}text-white shadow-sm{% else %}text-slate-400 hover:text-white hover:bg-white/5{% endif %}">
+                        <i class="fa-solid fa-store text-xl"></i>
+                        <span>가맹점</span>
+                    </a>
+                </div>
+            </div>
+            
+
+            <!-- Theme Toggle Switch -->
+            <div class="flex items-center justify-between bg-slate-800 rounded-xl px-4 py-3 mb-3">
+                <span class="text-xs font-bold text-slate-400"><i class="fa-solid fa-palette mr-2"></i>테마</span>
+                <button id="theme-toggle" onclick="toggleTheme()" class="relative w-14 h-7 bg-slate-700 rounded-full transition-colors duration-300">
+                    <span id="toggle-knob" class="absolute top-0.5 left-0.5 w-6 h-6 bg-slate-400 rounded-full flex items-center justify-center text-xs transition-all duration-300">
+                        <i id="theme-icon" class="fa-solid fa-moon text-slate-900"></i>
+                    </span>
+                </button>
+            </div>
+            
+             <a href="{% url 'toggle_work' %}" class="flex items-center justify-center gap-2 w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 px-4 py-3 rounded-xl font-bold transition">
+                <span>🛑</span> 업무 종료
+            </a>
+        </div>
+
+    </aside>
+
+
+    <!-- Mobile Header -->
+    <div class="lg:hidden fixed top-0 w-full z-40 glass px-6 py-4 flex justify-between items-center bg-slate-900/90">
+        <a href="{% url 'dashboard' %}" class="text-xl font-bold text-blue-400 hover:text-blue-300 transition">Forkast AI</a>
+        <button class="text-white text-2xl" onclick="toggleSidebar()">☰</button>
+    </div>
+
+    <!-- 메인 콘텐츠 영역 -->
+    <main class="lg:ml-64 h-screen flex flex-col relative z-0 transition-all duration-300 text-base overflow-y-auto">
+        <div class="flex-1">
+            {% block content %}{% endblock %}
+        </div>
+
+        <!-- Footer Removed (Moved to Dashboard-only) -->
+    </main>
+
+    <!-- Scripts -->
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+            }
+        }
+
+        // Theme Toggle Function
+        function toggleTheme() {
+            const body = document.body;
+            const toggleBtn = document.getElementById('theme-toggle');
+            const knob = document.getElementById('toggle-knob');
+            const icon = document.getElementById('theme-icon');
+            
+            body.classList.toggle('dark-mode');
+            const isDark = body.classList.contains('dark-mode');
+            
+            // Sync data-theme attribute for CSS compatibility
+            body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+            
+            // Update toggle appearance
+            if (isDark) {
+                toggleBtn.classList.remove('bg-blue-500');
+                toggleBtn.classList.add('bg-slate-700');
+                knob.classList.remove('left-7', 'bg-white');
+                knob.classList.add('left-0.5', 'bg-slate-400');
+                icon.className = 'fa-solid fa-moon text-slate-900';
+            } else {
+                toggleBtn.classList.remove('bg-slate-700');
+                toggleBtn.classList.add('bg-blue-500');
+                knob.classList.remove('left-0.5', 'bg-slate-400');
+                knob.classList.add('left-7', 'bg-white');
+                icon.className = 'fa-solid fa-sun text-amber-500';
+            }
+            
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+
+        // Initialize theme on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            const body = document.body;
+            const toggleBtn = document.getElementById('theme-toggle');
+            const knob = document.getElementById('toggle-knob');
+            const icon = document.getElementById('theme-icon');
+            
+            // Default is dark mode
+            if (savedTheme === 'light') {
+                body.classList.remove('dark-mode');
+                body.setAttribute('data-theme', 'light');
+                toggleBtn.classList.remove('bg-slate-700');
+                toggleBtn.classList.add('bg-blue-500');
+                knob.classList.remove('left-0.5', 'bg-slate-400');
+                knob.classList.add('left-7', 'bg-white');
+                icon.className = 'fa-solid fa-sun text-amber-500';
+            } else {
+                // Ensure dark mode set if null or dark
+                body.classList.add('dark-mode');
+                body.setAttribute('data-theme', 'dark');
+            }
+            
+            // 전역 숫자 포맷팅 (천 단위 쉼표)
+            formatAllNumbers();
+        });
+        
+        // 숫자 포맷팅 함수
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+        
+        // .format-number 클래스가 있는 요소들 자동 포맷팅
+        function formatAllNumbers() {
+            document.querySelectorAll('.format-number').forEach(el => {
+                const num = parseInt(el.textContent.replace(/[^0-9-]/g, ''), 10);
+                if (!isNaN(num)) {
+                    el.textContent = formatNumber(num);
+                }
+            });
+        }
+        
+        // 동적으로 추가된 요소도 지원
+        window.formatNumber = formatNumber;
+        window.formatAllNumbers = formatAllNumbers;
+    </script>
+
+
+    <!-- Chart.js & Highcharts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-3d.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

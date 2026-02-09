@@ -1,0 +1,30 @@
+#!/bin/bash
+# Get the directory where the script is located
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# Calculate the project root (The App is likely in project root of the DMG/Folder)
+PROJECT_ROOT="$DIR/../../.."
+
+# Move to Project Root
+cd "$PROJECT_ROOT"
+
+# 1. Setup Environment Variables (Critical for GUI Apps launched by Finder)
+export PATH="/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH"
+
+# 2. Select Python Interpreter
+if [ -f ".venv/bin/python" ]; then
+    PYTHON_CMD=".venv/bin/python"
+elif [ -f ".venv/bin/python3" ]; then
+    PYTHON_CMD=".venv/bin/python3"
+elif command -v python3 &> /dev/null; then
+    PYTHON_CMD="python3"
+else
+    PYTHON_CMD="/usr/bin/python3" # Fallback (might fail if deps are missing)
+fi
+
+# 3. Start Wake Server (port 9998) if not already running
+if ! lsof -i :9998 -sTCP:LISTEN > /dev/null 2>&1; then
+    "$PYTHON_CMD" scripts/wake_server.py &
+fi
+
+# 4. Run the Web Launcher (port 9999)
+"$PYTHON_CMD" scripts/web_launcher.py

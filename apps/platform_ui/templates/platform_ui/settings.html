@@ -1,0 +1,108 @@
+{% extends 'platform_ui/base.html' %}
+{% load static humanize %}
+
+{% block title %}설정 - Forkast{% endblock %}
+
+{% block content %}
+    <section class="pt-24 pb-12 px-8">
+        <div class="max-w-4xl mx-auto">
+             <!-- Header -->
+            <div class="flex items-center gap-6 mb-12 border-b border-white/5 pb-8">
+                <div class="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center text-3xl text-white border border-white/10 shadow-xl backdrop-blur-3xl">
+                    <i class="fa-solid fa-sliders"></i>
+                </div>
+                <div>
+                    <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">시스템 구성 (System Configuration)</div>
+                    <h1 class="text-4xl font-display font-black text-white tracking-tight">서비스 <span class="text-blue-500">설정</span></h1>
+                </div>
+            </div>
+
+            <div class="space-y-8">
+                <!-- Business Goals -->
+                <div class="glass-panel p-10 rounded-[2.5rem]">
+                    <h3 class="text-2xl font-display font-black text-white mb-8 flex items-center gap-4 tracking-tight">
+                        <span class="w-1.5 h-8 bg-blue-500 rounded-full"></span> 비즈니스 목표 설정 (Matrix Goals)
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div>
+                            <label class="block text-slate-500 text-[10px] font-black uppercase tracking-widest mb-3">월 매출 목표액</label>
+                            <div class="relative group">
+                                <input type="text" value="30,000,000" class="w-full bg-slate-900/50 border border-white/10 rounded-2xl px-6 py-4 text-white focus:border-blue-500/50 focus:ring-4 focus:ring-blue-500/5 outline-none transition-all font-display font-black text-2xl tracking-tight">
+                                <span class="absolute right-6 top-1/2 -translate-y-1/2 text-slate-600 font-black text-sm uppercase">KRW</span>
+                            </div>
+                        </div>
+                         <div>
+                            <label class="block text-slate-500 text-[10px] font-black uppercase tracking-widest mb-3">매장 운영 시간</label>
+                            <div class="flex items-center gap-3">
+                                <input type="time" value="11:00" class="bg-slate-900/50 border border-white/10 rounded-2xl px-5 py-4 text-white w-full font-bold focus:border-blue-500/50 outline-none transition-all">
+                                <span class="text-slate-700 font-black">-</span>
+                                <input type="time" value="23:00" class="bg-slate-900/50 border border-white/10 rounded-2xl px-5 py-4 text-white w-full font-bold focus:border-blue-500/50 outline-none transition-all">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications Settings -->
+                <div class="glass-panel p-10 rounded-[2.5rem]">
+                     <h3 class="text-2xl font-display font-black text-white mb-8 flex items-center gap-4 tracking-tight">
+                        <span class="w-1.5 h-8 bg-indigo-500 rounded-full"></span> 스마트 알림 설정 (Smart Alerts)
+                    </h3>
+                     <div class="space-y-4">
+                        <label class="flex items-center justify-between cursor-pointer p-6 rounded-2xl hover:bg-white/5 border border-white/5 transition-all group">
+                            <div class="flex items-center gap-6">
+                                <div class="w-12 h-12 bg-rose-500/10 rounded-xl flex items-center justify-center text-rose-500 border border-rose-500/20 group-hover:scale-110 transition">
+                                    <i class="fa-solid fa-chart-line"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-white text-lg tracking-tight">매출 하락 감지 알림</div>
+                                    <div class="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">실시간 이상 징후 분석</div>
+                                </div>
+                            </div>
+                            <div class="relative w-14 h-7 bg-blue-600 rounded-full transition-all border-2 border-transparent">
+                                <div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-lg"></div>
+                            </div>
+                        </label>
+
+                        <label class="flex items-center justify-between cursor-pointer p-6 rounded-2xl hover:bg-white/5 border border-white/5 transition-all group">
+                            <div class="flex items-center gap-6">
+                                <div class="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center text-amber-500 border border-amber-500/20 group-hover:scale-110 transition">
+                                    <i class="fa-solid fa-box-open"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-white text-lg tracking-tight">임계 재고 도달 알림</div>
+                                    <div class="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">재고 안전 범위 모니터링</div>
+                                </div>
+                            </div>
+                            <div class="relative w-14 h-7 bg-blue-600 rounded-full transition-all border-2 border-transparent">
+                                <div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-lg"></div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                 <!-- Account -->
+                <div class="glass-panel p-10 rounded-[2.5rem]">
+                    <h3 class="text-2xl font-display font-black text-white mb-8 flex items-center gap-4 tracking-tight">
+                        <span class="w-1.5 h-8 bg-slate-500 rounded-full"></span> 계정 정보 (Profile Node)
+                    </h3>
+                    <div class="flex items-center justify-between p-6 bg-white/5 rounded-3xl border border-white/5">
+                        <div class="flex items-center gap-6">
+                            <div class="w-16 h-16 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center font-display font-black text-white text-2xl shadow-lg shadow-blue-600/20">F</div>
+                            <div>
+                                <div class="font-bold text-white text-xl tracking-tight">Forkast 전문 관리자</div>
+                                <div class="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">최고 관리자 계정</div>
+                            </div>
+                        </div>
+                        <button class="text-slate-400 hover:text-white text-[10px] font-black uppercase tracking-widest border border-white/10 px-6 py-2.5 rounded-xl hover:bg-white/5 transition-all duration-300">세션 로그아웃</button>
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-8">
+                    <button class="w-full md:w-auto px-12 py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black text-sm uppercase tracking-[0.2em] shadow-2xl shadow-blue-600/30 hover:shadow-blue-600/50 transition-all duration-500 group">
+                        모든 변경사항 저장하기 <i class="fa-solid fa-check ml-2 group-hover:scale-125 transition-transform"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

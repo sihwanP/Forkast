@@ -1,0 +1,235 @@
+{% extends 'platform_ui/base.html' %}
+{% load static humanize %}
+
+{% block title %}매출 관리 - Forkast{% endblock %}
+
+{% block content %}
+    <section class="pt-24 pb-12 px-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+                <div class="flex items-center gap-6">
+                    <a href="{% url 'dashboard' %}" class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-slate-400 border border-white/5 hover:bg-white/10 hover:text-white transition">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </a>
+                    <div>
+                        <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">재무 관리 센터 (Financial Console)</div>
+                        <h1 class="text-4xl font-display font-black text-white tracking-tight">매출 <span class="text-emerald-500">관리</span></h1>
+                    </div>
+                </div>
+                <button onclick="exportToExcel()"
+                    class="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-emerald-600/20 transition flex items-center gap-3 group">
+                    <i class="fa-solid fa-file-excel group-hover:scale-110 transition-transform"></i> Excel 내보내기
+                </button>
+            </div>
+
+            <!-- Summary Metrics -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
+                <div class="glass-panel p-8 rounded-3xl border-t-2 border-emerald-500">
+                    <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">금일 총 매출 (Total Revenue)</div>
+                    <div class="text-3xl font-display font-black text-white tracking-tighter">₩ {{ current_revenue|intcomma }}</div>
+                    <div class="mt-4 flex items-center gap-2 text-emerald-400 text-[10px] font-black">
+                        <i class="fa-solid fa-caret-up"></i> 12.4% <span class="text-slate-500 font-medium">전일 대비 (vs Yesterday)</span>
+                    </div>
+                </div>
+                <div class="glass-panel p-8 rounded-3xl border-t-2 border-blue-500">
+                    <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">예상 순이익 (Projected Profit)</div>
+                    <div class="text-3xl font-display font-black text-white tracking-tighter">₩ {{ monthly_stats.profit|intcomma }}</div>
+                    <div class="mt-4 flex items-center gap-2 text-blue-400 text-[10px] font-black">
+                        <i class="fa-solid fa-circle-check"></i> <span class="text-slate-200">안정적 수익 구간 (Consistent Margin)</span>
+                    </div>
+                </div>
+                <div class="glass-panel p-8 rounded-3xl border-t-2 border-purple-500">
+                    <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">AI 예측 정확도 (Accuracy Rating)</div>
+                    <div class="text-3xl font-display font-black text-white tracking-tighter">94.2%</div>
+                    <div class="mt-4 flex items-center gap-2 text-purple-400 text-[10px] font-black">
+                        <i class="fa-solid fa-microchip"></i> <span class="text-slate-200">높은 신뢰도 (High Confidence)</span>
+                    </div>
+                </div>
+                <div onclick="switchTab('prediction')" class="glass-panel p-8 rounded-3xl border-t-2 border-slate-700 bg-white/5 cursor-pointer hover:bg-white/10 transition">
+                    <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-4">빠른 요약 (Quick View)</div>
+                    <div class="text-xl font-bold text-white tracking-tight">AI 7일 매출 예측</div>
+                    <div class="mt-4 text-blue-400 text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                        상세 분석 보기 (Inspect Results) <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex gap-2 p-1.5 bg-white/5 rounded-2xl w-fit mb-8 border border-white/5">
+                <button onclick="switchTab('today')" id="tab-today" class="px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 tab-active bg-emerald-500 text-white shadow-lg shadow-emerald-500/20">금일 현황</button>
+                <button onclick="switchTab('history')" id="tab-history" class="px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 text-slate-500 hover:text-white">과거 기록</button>
+                <button onclick="switchTab('prediction')" id="tab-prediction" class="px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 text-slate-500 hover:text-white">매출 예측</button>
+                <button onclick="switchTab('monthly')" id="tab-monthly" class="px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all duration-300 text-slate-500 hover:text-white">월간 통계</button>
+            </div>
+
+            <!-- Content Container -->
+            <div class="glass-panel rounded-[2.5rem] overflow-hidden min-h-[400px]">
+                <!-- 1. Today's Hourly -->
+                <div id="content-today" class="fade-in block">
+                    <table class="w-full text-left border-collapse" id="table-today">
+                        <thead>
+                            <tr class="bg-white/5 border-b border-white/5 text-slate-500 text-[10px] font-black uppercase tracking-widest">
+                                <th class="p-8">시간대별 흐름 (Time Window)</th>
+                                <th class="p-8">단위 구간 매출 (Unit Revenue)</th>
+                                <th class="p-8">누적 합계 (Accumulated)</th>
+                                <th class="p-8">데이터 상태 (Status)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            {% for row in hourly_sales %}
+                            <tr class="hover:bg-white/5 transition-colors">
+                                <td class="p-8 font-display font-black text-white text-lg tracking-tight">{{ row.time }}</td>
+                                <td class="p-8 text-emerald-400 font-display font-black text-xl">₩ {{ row.amount|intcomma }}</td>
+                                <td class="p-8 text-slate-400 font-mono font-bold">₩ {{ row.cumulative|intcomma }}</td>
+                                <td class="p-8">
+                                    <span class="inline-flex items-center gap-1.5 py-1 px-3 rounded-lg bg-emerald-500/10 text-emerald-400 text-[10px] font-black uppercase tracking-widest border border-emerald-500/20">실시간 동기화 (Live)</span>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr><td colspan="4" class="p-20 text-center text-slate-500 font-bold italic">판매 데이터가 아직 생성되지 않았습니다.</td></tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 2. History -->
+                <div id="content-history" class="fade-in hidden">
+                    <table class="w-full text-left border-collapse" id="table-history">
+                        <thead>
+                            <tr class="bg-white/5 border-b border-white/5 text-slate-500 text-[10px] font-black uppercase tracking-widest">
+                                <th class="p-8">날짜 및 요일 (Post-Date)</th>
+                                <th class="p-8">총 판매액 (Total Sales)</th>
+                                <th class="p-8">운영 비용 (Operations Cost)</th>
+                                <th class="p-8 text-right">당기 순이익 (Net Profit)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            {% for row in history_data %}
+                            <tr class="hover:bg-white/5 transition-colors group">
+                                <td class="p-8">
+                                    <div class="font-bold text-white text-lg tracking-tight">{{ row.date|date:"Y-m-d" }}</div>
+                                    <div class="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">{{ row.day_of_week }}</div>
+                                </td>
+                                <td class="p-8 text-white font-display font-black text-xl tracking-tight">₩ {{ row.revenue|intcomma }}</td>
+                                <td class="p-8 text-rose-500 font-mono font-bold">- ₩ {{ row.cost|intcomma }}</td>
+                                <td class="p-8 text-right">
+                                    <span class="text-2xl font-display font-black text-emerald-400 tracking-tighter">₩ {{ row.profit|intcomma }}</span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 3. Prediction -->
+                <div id="content-prediction" class="fade-in hidden">
+                    <table class="w-full text-left border-collapse" id="table-prediction">
+                        <thead>
+                            <tr class="bg-white/5 border-b border-white/5 text-slate-500 text-[10px] font-black uppercase tracking-widest">
+                                <th class="p-8">예측 대상일 (Forecast Date)</th>
+                                <th class="p-8">기상 환경 예측 (Climate)</th>
+                                <th class="p-8">예측 매출액 (Projected Alpha)</th>
+                                <th class="p-8">AI 예측 신뢰지수 (Confidence Meter)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-white/5">
+                            {% for row in prediction_data %}
+                            <tr class="hover:bg-white/5 transition-colors">
+                                <td class="p-8">
+                                    <div class="font-bold text-white text-lg tracking-tight">{{ row.date|date:"Y-m-d" }}</div>
+                                    <div class="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">{{ row.day_of_week }}</div>
+                                </td>
+                                <td class="p-8">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center text-xl text-blue-400 border border-white/5">
+                                            {% if row.weather_forecast == '맑음' %}<i class="fa-solid fa-sun"></i>{% elif row.weather_forecast == '비' %}<i class="fa-solid fa-cloud-rain"></i>{% elif row.weather_forecast == '눈' %}<i class="fa-solid fa-snowflake"></i>{% else %}<i class="fa-solid fa-cloud"></i>{% endif %}
+                                        </div>
+                                        <span class="text-sm font-bold text-slate-300">{{ row.weather_forecast }}</span>
+                                    </div>
+                                </td>
+                                <td class="p-8 text-purple-400 font-display font-black text-xl tracking-tight">₩ {{ row.predicted_revenue|intcomma }}</td>
+                                <td class="p-8">
+                                    <div class="flex flex-col gap-2">
+                                        <div class="flex justify-between text-[10px] font-black text-slate-600 uppercase tracking-widest">
+                                            <span>예측 신뢰도 (Accuracy Index)</span>
+                                            <span>{{ row.confidence }}%</span>
+                                        </div>
+                                            <div class="bg-purple-500 h-full rounded-full shadow-md" style="width: {{ row.confidence }}%"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 4. Monthly Statistics -->
+                <div id="content-monthly" class="fade-in hidden p-20">
+                    <div class="max-w-xl mx-auto glass-panel p-12 rounded-[2.5rem] bg-gradient-to-tr from-slate-900 to-slate-950 border border-white/10">
+                        <div class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-10 text-center">누적 성과 사이클 (Cumulative Performance Cycle)</div>
+                        <div class="space-y-8">
+                            <div class="flex justify-between items-center group">
+                                <span class="text-slate-500 font-bold uppercase text-[10px] tracking-widest">총 매출 누계 (Gross Sales Flow)</span>
+                                <span class="text-3xl font-display font-black text-white group-hover:text-blue-400 transition">₩ {{ monthly_stats.revenue|intcomma }}</span>
+                            </div>
+                            <div class="flex justify-between items-center group">
+                                <span class="text-slate-500 font-bold uppercase text-[10px] tracking-widest">시스템 운영비 (System Overheads)</span>
+                                <span class="text-2xl font-display font-black text-rose-500 group-hover:underline decoration-rose-500/30 underline-offset-8 transition">- ₩ {{ monthly_stats.cost|intcomma }}</span>
+                            </div>
+                            <div class="pt-8 border-t border-white/5 group">
+                                <div class="flex justify-between items-center bg-emerald-500/5 p-6 rounded-2xl border border-emerald-500/10">
+                                    <span class="text-emerald-500 font-black uppercase text-xs tracking-widest">실질 순수익 (Actual Net Liquidity)</span>
+                                    <span class="text-4xl font-display font-black text-white">₩ {{ monthly_stats.profit|intcomma }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+    function switchTab(tabName) {
+        // IDs: today, history, prediction, monthly
+        const tabs = ['today', 'history', 'prediction', 'monthly'];
+        
+        tabs.forEach(t => {
+            const content = document.getElementById('content-' + t);
+            const btn = document.getElementById('tab-' + t);
+            
+            if (t === tabName) {
+                content.classList.remove('hidden');
+                btn.classList.add('tab-active', 'bg-emerald-500', 'text-white', 'shadow-lg', 'shadow-emerald-500/20');
+                btn.classList.remove('text-slate-500');
+            } else {
+                content.classList.add('hidden');
+                btn.classList.remove('tab-active', 'bg-emerald-500', 'text-white', 'shadow-lg', 'shadow-emerald-500/20');
+                btn.classList.add('text-slate-500');
+            }
+        });
+    }
+
+    function exportToExcel() {
+        const wb = XLSX.utils.book_new();
+        
+        // Export Current and History
+        try {
+            const ws_today = XLSX.utils.table_to_sheet(document.getElementById('table-today'));
+            XLSX.utils.book_append_sheet(wb, ws_today, "오늘_실시간매출");
+            
+            const ws_history = XLSX.utils.table_to_sheet(document.getElementById('table-history'));
+            XLSX.utils.book_append_sheet(wb, ws_history, "과거_매출기록");
+            
+            XLSX.writeFile(wb, 'Forkast_Financial_Report_{{ today|date:"Ymd" }}.xlsx');
+        } catch (e) {
+            console.error(e);
+            alert('데이터 추출 중 오류가 발생했습니다.');
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,139 @@
+{% extends 'platform_ui/base.html' %}
+{% load static humanize %}
+
+{% block title %}배달 플랫폼 분석 - Forkast{% endblock %}
+
+{% block content %}
+    <section class="pt-24 pb-12 px-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="relative rounded-[2.5rem] overflow-hidden bg-slate-900 border border-white/5 p-12 mb-12 shadow-2xl group">
+                <div class="absolute inset-0 bg-gradient-to-tr from-teal-600/10 via-transparent to-emerald-600/10 opacity-60"></div>
+                <div class="relative z-10">
+                    <div class="inline-block py-1 px-3 rounded-lg bg-teal-500/10 text-teal-400 text-[10px] font-black uppercase tracking-widest mb-4 border border-teal-500/20">플랫폼 물류 분석 (Platform Logistics)</div>
+                    <h1 class="text-4xl lg:text-5xl font-display font-black text-white mb-6 tracking-tight">
+                        배달 플랫폼 <span class="text-teal-400">통합 인텔리전스</span>
+                    </h1>
+                    <p class="text-slate-400 max-w-xl text-lg font-medium leading-relaxed">배달의민족, 요기요, 쿠팡이츠의 데이터를 전수 병합하여<br> 수수료 구조를 최적화하고 최종 영업 이익을 극대화합니다.</p>
+                </div>
+                <div class="absolute right-12 top-1/2 -translate-y-1/2 text-8xl opacity-10 transform group-hover:scale-110 transition-transform duration-700">
+                    <i class="fa-solid fa-truck-ramp-box"></i>
+                </div>
+            </div>
+
+            <!-- Platform Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+                <!-- Baemin -->
+                <div class="glass-panel p-8 rounded-3xl border-t-2 border-teal-400 hover:-translate-y-2 transition-all duration-500 group">
+                    <div class="flex justify-between items-start mb-6">
+                        <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500">배달의민족 분석</h3>
+                        <span class="w-8 h-8 rounded-lg bg-teal-400/20 text-teal-400 flex items-center justify-center text-xs border border-teal-400/20"><i class="fa-solid fa-person-biking"></i></span>
+                    </div>
+                    <div class="text-4xl font-display font-black text-white mb-2 tracking-tight">58%</div>
+                    <p class="text-[10px] font-black text-teal-400 uppercase tracking-widest mb-6">시장 점유율</p>
+                    <div class="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
+                        <span class="text-[10px] font-black text-slate-500 uppercase">Volume</span>
+                        <span class="text-sm font-bold text-white">128 건</span>
+                    </div>
+                </div>
+                 <!-- Yogiyo -->
+                <div class="glass-panel p-8 rounded-3xl border-t-2 border-rose-500 hover:-translate-y-2 transition-all duration-500 group">
+                    <div class="flex justify-between items-start mb-6">
+                        <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500">요기요 분석</h3>
+                        <span class="w-8 h-8 rounded-lg bg-rose-500/20 text-rose-500 flex items-center justify-center text-xs border border-rose-500/20"><i class="fa-solid fa-utensils"></i></span>
+                    </div>
+                    <div class="text-4xl font-display font-black text-white mb-2 tracking-tight">24%</div>
+                    <p class="text-[10px] font-black text-rose-500 uppercase tracking-widest mb-6">시장 점유율</p>
+                    <div class="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
+                        <span class="text-[10px] font-black text-slate-500 uppercase">Volume</span>
+                        <span class="text-sm font-bold text-white">52 건</span>
+                    </div>
+                </div>
+                 <!-- Coupang Eats -->
+                <div class="glass-panel p-8 rounded-3xl border-t-2 border-blue-500 hover:-translate-y-2 transition-all duration-500 group">
+                    <div class="flex justify-between items-start mb-6">
+                        <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500">쿠팡이츠 분석</h3>
+                        <span class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs border border-blue-500/20"><i class="fa-solid fa-bolt-lightning"></i></span>
+                    </div>
+                    <div class="text-4xl font-display font-black text-white mb-2 tracking-tight">18%</div>
+                    <p class="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-6">시장 점유율</p>
+                    <div class="flex justify-between items-center p-3 bg-white/5 rounded-xl border border-white/5">
+                        <span class="text-[10px] font-black text-slate-500 uppercase">Volume</span>
+                        <span class="text-sm font-bold text-white">39 건</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analysis Section -->
+            <div class="flex flex-col lg:flex-row gap-8">
+                <!-- Delivery Time Analysis -->
+                <div class="lg:w-2/3 glass-panel p-10 rounded-[2.5rem]">
+                    <h3 class="text-2xl font-display font-black text-white mb-10 tracking-tight flex items-center gap-4">
+                        <span class="w-1.5 h-8 bg-teal-500 rounded-full"></span> 물류 및 서비스 품질 지표
+                    </h3>
+                    <div class="space-y-10">
+                        <div>
+                            <div class="flex justify-between mb-4">
+                                <span class="text-sm font-bold text-slate-300">배달의민족 <span class="text-slate-500 font-medium ml-2">(평균 28분)</span></span>
+                                <span class="text-sm font-black text-teal-400">⭐ 4.8 / 5.0</span>
+                            </div>
+                            <div class="w-full bg-white/5 rounded-full h-3 border border-white/5">
+                                <div class="bg-teal-500 h-full rounded-full shadow-[0_0_15px_rgba(20,184,166,0.4)]" style="width: 85%"></div>
+                            </div>
+                        </div>
+                        <div>
+                             <div class="flex justify-between mb-4">
+                                <span class="text-sm font-bold text-slate-300">요기요 <span class="text-slate-500 font-medium ml-2">(평균 35분)</span></span>
+                                <span class="text-sm font-black text-rose-500">⭐ 4.5 / 5.0</span>
+                            </div>
+                            <div class="w-full bg-white/5 rounded-full h-3 border border-white/5">
+                                <div class="bg-rose-500 h-full rounded-full shadow-[0_0_15px_rgba(244,63,94,0.4)]" style="width: 70%"></div>
+                            </div>
+                        </div>
+                        <div>
+                             <div class="flex justify-between mb-4">
+                                <span class="text-sm font-bold text-slate-300">쿠팡이츠 <span class="text-slate-500 font-medium ml-2">(평균 22분)</span></span>
+                                <span class="text-sm font-black text-blue-400">⭐ 4.9 / 5.0</span>
+                            </div>
+                            <div class="w-full bg-white/5 rounded-full h-3 border border-white/5">
+                                <div class="bg-blue-500 h-full rounded-full shadow-[0_0_15px_rgba(59,130,246,0.4)]" style="width: 92%"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-12 group">
+                        <div class="bg-blue-500/10 p-6 rounded-2xl border border-blue-500/20 text-sm flex gap-4 items-center group-hover:bg-blue-500/15 transition-all">
+                             <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white text-lg"><i class="fa-solid fa-bolt"></i></div>
+                             <p class="text-blue-200 font-medium leading-relaxed"><b>AI 분석 결과:</b> 쿠팡이츠의 물류 효율이 가장 상위권이며, 고객 만족도 지표가 매우 안정적입니다. 배달팁 정책 최적화가 제안됩니다.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fees -->
+                <div class="lg:w-1/3 glass-panel p-10 rounded-[2.5rem] bg-gradient-to-b from-slate-900 to-slate-950 flex flex-col justify-between">
+                    <div>
+                        <div class="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-4">예상 주문 중개 수수료</div>
+                        <div class="text-5xl font-display font-black text-white mb-3 tracking-tighter">₩ 458,000</div>
+                        <div class="flex items-center gap-2 text-sm font-black text-emerald-400">
+                            <i class="fa-solid fa-caret-down"></i> 2.4% <span class="text-slate-500 font-normal">지난 기간 대비</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-12 space-y-4">
+                         <div class="p-4 bg-white/5 rounded-2xl border border-white/5">
+                            <div class="text-[9px] font-black text-slate-600 uppercase mb-2">플랫폼별 수수료 비중</div>
+                            <div class="w-full h-1.5 bg-white/5 rounded-full flex overflow-hidden">
+                                <div class="bg-teal-500" style="width: 60%"></div>
+                                <div class="bg-rose-500" style="width: 25%"></div>
+                                <div class="bg-blue-500" style="width: 15%"></div>
+                            </div>
+                         </div>
+                        <button class="w-full py-4 bg-white text-slate-950 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all duration-300 shadow-xl shadow-white/5">
+                            <i class="fa-solid fa-file-invoice-dollar mr-2"></i> 리포트 다운로드
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+{% endblock %}

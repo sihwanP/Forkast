@@ -7,3 +7,5 @@ export * from './DeliveryPage';
 export * from './AlertsPage';
 export * from './SettingsPage';
 export * from './LoginPage';
+export * from './AdminPage';
+export * from './SuperAdminPage';

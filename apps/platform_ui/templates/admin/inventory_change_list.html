@@ -1,0 +1,226 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls static admin_list humanize %}
+
+{% block content %}
+    <!-- 1. DASHBOARD METRICS (Top) -->
+    <div style="margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px;">
+        <!-- Metric Card 3 (Moved to First for Visibility per User Request) -->
+        <div class="erp-metric-card alert">
+            <div class="label">재고 부족 경고</div>
+            <div class="value text-red">{{ erp_low_stock }} <span class="unit">alerts</span></div>
+        </div>
+        <!-- Metric Card 1 -->
+        <div class="erp-metric-card">
+            <div class="label">등록된 총 상품 수</div>
+            <div class="value">{{ erp_total_items|intcomma }} <span class="unit">items</span></div>
+        </div>
+        <!-- Metric Card 2 -->
+        <div class="erp-metric-card">
+            <div class="label">총 재고 자산 규모 (Cost)</div>
+            <div class="value text-blue">₩ {{ erp_total_value|intcomma }}</div>
+        </div>
+    </div>
+
+    <!-- 2. MASTER-DETAIL LAYOUT -->
+    <div class="erp-layout-container">
+        
+        <!-- RIGHT: DETAIL PANE (Moved to Left) -->
+        <div class="erp-detail-col">
+            <iframe name="erp-detail-frame" id="erp-detail-frame" src="" frameborder="0"></iframe>
+            <div id="empty-state-msg">
+                <div style="text-align: center; color: #cbd5e1;">
+                    <svg style="width: 48px; height: 48px; margin: 0 auto 10px; display: block;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
+                    목록에서 항목을 선택하여<br>상세 정보를 확인하세요.
+                </div>
+            </div>
+        </div>
+
+        <!-- LEFT: MASTER LIST (Moved to Right) -->
+        <div class="erp-master-col">
+            <!-- Search & Filters -->
+            <div class="erp-search-box">
+                {% search_form cl %}
+            </div>
+
+            <!-- List Content -->
+            <div class="erp-list-scroll">
+                {% if cl.result_list %}
+                    {% for result in cl.result_list %}
+                    <a href="{{ result.pk }}/change/?_popup=1" target="erp-detail-frame" class="erp-list-item" onclick="setActive(this)">
+                        <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 8px;">
+                            <!-- Image Thumbnail -->
+                            {% if result.image %}
+                                <div style="width: 50px; height: 50px; border-radius: 6px; overflow: hidden; flex-shrink: 0; border: 1px solid #e2e8f0;">
+                                    <img src="{{ result.image.url }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                </div>
+                            {% else %}
+                                <div style="width: 50px; height: 50px; border-radius: 6px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #cbd5e1;">
+                                    <i class="fa-solid fa-box" style="font-size: 20px;"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <div style="flex: 1; min-width: 0;">
+                                <div class="item-header" style="margin-bottom: 2px;">
+                                    <span class="code">{{ result.code|default:"NO CODE" }}</span>
+                                    {% if result.status == 'LOW' %}<span class="badge badge-red">부족</span>
+                                    {% elif result.status == 'OVER' %}<span class="badge badge-orange">과잉</span>
+                                    {% else %}<span class="badge badge-green">적정</span>{% endif %}
+                                </div>
+                                <div class="item-name" style="font-size: 15px;">{{ result.item_name }}</div>
+                            </div>
+                        </div>
+
+                        <div class="item-meta">
+                            <span>재고: <b>{{ result.current_stock|intcomma }}</b></span>
+                            <span>단가: {{ result.price|intcomma }}</span>
+                        </div>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <div style="padding: 20px; text-align: center; color: #94a3b8;">검색 결과가 없습니다.</div>
+                {% endif %}
+            </div>
+            
+            <!-- Pagination (Compact) -->
+            <div class="erp-pagination">
+                {% pagination cl %}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- STYLES -->
+    <style>
+        /* Hide Standard Django Elements we replaced */
+        #changelist-filter { display: none !important; }
+        .paginator { border: none !important; background: transparent !important; }
+        
+        /* Metric Cards */
+        .erp-metric-card { background: white; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
+        .erp-metric-card.alert { border-left: 5px solid #ef4444; border-color: #fecaca; }
+        .erp-metric-card .label { font-size: 13px; font-weight: 800; color: #475569; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 0.02em; }
+        .erp-metric-card .value { font-size: 30px; font-weight: 800; color: #0f172a; }
+        .erp-metric-card .unit { font-size: 15px; color: #64748b; font-weight: 600; }
+        .text-blue { color: #2563eb !important; }
+        .text-red { color: #dc2626 !important; } /* Darker Red */
+
+        /* Layout */
+        .erp-layout-container {
+            display: grid;
+            grid-template-columns: 1fr 340px; /* Slightly wider list col */
+            gap: 20px;
+            height: calc(100vh - 250px);
+            min-height: 600px;
+        }
+
+        /* Left Col */
+        .erp-master-col {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        .erp-search-box {
+            padding: 15px;
+            border-bottom: 1px solid #e2e8f0;
+            background: #f8fafc;
+        }
+        .erp-search-box input[type="text"] {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #334155;
+            font-weight: 500;
+        }
+        .erp-search-box input[type="submit"] { display: none; }
+
+        .erp-list-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .erp-list-item {
+            display: block;
+            padding: 16px 18px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            text-decoration: none !important;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .erp-list-item:hover {
+            border-color: #3b82f6;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .erp-list-item.active {
+            background: #eff6ff;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .item-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+        .item-header .code { font-size: 12px; color: #475569; font-weight: 700; background: #f1f5f9; padding: 3px 8px; border-radius: 4px; }
+        .item-name { font-weight: 700; color: #0f172a; font-size: 16px; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .item-meta { font-size: 13px; color: #475569; display: flex; justify-content: space-between; font-weight: 500; }
+        
+        .badge { padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 800; }
+        .badge-green { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+        .badge-red { background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; }
+        .badge-orange { background: #ffedd5; color: #c2410c; border: 1px solid #fdba74; }
+
+        .erp-pagination {
+            padding: 12px;
+            border-top: 1px solid #e2e8f0;
+            background: #f8fafc;
+            font-size: 13px;
+            font-weight: 600;
+            color: #475569;
+            text-align: center;
+        }
+
+        /* Right Col */
+        .erp-detail-col {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+        
+        #erp-detail-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: none; /* Hidden until loaded */
+        }
+        
+        #empty-state-msg {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+        }
+    </style>
+
+    <script>
+        function setActive(element) {
+            // Remove active class from all
+            document.querySelectorAll('.erp-list-item').forEach(el => el.classList.remove('active'));
+            // Add to clicked
+            element.classList.add('active');
+            // Show iframe, hide empty state
+            document.getElementById('erp-detail-frame').style.display = 'block';
+            document.getElementById('empty-state-msg').style.display = 'none';
+        }
+    </script>
+{% endblock %}

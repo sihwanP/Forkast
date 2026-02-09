@@ -1,0 +1,261 @@
+{% load i18n static %}<!DOCTYPE html>
+{% get_current_language as LANGUAGE_CODE %}{% get_current_language_bidi as LANGUAGE_BIDI %}
+<html lang="{{ LANGUAGE_CODE|default:"en-us" }}" dir="{{ LANGUAGE_BIDI|yesno:"rtl,ltr" }}">
+<head>
+<title>{% block title %}{% endblock %}</title>
+<link rel="stylesheet" href="{% block stylesheet %}{% static "admin/css/base.css" %}{% endblock %}">
+{% if not is_popup and is_nav_sidebar_enabled %}
+  <link rel="stylesheet" href="{% static "admin/css/nav_sidebar.css" %}">
+  <script src="{% static "admin/js/nav_sidebar.js" %}" defer></script>
+{% endif %}
+{% block extrastyle %}{% endblock %}
+{% if LANGUAGE_BIDI %}<link rel="stylesheet" href="{% block stylesheet_rtl %}{% static "admin/css/rtl.css" %}{% endblock %}">{% endif %}
+{% block extrahead %}{% endblock %}
+{% block responsive %}
+    <meta name="viewport" content="user-scalable=no, width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <link rel="stylesheet" href="{% static "admin/css/responsive.css" %}">
+    {% if LANGUAGE_BIDI %}<link rel="stylesheet" href="{% static "admin/css/responsive_rtl.css" %}">{% endif %}
+{% endblock %}
+{% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE">{% endblock %}
+
+<style>
+    /* =========================================================
+       GLOBAL ERP LAYOUT - DARK TEAL SIDEBAR THEME
+       ========================================================= */
+    :root {
+        --sidebar-width: 260px;
+        --sidebar-bg: linear-gradient(180deg, #0d4740 0%, #083530 100%);
+        --sidebar-text: #ffffff;
+        --header-height: 60px;
+        --content-bg: #f4f7f6;
+    }
+
+    body {
+        display: flex !important;
+        height: 100vh !important; /* 전체 높이 100% 고정 */
+        margin: 0 !important;
+        padding: 0 !important;
+        background-color: var(--content-bg) !important;
+        font-family: 'Noto Sans KR', -apple-system, sans-serif !important;
+        overflow: hidden !important; /* 페이지 전체 스크롤 금지 */
+    }
+
+    /* ===== SIDEBAR WRAPPER ===== */
+    .erp-sidebar-wrapper {
+        width: var(--sidebar-width) !important;
+        min-width: var(--sidebar-width) !important;
+        align-self: stretch !important;
+        background: var(--sidebar-bg) !important;
+        border-right: none !important;
+        z-index: 1000 !important;
+        box-shadow: 2px 0 10px rgba(0,0,0,0.2) !important;
+        flex-shrink: 0 !important;
+        overflow: visible !important;
+    }
+
+    /* SIDEBAR BRANDING */
+    .erp-sidebar-brand {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        height: var(--header-height);
+        background: rgba(0,0,0,0.2);
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .erp-sidebar-brand a {
+        color: #ffffff !important;
+        font-weight: 900;
+        font-size: 1.4rem;
+        text-decoration: none;
+        letter-spacing: -0.02em;
+    }
+
+    /* ===== MAIN RIGHT AREA ===== */
+    .main-right-area {
+        flex: 1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100vh !important; /* 고정 높이 */
+        overflow: hidden !important;
+    }
+
+    /* ===== HEADER AREA (Hidden to remove redundancy) ===== */
+    #header {
+        display: none !important; /* 제거 요청에 따라 헤더 숨김 */
+    }
+
+    /* ===== CONTENT AREA (Individual Scroll) ===== */
+    .main-content-wrapper {
+        flex: 1 !important;
+        padding: 24px !important;
+        background-color: var(--content-bg) !important;
+        min-width: 0 !important;
+        overflow-y: auto !important; /* 콘텐츠 영역 내에서만 스크롤 허용 */
+        height: 100vh !important; /* 전체 높이 고정 */
+    }
+
+    #content {
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08) !important;
+        padding: 24px !important;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1024px) {
+        body {
+            grid-template-columns: 1fr !important;
+            grid-template-areas:
+                "header"
+                "content" !important;
+        }
+        .erp-sidebar-wrapper {
+            display: none !important;
+        }
+    }
+
+    /* ===== TABLE STYLING ===== */
+    #changelist table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        background: #ffffff !important;
+    }
+
+    #changelist table thead th {
+        background: #f0f4f3 !important;
+        color: #1a3a37 !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        font-size: 11px !important;
+        letter-spacing: 0.5px !important;
+        padding: 12px 16px !important;
+        border-bottom: 2px solid #d1dbd9 !important;
+    }
+
+    #changelist table tbody td {
+        padding: 12px 16px !important;
+        border-bottom: 1px solid #e8edec !important;
+        color: #374151 !important;
+        font-size: 13px !important;
+    }
+
+    #changelist table tbody tr:hover {
+        background: #f0faf9 !important;
+    }
+
+    /* ===== BUTTON STYLING ===== */
+    .button, input[type=submit], input[type=button] {
+        background: #0d6b62 !important;
+        color: #ffffff !important;
+        border-radius: 6px !important;
+        padding: 10px 18px !important;
+        font-weight: 600 !important;
+        border: none !important;
+        cursor: pointer !important;
+        transition: background 0.2s !important;
+    }
+
+    .button:hover, input[type=submit]:hover {
+        background: #0a5a53 !important;
+    }
+
+    /* ===== MODULE / CARD STYLING ===== */
+    .module {
+        background: #ffffff !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 8px !important;
+        margin-bottom: 16px !important;
+        box-shadow: none !important;
+    }
+
+    .module caption, .module h2 {
+        background: #f8fafb !important;
+        color: #1a3a37 !important;
+        font-weight: 700 !important;
+        padding: 12px 16px !important;
+        border-bottom: 1px solid #e2e8f0 !important;
+    }
+</style>
+</head>
+
+<body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}"
+  data-admin-utc-offset="{% now "Z" %}">
+
+<!-- ===== SIDEBAR ===== -->
+{% if not is_popup %}
+<div class="erp-sidebar-wrapper">
+    <div class="erp-sidebar-brand">
+        <a href="{% url 'admin:index' %}" style="font-weight: 900; font-size: 1.3rem; letter-spacing: -0.02em;">
+            Forkast AI
+        </a>
+    </div>
+    
+    {% block nav-sidebar %}
+        {% include 'admin/nav_sidebar.html' %}
+    {% endblock %}
+</div>
+{% endif %}
+
+<!-- ===== MAIN RIGHT AREA ===== -->
+<div class="main-right-area">
+
+<!-- ===== HEADER ===== -->
+<div id="header" class="{% if is_popup %}popup-header{% endif %}">
+    {% block branding %}{% endblock %}
+    {% block usertools %}
+        {% if has_permission %}
+        <div id="user-tools">
+            {% block welcome-msg %}
+                <span class="welcome-msg">
+                    {% translate 'Welcome,' %}
+                    <strong>{% firstof user.get_short_name user.get_username %}</strong>
+                </span>
+            {% endblock %}
+            {% block userlinks %}
+                {% if site_url %}
+                    <a href="{{ site_url }}">{% translate 'View site' %}</a> /
+                {% endif %}
+                {% if user.is_active and user.is_staff %}
+                    {% url 'django-admindocs-docroot' as docsroot %}
+                    {% if docsroot %}
+                        <a href="{{ docsroot }}">{% translate 'Documentation' %}</a> /
+                    {% endif %}
+                {% endif %}
+                {% if user.has_usable_password %}
+                <a href="{% url 'admin:password_change' %}">{% translate 'Change password' %}</a> /
+                {% endif %}
+                <a href="{% url 'admin:logout' %}">{% translate 'Log out' %}</a>
+            {% endblock %}
+        </div>
+        {% endif %}
+    {% endblock %}
+    {% block nav-global %}{% endblock %}
+</div>
+
+<!-- ===== CONTENT ===== -->
+<div class="main-content-wrapper">
+    {% block messages %}
+        {% if messages %}
+        <ul class="messagelist">{% for message in messages %}
+          <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message|capfirst }}</li>
+        {% endfor %}</ul>
+        {% endif %}
+    {% endblock %}
+
+    <div id="content" class="{% block coltype %}colM{% endblock %}">
+        {% block pretitle %}{% endblock %}
+        {% block content_title %}{% if title %}<h1>{{ title }}</h1>{% endif %}{% endblock %}
+        {% block content %}{% endblock %}
+        {% block sidebar %}{% endblock %}
+        <br class="clear">
+    </div>
+
+    {% block footer %}<div id="footer"></div>{% endblock %}
+</div>
+
+</div>
+
+</body>
+</html>

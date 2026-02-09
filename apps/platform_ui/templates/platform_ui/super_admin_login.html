@@ -1,0 +1,191 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>본사 관리자 로그인 - Forkast</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Pretendard', 'Noto Sans KR', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        body { 
+            font-family: 'Inter', 'Pretendard', 'Noto Sans KR', sans-serif !important; 
+            margin: 0;
+            padding: 0;
+            background-color: #0f172a; /* Force Dark Background */
+        }
+        
+        /* LED Flow Animation Keyframes */
+        @keyframes ledFlow {
+            0% { background-position: 100% 100%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { background-position: 0% 0%; opacity: 0; }
+        }
+        
+        /* Shake Animation for Errors */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10% { transform: translateX(-4px); }
+            30% { transform: translateX(4px); }
+            50% { transform: translateX(-4px); }
+            70% { transform: translateX(4px); }
+            90% { transform: translateX(-2px); }
+        }
+        .animate-shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+    </style>
+</head>
+<body class="overflow-hidden">
+
+<div class="min-h-screen relative overflow-hidden bg-slate-900">
+    
+    <!-- 1. FULL SCREEN BACKGROUND -->
+    <div class="absolute inset-0 z-0">
+        <!-- Background Image (Fixed Dark Theme) -->
+        <div class="absolute inset-0 bg-cover bg-center" 
+             style="background-image: url('{% static 'platform_ui/img/login_bg.png' %}'); opacity: 1.0;">
+        </div>
+        
+        <!-- LED Flow Animation Layer -->
+        <!-- 'Color Dodge' blend mode makes the underlying lighter pixels (circuit lines) glow when the gradient passes over -->
+        <div class="absolute inset-0 z-10" 
+             style="background: linear-gradient(115deg, transparent 40%, rgba(59, 130, 246, 0.4) 45%, rgba(147, 197, 253, 0.6) 50%, rgba(59, 130, 246, 0.4) 55%, transparent 60%); 
+                    mix-blend-mode: color-dodge; 
+                    animation: ledFlow 6s infinite linear;
+                    background-size: 200% 200%;
+                    pointer-events: none;">
+        </div>
+
+        <!-- Dark Overlay for Readability (Glass Effect Base) -->
+        <div class="absolute inset-0 bg-slate-900/40 z-20 backdrop-blur-[2px]"></div>
+    </div>
+
+    <!-- 2. CONTENT CONTAINER -->
+    <div class="relative z-30 min-h-screen flex flex-col lg:flex-row items-center justify-center p-6 lg:p-20 gap-12 lg:gap-24">
+        
+        <!-- Branding / Visual Text -->
+        <div class="text-center lg:text-left max-w-2xl text-white drop-shadow-lg hidden lg:block">
+             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-500/30 backdrop-blur-sm text-blue-300 text-xs font-bold uppercase tracking-wider mb-6">
+                <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+                Forkast AI ERP System
+            </div>
+            <h1 class="text-5xl lg:text-7xl font-black leading-tight tracking-tight mb-6 text-white">
+                Data-Driven <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">Decision Making</span>
+            </h1>
+            <p class="text-lg lg:text-xl text-slate-200 font-medium leading-relaxed opacity-90">
+                실시간 재고 관리부터 AI 기반 수요 예측까지.<br>
+                모든 비즈니스 데이터를 한눈에 파악하세요.
+            </p>
+        </div>
+
+        <!-- Login Form Card (Glassmorphism + Fixed Dark Styles) -->
+        <div class="w-full max-w-md bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-3xl p-8 lg:p-10 shadow-2xl">
+            <div class="mb-8 text-center lg:text-left">
+                 <h2 class="text-3xl font-black text-white tracking-tight mb-2">Welcome Back</h2>
+                 <p class="text-slate-400 font-medium">관리자 계정으로 접속하세요.</p>
+            </div>
+
+            <form method="POST" class="space-y-6">
+                {% csrf_token %}
+                
+                {% if error %}
+                <div class="p-4 rounded-xl bg-red-500/10 text-red-300 text-sm font-bold border border-red-500/20 flex items-center gap-3 animate-shake">
+                    <i class="fa-solid fa-circle-exclamation text-lg"></i>
+                    {{ error }}
+                </div>
+                {% endif %}
+
+                <div class="space-y-5">
+                    <div>
+                        <label for="sa_username" class="block text-sm font-bold text-slate-300 mb-2">Username</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-user absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" name="username" id="sa_username" required
+                                class="w-full pl-11 pr-4 py-4 bg-slate-800/50 border border-slate-700/80 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all font-medium text-white placeholder-slate-400"
+                                placeholder="관리자 아이디">
+                        </div>
+                    </div>
+
+                    <div>
+                         <label for="password" class="block text-sm font-bold text-slate-300 mb-2">Password</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="password" name="password" id="password" required
+                                class="w-full pl-11 pr-4 py-4 bg-slate-800/50 border border-slate-700/80 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all font-medium text-white placeholder-slate-400"
+                                placeholder="비밀번호">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <input id="remember_id" type="checkbox" class="w-4 h-4 text-blue-600 rounded border-slate-600 bg-slate-800 focus:ring-blue-500 cursor-pointer">
+                        <label for="remember_id" class="text-sm font-medium text-slate-400 cursor-pointer select-none">아이디 저장</label>
+                    </div>
+                </div>
+
+                <button type="submit" 
+                    class="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold rounded-xl shadow-lg shadow-blue-900/40 transition-all hover:-translate-y-1 active:scale-95 text-lg flex items-center justify-center gap-2 border border-blue-500/20">
+                    <span>로그인</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+
+            <div class="mt-8 pt-6 border-t border-slate-700/50 text-center">
+                <a href="{% url 'dashboard' %}" class="inline-flex items-center gap-2 text-slate-400 hover:text-white transition-colors font-bold text-sm">
+                    <i class="fa-solid fa-arrow-left"></i>
+                    <span>매장 대시보드로 돌아가기</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="absolute bottom-6 w-full text-center z-30 text-slate-500 text-xs font-medium">
+        &copy; 2026 Forkast AI Solution. All rights reserved.
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const usernameInput = document.getElementById('sa_username');
+        const rememberCheckbox = document.getElementById('remember_id');
+
+        // 저장된 아이디 불러오기
+        const savedId = localStorage.getItem('remembered_sa_id');
+        if (savedId) {
+            usernameInput.value = savedId;
+            rememberCheckbox.checked = true;
+        }
+
+        // 제출 시 저장 처리
+        document.querySelector('form').addEventListener('submit', function() {
+            if (rememberCheckbox.checked) {
+                localStorage.setItem('remembered_sa_id', usernameInput.value);
+            } else {
+                localStorage.removeItem('remembered_sa_id');
+            }
+        });
+    });
+</script>
+</body>
+</html>

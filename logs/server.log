@@ -1,0 +1,305 @@
+Watching for file changes with StatReloader
+[04/Feb/2026 17:44:24] "GET /admin/ HTTP/1.1" 200 60756
+[04/Feb/2026 17:44:24] "GET /static/admin/css/base.css HTTP/1.1" 304 0
+[04/Feb/2026 17:44:24] "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 304 0
+[04/Feb/2026 17:44:24] "GET /static/admin/css/responsive.css HTTP/1.1" 304 0
+[04/Feb/2026 17:44:24] "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 304 0
+Not Found: /.well-known/appspecific/com.chrome.devtools.json
+[04/Feb/2026 17:44:24] "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 7428
+[04/Feb/2026 17:44:25] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 17:44:37] "GET /super-admin/ HTTP/1.1" 200 66706
+[04/Feb/2026 17:44:38] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 17:44:52] "GET /api/docs HTTP/1.1" 200 1088
+[04/Feb/2026 17:44:54] "GET /api/openapi.json HTTP/1.1" 200 3133
+[04/Feb/2026 17:45:28] "GET /dashboard/ HTTP/1.1" 200 93862
+[04/Feb/2026 17:45:29] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 17:45:30] "GET /api/dashboard-stats/ HTTP/1.1" 200 4266
+[04/Feb/2026 17:45:47,710] - Broken pipe from ('127.0.0.1', 53201)
+[04/Feb/2026 17:46:05] "GET /admin/ HTTP/1.1" 200 60756
+[04/Feb/2026 17:46:05] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 17:46:05] "GET /admin/platform_ui/transaction/ HTTP/1.1" 200 39011
+[04/Feb/2026 17:46:05] "GET /static/admin/css/changelists.css HTTP/1.1" 304 0
+[04/Feb/2026 17:46:05] "GET /static/admin/js/vendor/jquery/jquery.js HTTP/1.1" 304 0
+[04/Feb/2026 17:46:05] "GET /static/admin/js/jquery.init.js HTTP/1.1" 304 0
+[04/Feb/2026 17:46:05] "GET /static/admin/js/urlify.js HTTP/1.1" 304 0
+[04/Feb/2026 17:46:05] "GET /static/admin/js/actions.js HTTP/1.1" 304 0
+[04/Feb/2026 17:46:05] "GET /static/admin/js/core.js HTTP/1.1" 304 0
+[04/Feb/2026 17:46:05] "GET /static/admin/js/admin/RelatedObjectLookups.js HTTP/1.1" 304 0
+[04/Feb/2026 17:46:05] "GET /static/admin/js/prepopulate.js HTTP/1.1" 304 0
+[04/Feb/2026 17:46:05] "GET /static/admin/img/search.svg HTTP/1.1" 304 0
+[04/Feb/2026 17:46:05] "GET /static/admin/js/vendor/xregexp/xregexp.js HTTP/1.1" 304 0
+[04/Feb/2026 17:46:05] "GET /static/admin/js/filters.js HTTP/1.1" 304 0
+[04/Feb/2026 17:46:05] "GET /admin/jsi18n/ HTTP/1.1" 200 9131
+[04/Feb/2026 17:46:05] "GET /static/admin/img/tooltag-add.svg HTTP/1.1" 304 0
+[04/Feb/2026 17:46:05] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 17:46:18] "GET /admin/ HTTP/1.1" 200 60756
+[04/Feb/2026 17:46:18] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 17:46:58] "GET /dashboard/ HTTP/1.1" 200 93862
+[04/Feb/2026 17:47:00] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 17:47:02] "GET /api/dashboard-stats/ HTTP/1.1" 200 4266
+[04/Feb/2026 17:47:15,068] - Broken pipe from ('127.0.0.1', 53200)
+[04/Feb/2026 17:48:42] "GET /super-admin/ HTTP/1.1" 200 66706
+[04/Feb/2026 17:48:44] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 17:48:50] "GET /dashboard/ HTTP/1.1" 200 93862
+[04/Feb/2026 17:48:52] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 17:48:53] "GET /api/dashboard-stats/ HTTP/1.1" 200 4266
+[04/Feb/2026 17:49:07,531] - Broken pipe from ('127.0.0.1', 53196)
+[04/Feb/2026 17:49:16] "GET /admin/ HTTP/1.1" 200 60756
+[04/Feb/2026 17:49:17] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 17:50:20] "GET /super-admin/ HTTP/1.1" 200 66706
+[04/Feb/2026 17:50:23] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 17:51:43,791] - Broken pipe from ('127.0.0.1', 53241)
+[04/Feb/2026 17:51:44] "GET /dashboard/ HTTP/1.1" 200 93862
+[04/Feb/2026 17:51:45] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 17:51:48] "GET /api/dashboard-stats/ HTTP/1.1" 200 4266
+[04/Feb/2026 17:52:00,674] - Broken pipe from ('127.0.0.1', 53195)
+[04/Feb/2026 17:52:05] "GET /notifications/ HTTP/1.1" 200 30164
+[04/Feb/2026 17:52:06] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 17:52:45] "GET /super-admin/ HTTP/1.1" 200 66706
+[04/Feb/2026 17:52:46] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 17:54:44] "GET /dashboard/ HTTP/1.1" 200 94931
+[04/Feb/2026 17:54:45] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 17:54:47] "GET /api/dashboard-stats/ HTTP/1.1" 200 4266
+[04/Feb/2026 17:55:00,669] - Broken pipe from ('127.0.0.1', 53332)
+[04/Feb/2026 17:55:07] "GET /super-admin/ HTTP/1.1" 200 67775
+[04/Feb/2026 17:55:09] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 17:57:41] "GET /dashboard/ HTTP/1.1" 200 94931
+[04/Feb/2026 17:57:42] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 17:57:43] "GET /api/dashboard-stats/ HTTP/1.1" 200 4266
+[04/Feb/2026 17:57:57,337] - Broken pipe from ('127.0.0.1', 53338)
+[04/Feb/2026 18:00:05] "GET /admin/ HTTP/1.1" 200 60756
+[04/Feb/2026 18:00:05] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:00:12] "GET /super-admin/ HTTP/1.1" 200 67775
+[04/Feb/2026 18:00:13] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:01:42] "GET /dashboard/ HTTP/1.1" 200 94967
+[04/Feb/2026 18:01:44] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:01:45] "GET /api/dashboard-stats/ HTTP/1.1" 200 4266
+[04/Feb/2026 18:01:58,957] - Broken pipe from ('127.0.0.1', 53394)
+Not Found: /.well-known/appspecific/com.chrome.devtools.json
+[04/Feb/2026 18:04:44] "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 7428
+[04/Feb/2026 18:06:27] "GET /super-admin/ HTTP/1.1" 200 67959
+[04/Feb/2026 18:06:29] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:06:50] "GET /dashboard/ HTTP/1.1" 200 94967
+[04/Feb/2026 18:06:55] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:06:55] "GET /api/dashboard-stats/ HTTP/1.1" 200 4266
+[04/Feb/2026 18:07:09,846] - Broken pipe from ('127.0.0.1', 53954)
+[04/Feb/2026 18:09:54] "GET /dashboard/ HTTP/1.1" 200 94932
+[04/Feb/2026 18:09:57] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:09:57] "GET /api/dashboard-stats/ HTTP/1.1" 200 4266
+[04/Feb/2026 18:10:11,796] - Broken pipe from ('127.0.0.1', 53956)
+[04/Feb/2026 18:14:01] "GET /dashboard/ HTTP/1.1" 200 95002
+[04/Feb/2026 18:14:02] "GET /static/videos/hero.mp4 HTTP/1.1" 304 0
+[04/Feb/2026 18:14:02] "GET /static/videos/promo.mp4 HTTP/1.1" 304 0
+[04/Feb/2026 18:14:03] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:14:04] "GET /api/dashboard-stats/ HTTP/1.1" 200 4266
+[04/Feb/2026 18:14:18,093] - Broken pipe from ('127.0.0.1', 54918)
+[04/Feb/2026 18:20:54] "GET /dashboard/ HTTP/1.1" 200 95002
+[04/Feb/2026 18:20:57] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:20:57] "GET /api/dashboard-stats/ HTTP/1.1" 200 4266
+[04/Feb/2026 18:21:11,831] - Broken pipe from ('127.0.0.1', 54977)
+[04/Feb/2026 18:22:34] "GET /super-admin/ HTTP/1.1" 200 67959
+[04/Feb/2026 18:22:35] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:22:57] "GET /dashboard/ HTTP/1.1" 200 95052
+[04/Feb/2026 18:22:59] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:23:00] "GET /api/dashboard-stats/ HTTP/1.1" 200 4266
+[04/Feb/2026 18:23:13] "GET /dashboard/ HTTP/1.1" 200 95052
+[04/Feb/2026 18:23:13,719] - Broken pipe from ('127.0.0.1', 54979)
+[04/Feb/2026 18:23:15] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:23:16] "GET /api/dashboard-stats/ HTTP/1.1" 200 4266
+[04/Feb/2026 18:23:30,153] - Broken pipe from ('127.0.0.1', 54986)
+[04/Feb/2026 18:25:42] "GET /dashboard/ HTTP/1.1" 200 95052
+[04/Feb/2026 18:25:43] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:25:44] "GET /api/dashboard-stats/ HTTP/1.1" 200 4266
+[04/Feb/2026 18:25:45] "GET /super-admin/ HTTP/1.1" 200 67959
+[04/Feb/2026 18:25:45,137] - Broken pipe from ('127.0.0.1', 55017)
+[04/Feb/2026 18:25:45] "GET /favicon.ico HTTP/1.1" 200 0
+Not Found: /.well-known/appspecific/com.chrome.devtools.json
+[04/Feb/2026 18:26:25] "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 7428
+[04/Feb/2026 18:27:21] "GET /super-admin/ HTTP/1.1" 200 67623
+[04/Feb/2026 18:27:22] "GET /favicon.ico HTTP/1.1" 200 0
+Not Found: /.well-known/appspecific/com.chrome.devtools.json
+[04/Feb/2026 18:27:55] "GET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1" 404 7428
+[04/Feb/2026 18:31:51] "GET /admin/ HTTP/1.1" 200 60756
+[04/Feb/2026 18:31:51] "GET /static/admin/css/base.css HTTP/1.1" 304 0
+[04/Feb/2026 18:31:51] "GET /static/admin/css/responsive.css HTTP/1.1" 304 0
+[04/Feb/2026 18:31:51] "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 304 0
+[04/Feb/2026 18:31:51] "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 304 0
+[04/Feb/2026 18:31:51] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:32:01] "GET /admin/platform_ui/salesorder/ HTTP/1.1" 200 55836
+[04/Feb/2026 18:32:01] "GET /static/admin/css/changelists.css HTTP/1.1" 304 0
+[04/Feb/2026 18:32:01] "GET /static/admin/js/vendor/jquery/jquery.js HTTP/1.1" 304 0
+[04/Feb/2026 18:32:01] "GET /static/admin/js/actions.js HTTP/1.1" 304 0
+[04/Feb/2026 18:32:01] "GET /static/admin/js/jquery.init.js HTTP/1.1" 304 0
+[04/Feb/2026 18:32:01] "GET /static/admin/js/prepopulate.js HTTP/1.1" 304 0
+[04/Feb/2026 18:32:01] "GET /static/admin/js/core.js HTTP/1.1" 304 0
+[04/Feb/2026 18:32:01] "GET /static/admin/js/admin/RelatedObjectLookups.js HTTP/1.1" 304 0
+[04/Feb/2026 18:32:01] "GET /static/admin/js/vendor/xregexp/xregexp.js HTTP/1.1" 304 0
+[04/Feb/2026 18:32:01] "GET /static/admin/js/urlify.js HTTP/1.1" 304 0
+[04/Feb/2026 18:32:01] "GET /static/admin/img/search.svg HTTP/1.1" 304 0
+[04/Feb/2026 18:32:01] "GET /static/admin/js/filters.js HTTP/1.1" 304 0
+[04/Feb/2026 18:32:01] "GET /admin/jsi18n/ HTTP/1.1" 200 9131
+[04/Feb/2026 18:32:01] "GET /static/admin/img/tooltag-add.svg HTTP/1.1" 304 0
+[04/Feb/2026 18:32:01] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:32:02] "GET /admin/platform_ui/inbound/ HTTP/1.1" 200 56035
+[04/Feb/2026 18:32:02] "GET /admin/jsi18n/ HTTP/1.1" 200 9131
+[04/Feb/2026 18:32:03] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:32:04] "GET /admin/platform_ui/inbound/add/ HTTP/1.1" 200 42674
+[04/Feb/2026 18:32:04] "GET /static/admin/css/forms.css HTTP/1.1" 200 9090
+[04/Feb/2026 18:32:04] "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 304 0
+[04/Feb/2026 18:32:04] "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 304 0
+[04/Feb/2026 18:32:04] "GET /static/admin/css/widgets.css HTTP/1.1" 200 11921
+[04/Feb/2026 18:32:04] "GET /static/admin/img/icon-viewlink.svg HTTP/1.1" 200 581
+[04/Feb/2026 18:32:04] "GET /static/admin/js/prepopulate_init.js HTTP/1.1" 200 586
+[04/Feb/2026 18:32:04] "GET /static/admin/img/icon-deletelink.svg HTTP/1.1" 200 392
+[04/Feb/2026 18:32:04] "GET /static/admin/js/change_form.js HTTP/1.1" 200 606
+[04/Feb/2026 18:32:04] "GET /admin/jsi18n/ HTTP/1.1" 200 9131
+[04/Feb/2026 18:32:04] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:32:07] "GET /admin/platform_ui/inventory/add/?_to_field=id&_popup=1 HTTP/1.1" 200 33103
+[04/Feb/2026 18:32:07] "GET /admin/jsi18n/ HTTP/1.1" 200 9131
+[04/Feb/2026 18:32:07] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:32:23] "POST /admin/platform_ui/inventory/add/?_to_field=id&_popup=1 HTTP/1.1" 200 345
+[04/Feb/2026 18:32:23] "GET /static/admin/js/popup_response.js HTTP/1.1" 200 551
+[04/Feb/2026 18:32:28] "GET /admin/platform_ui/outbound/ HTTP/1.1" 200 55816
+[04/Feb/2026 18:32:28] "GET /admin/jsi18n/ HTTP/1.1" 200 9131
+[04/Feb/2026 18:32:28] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:32:31] "GET /admin/platform_ui/outbound/?q= HTTP/1.1" 200 55884
+[04/Feb/2026 18:32:31] "GET /admin/jsi18n/ HTTP/1.1" 200 9131
+[04/Feb/2026 18:32:31] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:32:34] "GET /admin/platform_ui/outbound/?q=1 HTTP/1.1" 200 55892
+[04/Feb/2026 18:32:34] "GET /admin/jsi18n/ HTTP/1.1" 200 9131
+[04/Feb/2026 18:32:35] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:32:37] "GET /super-admin/ HTTP/1.1" 200 69383
+[04/Feb/2026 18:32:38] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:33:34] "GET /admin/ HTTP/1.1" 200 61486
+[04/Feb/2026 18:33:34] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:33:36] "GET /admin/platform_ui/inventory/?status__exact=LOW HTTP/1.1" 200 43842
+[04/Feb/2026 18:33:37] "GET /admin/jsi18n/ HTTP/1.1" 200 9131
+[04/Feb/2026 18:33:37] "GET /favicon.ico HTTP/1.1" 200 0
+/Users/hwany/Desktop/Forkast/apps/platform_ui/views.py changed, reloading.
+Performing system checks...
+
+System check identified no issues (0 silenced).
+
+You have 7 unapplied migration(s). Your project may not work properly until you apply the migrations for app(s): platform_ui.
+Run 'python manage.py migrate' to apply them.
+February 04, 2026 - 17:43:55
+Django version 4.2.27, using settings 'forkast_project.settings'
+Starting development server at http://0.0.0.0:8000/
+Quit the server with CONTROL-C.
+
+Watching for file changes with StatReloader
+[04/Feb/2026 18:43:32] "GET /register/ HTTP/1.1" 200 27962
+[04/Feb/2026 18:43:33] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:44:43] "GET /super-admin/ HTTP/1.1" 200 69461
+[04/Feb/2026 18:44:44] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:46:28] "POST /super-admin/ HTTP/1.1" 302 0
+[04/Feb/2026 18:46:28] "GET /super-admin/ HTTP/1.1" 200 69866
+[04/Feb/2026 18:46:29] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:48:21] "GET /admin/platform_ui/salesorder/ HTTP/1.1" 200 55836
+[04/Feb/2026 18:48:21] "GET /admin/jsi18n/ HTTP/1.1" 200 9131
+[04/Feb/2026 18:48:21] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:48:23] "GET /admin/platform_ui/inbound/ HTTP/1.1" 200 58304
+[04/Feb/2026 18:48:23] "GET /admin/jsi18n/ HTTP/1.1" 200 9131
+[04/Feb/2026 18:48:23] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:48:25] "GET /admin/platform_ui/outbound/ HTTP/1.1" 200 55816
+[04/Feb/2026 18:48:25] "GET /admin/jsi18n/ HTTP/1.1" 200 9131
+[04/Feb/2026 18:48:25] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:48:27] "GET /admin/platform_ui/purchaseorder/ HTTP/1.1" 200 57566
+[04/Feb/2026 18:48:27] "GET /admin/jsi18n/ HTTP/1.1" 200 9131
+[04/Feb/2026 18:48:27] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:48:29] "GET /admin/platform_ui/inventory/ HTTP/1.1" 200 44224
+[04/Feb/2026 18:48:29] "GET /admin/jsi18n/ HTTP/1.1" 200 9131
+[04/Feb/2026 18:48:29] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:48:31] "GET /admin/platform_ui/inventory/1/change/?_popup=1 HTTP/1.1" 200 33032
+[04/Feb/2026 18:48:32] "GET /admin/jsi18n/ HTTP/1.1" 200 9131
+[04/Feb/2026 18:48:34] "GET /super-admin/ HTTP/1.1" 200 69889
+[04/Feb/2026 18:48:35] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:50:54] "GET / HTTP/1.1" 200 40351
+[04/Feb/2026 18:50:54] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:51:02] "GET /super-admin/ HTTP/1.1" 302 0
+[04/Feb/2026 18:51:02] "GET /admin/login/?next=/super-admin/ HTTP/1.1" 200 29950
+[04/Feb/2026 18:51:02] "GET /static/admin/css/base.css HTTP/1.1" 304 0
+[04/Feb/2026 18:51:02] "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 304 0
+[04/Feb/2026 18:51:02] "GET /static/admin/css/login.css HTTP/1.1" 304 0
+[04/Feb/2026 18:51:02] "GET /static/admin/css/responsive.css HTTP/1.1" 304 0
+[04/Feb/2026 18:51:02] "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 304 0
+[04/Feb/2026 18:51:02] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:51:07] "POST /admin/login/?next=/super-admin/ HTTP/1.1" 302 0
+[04/Feb/2026 18:51:07] "GET /super-admin/ HTTP/1.1" 200 28060
+[04/Feb/2026 18:51:08] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:51:15] "POST /super-admin/ HTTP/1.1" 200 28362
+[04/Feb/2026 18:51:15] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:51:20] "POST /super-admin/ HTTP/1.1" 302 0
+[04/Feb/2026 18:51:20] "GET /super-admin/ HTTP/1.1" 200 69889
+[04/Feb/2026 18:51:21] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:51:36] "POST /super-admin/ HTTP/1.1" 302 0
+[04/Feb/2026 18:51:36] "GET /super-admin/ HTTP/1.1" 200 70655
+[04/Feb/2026 18:51:36] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:51:50] "GET /admin/platform_ui/purchaseorder/ HTTP/1.1" 200 58067
+[04/Feb/2026 18:51:50] "GET /static/admin/js/jquery.init.js HTTP/1.1" 304 0
+[04/Feb/2026 18:51:50] "GET /static/admin/js/core.js HTTP/1.1" 304 0
+[04/Feb/2026 18:51:50] "GET /static/admin/js/vendor/jquery/jquery.js HTTP/1.1" 304 0
+[04/Feb/2026 18:51:50] "GET /static/admin/css/changelists.css HTTP/1.1" 304 0
+[04/Feb/2026 18:51:50] "GET /static/admin/js/actions.js HTTP/1.1" 304 0
+[04/Feb/2026 18:51:50] "GET /static/admin/js/urlify.js HTTP/1.1" 304 0
+[04/Feb/2026 18:51:50] "GET /static/admin/js/admin/RelatedObjectLookups.js HTTP/1.1" 304 0
+[04/Feb/2026 18:51:50] "GET /static/admin/js/vendor/xregexp/xregexp.js HTTP/1.1" 304 0
+[04/Feb/2026 18:51:50] "GET /static/admin/js/prepopulate.js HTTP/1.1" 304 0
+[04/Feb/2026 18:51:50] "GET /static/admin/js/filters.js HTTP/1.1" 304 0
+[04/Feb/2026 18:51:50] "GET /admin/jsi18n/ HTTP/1.1" 200 9131
+[04/Feb/2026 18:51:50] "GET /static/admin/img/tooltag-add.svg HTTP/1.1" 304 0
+[04/Feb/2026 18:51:50] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:51:52] "POST /admin/platform_ui/purchaseorder/ HTTP/1.1" 302 0
+[04/Feb/2026 18:51:52] "GET /admin/platform_ui/purchaseorder/ HTTP/1.1" 200 58305
+[04/Feb/2026 18:51:52] "GET /admin/jsi18n/ HTTP/1.1" 200 9131
+[04/Feb/2026 18:51:52] "GET /static/admin/img/icon-alert.svg HTTP/1.1" 200 504
+[04/Feb/2026 18:51:52] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:52:04] "GET /admin/platform_ui/partner/ HTTP/1.1" 200 37707
+[04/Feb/2026 18:52:04] "GET /static/admin/img/search.svg HTTP/1.1" 304 0
+[04/Feb/2026 18:52:04] "GET /admin/jsi18n/ HTTP/1.1" 200 9131
+[04/Feb/2026 18:52:04] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:52:05] "GET /admin/platform_ui/inventory/ HTTP/1.1" 200 44224
+[04/Feb/2026 18:52:05] "GET /admin/jsi18n/ HTTP/1.1" 200 9131
+[04/Feb/2026 18:52:05] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:52:06] "GET /admin/platform_ui/inventory/1/change/?_popup=1 HTTP/1.1" 200 33032
+[04/Feb/2026 18:52:06] "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 304 0
+[04/Feb/2026 18:52:06] "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 304 0
+[04/Feb/2026 18:52:06] "GET /static/admin/css/forms.css HTTP/1.1" 304 0
+[04/Feb/2026 18:52:06] "GET /static/admin/img/icon-deletelink.svg HTTP/1.1" 304 0
+[04/Feb/2026 18:52:06] "GET /static/admin/img/icon-viewlink.svg HTTP/1.1" 304 0
+[04/Feb/2026 18:52:06] "GET /static/admin/js/prepopulate_init.js HTTP/1.1" 304 0
+[04/Feb/2026 18:52:06] "GET /static/admin/css/widgets.css HTTP/1.1" 304 0
+[04/Feb/2026 18:52:06] "GET /static/admin/js/change_form.js HTTP/1.1" 304 0
+[04/Feb/2026 18:52:06] "GET /admin/jsi18n/ HTTP/1.1" 200 9131
+[04/Feb/2026 18:52:10] "GET /super-admin/ HTTP/1.1" 200 70655
+[04/Feb/2026 18:52:18] "GET /super-admin/ HTTP/1.1" 200 70655
+[04/Feb/2026 18:52:18] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:52:22] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:54:36] "GET /super-admin/ HTTP/1.1" 200 70643
+[04/Feb/2026 18:54:37] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:56:14] "GET /super-admin/ HTTP/1.1" 200 70643
+[04/Feb/2026 18:56:15] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:56:42] "GET / HTTP/1.1" 200 40351
+[04/Feb/2026 18:56:43] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:56:49] "GET /super-admin/ HTTP/1.1" 302 0
+[04/Feb/2026 18:56:49] "GET /admin/login/?next=/super-admin/ HTTP/1.1" 200 29950
+[04/Feb/2026 18:56:50] "GET /static/admin/css/base.css HTTP/1.1" 200 21310
+[04/Feb/2026 18:56:50] "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 200 2694
+[04/Feb/2026 18:56:50] "GET /static/admin/css/login.css HTTP/1.1" 200 958
+[04/Feb/2026 18:56:50] "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 200 3063
+[04/Feb/2026 18:56:50] "GET /static/admin/css/responsive.css HTTP/1.1" 200 18559
+[04/Feb/2026 18:56:55] "POST /admin/login/?next=/super-admin/ HTTP/1.1" 302 0
+[04/Feb/2026 18:56:55] "GET /super-admin/ HTTP/1.1" 200 28060
+[04/Feb/2026 18:57:03] "POST /super-admin/ HTTP/1.1" 302 0
+[04/Feb/2026 18:57:03] "GET /super-admin/ HTTP/1.1" 200 70643
+[04/Feb/2026 18:57:42] "GET /super-admin/ HTTP/1.1" 200 70643
+[04/Feb/2026 18:57:43] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:57:53] "GET /super-admin/ HTTP/1.1" 200 70643
+[04/Feb/2026 18:57:54] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:58:48] "GET /super-admin/ HTTP/1.1" 200 70643
+[04/Feb/2026 18:58:49] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:58:54] "GET /super-admin/ HTTP/1.1" 200 70643
+[04/Feb/2026 18:58:55] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:59:07] "GET /super-admin/ HTTP/1.1" 200 70643
+[04/Feb/2026 18:59:09] "GET /favicon.ico HTTP/1.1" 200 0
+[04/Feb/2026 18:59:57] "GET /super-admin/ HTTP/1.1" 200 70643

@@ -1,0 +1,585 @@
+{% extends "admin/change_list.html" %}
+{% load static humanize %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    /* ===== ERP LOGISTICS MASTER-DETAIL ===== */
+    :root {
+        --erp-primary: #0d6b62;
+        --erp-success: #059669;
+        --erp-warning: #d97706;
+        --erp-danger: #dc2626;
+        --erp-info: #3b82f6;
+        --erp-bg: #f8fafa;
+        --erp-card: #ffffff;
+        --erp-border: #e5e7eb;
+        --erp-text: #1f2937;
+        --erp-muted: #6b7280;
+    }
+
+    /* Dark Mode Defaults */
+    [data-theme="dark"] {
+        --erp-primary: #0d6b62; /* Keep primary */
+        --erp-bg: #0f172a;      /* Slate 900 */
+        --erp-card: #1e293b;    /* Slate 800 */
+        --erp-border: #334155;  /* Slate 700 */
+        --erp-text: #f8fafc;    /* Slate 50 */
+        --erp-muted: #94a3b8;   /* Slate 400 */
+    }
+
+    /* Input & Select Dark Mode */
+    [data-theme="dark"] input[type="text"], 
+    [data-theme="dark"] input[type="number"], 
+    [data-theme="dark"] select,
+    [data-theme="dark"] textarea {
+        background-color: #334155 !important;
+        color: #f8fafc !important;
+        border: 1px solid #475569 !important;
+    }
+
+    [data-theme="dark"] .action-btn {
+        background-color: #334155 !important;
+        color: #f8fafc !important;
+        border-color: #475569 !important;
+    }
+    
+    /* Django Admin Overrides (Prevent Black Bars) */
+    #toolbar {
+        background: transparent !important;
+        border: none !important;
+        padding: 0 !important;
+        margin-bottom: 16px !important;
+    }
+    
+    #changelist-form .results {
+        background: transparent !important;
+    }
+    
+    /* Fix for Search Bar Container */
+    #toolbar form {
+        background: var(--erp-card) !important;
+        padding: 10px !important;
+        border-radius: 8px !important;
+        border: 1px solid var(--erp-border) !important;
+        color: var(--erp-text) !important;
+    }
+
+    #content {
+        background: var(--erp-bg) !important;
+        padding: 0 !important;
+    }
+
+    /* 물류 상태 바 */
+    .logistics-status-bar {
+        display: flex;
+        gap: 16px;
+        padding: 20px;
+        background: var(--erp-card);
+        border-bottom: 1px solid var(--erp-border);
+    }
+
+    .status-card {
+        flex: 1;
+        background: linear-gradient(135deg, #f0fdf9 0%, #ecfdf5 100%);
+        border: 1px solid #d1fae5;
+        border-radius: 8px;
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .status-card.pending {
+        background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+        border-color: #fde68a;
+    }
+
+    .status-card.transit {
+        background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+        border-color: #bfdbfe;
+    }
+
+    .status-card.completed {
+        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+        border-color: #bbf7d0;
+    }
+
+    /* Dark Mode Status Cards */
+    [data-theme="dark"] .status-card {
+        background: #1e293b !important;
+        border-color: #334155 !important;
+    }
+
+    [data-theme="dark"] .status-card.pending {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.1) 0%, rgba(245, 158, 11, 0.2) 100%) !important;
+        border-color: rgba(245, 158, 11, 0.3) !important;
+    }
+
+    [data-theme="dark"] .status-card.transit {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(59, 130, 246, 0.2) 100%) !important;
+        border-color: rgba(59, 130, 246, 0.3) !important;
+    }
+
+    [data-theme="dark"] .status-card.completed {
+        background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.2) 100%) !important;
+        border-color: rgba(16, 185, 129, 0.3) !important;
+    }
+    
+    [data-theme="dark"] .status-card .info .value {
+        color: #f8fafc !important;
+    }
+    
+    [data-theme="dark"] .status-card .info .label {
+        color: #94a3b8 !important;
+    }
+
+    .status-card .icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: #ffffff;
+    }
+
+    /* Django Admin Filter Sidebar Dark Mode */
+    [data-theme="dark"] #changelist-filter {
+        background-color: var(--erp-card) !important;
+        border-left: 1px solid var(--erp-border) !important;
+        color: var(--erp-text) !important;
+    }
+    
+    [data-theme="dark"] #changelist-filter h2 {
+        background-color: #334155 !important;
+        color: #f8fafc !important;
+        border-bottom: 1px solid #475569 !important;
+    }
+    
+    [data-theme="dark"] #changelist-filter a {
+        color: #94a3b8 !important;
+    }
+    
+    [data-theme="dark"] #changelist-filter a:hover,
+    [data-theme="dark"] #changelist-filter li.selected a {
+        color: #60a5fa !important;
+    }
+
+    .status-card.pending .icon { background: var(--erp-warning); }
+    .status-card.transit .icon { background: var(--erp-info); }
+    .status-card.completed .icon { background: var(--erp-success); }
+
+    .status-card .info .label {
+        font-size: 1rem; /* 16px */
+        font-weight: 700;
+        color: var(--erp-muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .status-card .info .value {
+        font-size: 1.875rem; /* 30px */
+        font-weight: 800;
+        color: var(--erp-text);
+        margin-top: 4px;
+    }
+
+    /* ===== QUICK ACTIONS ===== */
+    .logistics-actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 16px 20px;
+        background: var(--erp-card);
+        border-bottom: 1px solid var(--erp-border);
+    }
+
+    .logistics-actions .action-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 20px;
+        font-size: 1rem; /* 16px */
+        font-weight: 600;
+        border: 1px solid var(--erp-border);
+        border-radius: 8px;
+        background: var(--erp-card);
+        color: var(--erp-text);
+        cursor: pointer;
+        transition: all 0.15s;
+        text-decoration: none;
+    }
+
+    .logistics-actions .action-btn:hover {
+        background: #f3f4f6;
+        border-color: #9ca3af;
+    }
+
+    .logistics-actions .action-btn.primary {
+        background: var(--erp-primary);
+        color: #ffffff;
+        border-color: var(--erp-primary);
+    }
+
+    .logistics-actions .action-btn.primary:hover {
+        background: #0a5a53;
+    }
+
+    .logistics-actions .action-btn.success {
+        background: var(--erp-success);
+        color: #ffffff;
+        border-color: var(--erp-success);
+    }
+
+    .logistics-actions .action-btn.danger {
+        background: #fee2e2;
+        color: var(--erp-danger);
+        border-color: #fca5a5;
+    }
+
+    /* ===== STATUS TIMELINE ===== */
+    .status-timeline {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        padding: 20px;
+        background: var(--erp-card);
+        border-bottom: 1px solid var(--erp-border);
+    }
+
+    .timeline-step {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+    }
+
+    .timeline-step::after {
+        content: '';
+        position: absolute;
+        top: 18px;
+        left: 50%;
+        width: 100%;
+        height: 3px;
+        background: #e5e7eb;
+        z-index: 0;
+    }
+
+    .timeline-step:last-child::after {
+        display: none;
+    }
+
+    .timeline-step.completed::after {
+        background: var(--erp-success);
+    }
+
+    .timeline-step .step-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #e5e7eb;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem; /* 20px */
+        color: #9ca3af;
+        z-index: 1;
+        margin-bottom: 8px;
+    }
+
+    .timeline-step.completed .step-icon {
+        background: var(--erp-success);
+        color: #ffffff;
+    }
+
+    .timeline-step.active .step-icon {
+        background: var(--erp-info);
+        color: #ffffff;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+    }
+
+    .timeline-step .step-label {
+        font-size: 1rem; /* 16px */
+        font-weight: 700;
+        color: var(--erp-muted);
+        text-transform: uppercase;
+    }
+
+    .timeline-step.completed .step-label,
+    .timeline-step.active .step-label {
+        color: var(--erp-text);
+    }
+
+    /* ===== ENHANCED TABLE ===== */
+    #result_list {
+        margin: 20px !important;
+        border: 1px solid var(--erp-border) !important;
+        border-radius: 8px !important;
+        overflow: hidden !important;
+        background: var(--erp-card) !important;
+    }
+
+    #result_list thead th {
+        background: var(--erp-bg) !important;
+        padding: 16px !important;
+        font-size: 1rem !important; /* 16px */
+        font-weight: 800 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+        color: var(--erp-text) !important;
+        border-bottom: 2px solid var(--erp-border) !important;
+    }
+
+    #result_list thead th a {
+        color: var(--erp-text) !important;
+    }
+
+    #result_list tbody td {
+        padding: 16px !important;
+        font-size: 1rem !important; /* 16px */
+        color: var(--erp-text) !important;
+        border-bottom: 1px solid var(--erp-border) !important;
+    }
+
+    #result_list tbody tr:hover {
+        background: rgba(13, 107, 98, 0.05) !important; /* Consistent Light hover */
+    }
+    
+    [data-theme="dark"] #result_list tbody tr:hover {
+        background: rgba(56, 189, 248, 0.1) !important; /* Dark mode hover */
+    }
+
+    /* ===== DETAIL PANEL ===== */
+    .logistics-detail-panel {
+        margin: 0 20px 20px 20px;
+        background: var(--erp-card);
+        border: 1px solid var(--erp-border);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .detail-panel-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 20px;
+        background: var(--erp-bg); /* Use var for theme support */
+        border-bottom: 1px solid var(--erp-border);
+    }
+
+    .detail-panel-header .title {
+        font-size: 1.125rem; /* 18px */
+        font-weight: 700;
+        color: var(--erp-text);
+    }
+
+    .detail-panel-body {
+        padding: 20px;
+    }
+
+    .detail-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+    }
+
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .detail-item .label {
+        font-size: 1rem; /* 16px */
+        font-weight: 700;
+        color: var(--erp-muted);
+        text-transform: uppercase;
+    }
+
+    .detail-item .value {
+        font-size: 1.125rem; /* 18px */
+        font-weight: 700;
+        color: var(--erp-text);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- STATUS CARDS -->
+<div class="logistics-status-bar">
+    <div class="status-card pending">
+        <div class="icon"><i class="fa-solid fa-clock"></i></div>
+        <div class="info">
+            <div class="label">대기중</div>
+            <div class="value">{{ pending_count|default:"0"|intcomma }}</div>
+        </div>
+    </div>
+    <div class="status-card transit">
+        <div class="icon"><i class="fa-solid fa-truck"></i></div>
+        <div class="info">
+            <div class="label">운송중</div>
+            <div class="value">{{ transit_count|default:"0"|intcomma }}</div>
+        </div>
+    </div>
+    <div class="status-card completed">
+        <div class="icon"><i class="fa-solid fa-check"></i></div>
+        <div class="info">
+            <div class="label">완료</div>
+            <div class="value">{{ completed_count|default:"0"|intcomma }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- STATUS TIMELINE -->
+<div class="status-timeline">
+    <div class="timeline-step completed">
+        <div class="step-icon"><i class="fa-solid fa-file-invoice"></i></div>
+        <div class="step-label">주문접수</div>
+    </div>
+    <div class="timeline-step completed">
+        <div class="step-icon"><i class="fa-solid fa-box"></i></div>
+        <div class="step-label">포장완료</div>
+    </div>
+    <div class="timeline-step active">
+        <div class="step-icon"><i class="fa-solid fa-truck-fast"></i></div>
+        <div class="step-label">배송중</div>
+    </div>
+    <div class="timeline-step">
+        <div class="step-icon"><i class="fa-solid fa-house"></i></div>
+        <div class="step-label">배송완료</div>
+    </div>
+</div>
+
+<!-- QUICK ACTIONS -->
+<div class="logistics-actions">
+    <a href="{% url 'admin:platform_ui_inbound_add' %}" class="action-btn primary">
+        <i class="fa-solid fa-plus"></i> 신규 등록
+    </a>
+    <button class="action-btn success" onclick="confirmReceiving()">
+        <i class="fa-solid fa-check"></i> 입고 확인
+    </button>
+    <button class="action-btn" onclick="exportExcel()">
+        <i class="fa-solid fa-file-excel"></i> 엑셀
+    </button>
+    <button class="action-btn" onclick="window.print()">
+        <i class="fa-solid fa-print"></i> 인쇄
+    </button>
+    <button class="action-btn danger" onclick="cancelSelected()">
+        <i class="fa-solid fa-xmark"></i> 취소
+    </button>
+</div>
+
+<!-- 메인 데이터 테이블 -->
+<div style="margin: 20px 20px 0 20px; padding: 16px; background: #f1f5f9; border: 1px solid var(--erp-border); border-radius: 8px 8px 0 0;">
+    <div class="flex items-center gap-4">
+        <span style="font-size: 16px; font-weight: 800; color: #475569; background: #fff; padding: 4px 16px; border-radius: 4px; border: 1px solid #cbd5e1;">테이블: PLATFORM_UI_ORDER / PLATFORM_UI_DELIVERY</span>
+        <span style="font-size: 16px; color: #64748b; font-weight: 500;">| 요약 설명: 가맹점별 주문 내역과 실시간 배송 상태를 통합 관리하는 테이블</span>
+    </div>
+</div>
+{{ block.super }}
+
+<!-- DETAIL PANEL (Selected Item) -->
+<div class="logistics-detail-panel">
+    <div class="detail-panel-header">
+        <div class="flex flex-col">
+            <span class="title">📦 선택된 항목 상세 정보</span>
+            <div class="mt-1 flex items-center gap-2">
+                <span style="font-size: 11px; font-weight: 800; color: #64748b; background: var(--erp-bg); padding: 1px 6px; border-radius: 3px; border: 1px solid var(--erp-border);">테이블: PLATFORM_UI_ORDER</span>
+                <span style="font-size: 11px; color: #94a3b8;">| 선택된 물류 항목의 기초 문서 정보와 처리 이력을 관리하는 테이블</span>
+            </div>
+        </div>
+    </div>
+    <div class="detail-panel-body">
+        <div class="detail-grid">
+            <div class="detail-item">
+                <span class="label">문서번호</span>
+                <span class="value" id="detail-doc-no">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">거래처</span>
+                <span class="value" id="detail-partner">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">상태</span>
+                <span class="value" id="detail-status">-</span>
+            </div>
+            <div class="detail-item">
+                <span class="label">최종수정</span>
+                <span class="value" id="detail-updated">-</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 선택된 체크박스 가져오기
+    function getSelectedIds() {
+        const checkboxes = document.querySelectorAll('input[name="_selected_action"]:checked');
+        return Array.from(checkboxes).map(cb => cb.value);
+    }
+
+    // 입고 확인
+    function confirmReceiving() {
+        const selected = getSelectedIds();
+        if (selected.length === 0) {
+            alert('입고 확인할 항목을 선택해주세요.');
+            return;
+        }
+        if (confirm(selected.length + '개 항목의 입고를 확인하시겠습니까?')) {
+            // Django admin action 실행
+            const form = document.getElementById('changelist-form');
+            if (form) {
+                const actionSelect = form.querySelector('select[name="action"]');
+                if (actionSelect) {
+                    actionSelect.value = 'confirm_receiving';
+                    form.submit();
+                }
+            }
+        }
+    }
+
+    // 엑셀 내보내기
+    function exportExcel() {
+        const currentUrl = window.location.href;
+        const exportUrl = currentUrl.includes('?') 
+            ? currentUrl + '&export=excel' 
+            : currentUrl + '?export=excel';
+        window.location.href = exportUrl;
+    }
+
+    // 선택 항목 취소
+    function cancelSelected() {
+        const selected = getSelectedIds();
+        if (selected.length === 0) {
+            alert('취소할 항목을 선택해주세요.');
+            return;
+        }
+        if (confirm(selected.length + '개 항목을 취소하시겠습니까?')) {
+            const form = document.getElementById('changelist-form');
+            if (form) {
+                const actionSelect = form.querySelector('select[name="action"]');
+                if (actionSelect) {
+                    actionSelect.value = 'cancel_items';
+                    form.submit();
+                }
+            }
+        }
+    }
+
+    // Row click to show detail
+    document.querySelectorAll('#result_list tbody tr').forEach(row => {
+        row.addEventListener('click', function() {
+            const cells = this.querySelectorAll('td');
+            if (cells.length > 1) {
+                document.getElementById('detail-doc-no').textContent = cells[1]?.textContent || '-';
+                document.getElementById('detail-partner').textContent = cells[2]?.textContent || '-';
+            }
+        });
+    });
+</script>
+{% endblock %}

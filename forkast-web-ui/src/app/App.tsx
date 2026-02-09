@@ -26,6 +26,8 @@ export const AppRouter = () => {
           <Route path="/delivery" element={<Pages.DeliveryPage />} />
           <Route path="/alerts" element={<Pages.AlertsPage />} />
           <Route path="/settings" element={<Pages.SettingsPage />} />
+          <Route path="/super-admin" element={<Pages.SuperAdminPage />} />
+          <Route path="/admin" element={<Pages.AdminPage />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -1,0 +1,441 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block content %}
+<div class="dashboard-container" style="max-width: 1400px; margin: 0 auto; padding: 10px 20px 40px 20px; min-height: calc(100vh - 72px); box-sizing: border-box;">
+    
+    <!-- 1. Welcome Banner -->
+    <div style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: white; padding: 40px; border-radius: 16px; margin-bottom: 30px; position: relative; overflow: hidden; box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.3);">
+        <div style="position: relative; z-index: 10;">
+            <p style="font-size: 0.9rem; font-weight: 600; opacity: 0.8; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px;">Store Management Console</p>
+            <h1 style="font-size: 2.2rem; font-weight: 800; margin: 0; line-height: 1.2;">
+                <span style="color: #e2e8f0; font-weight: 600;">{% firstof request.user.get_full_name request.user.username "관리자" %}</span>님, 환영합니다.
+            </h1>
+            <p style="margin-top: 15px; font-size: 1.05rem; opacity: 0.9; max-width: 600px;">
+                오늘 하루 매장의 흐름을 한눈에 확인하세요. 재고와 주문 현황이 실시간으로 동기화되고 있습니다.
+            </p>
+        </div>
+        <!-- Decorative Circle -->
+        <div style="position: absolute; right: -50px; bottom: -100px; width: 300px; height: 300px; background: radial-gradient(circle, rgba(59,130,246,0.3) 0%, rgba(255,255,255,0) 70%); border-radius: 50%;"></div>
+    </div>
+
+    <!-- 2. Key Metrics Grid -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; margin-bottom: 40px;">
+        
+        <!-- Metric 1: Pending Orders -->
+        <div style="background: var(--card-bg); padding: 28px; border-radius: 16px; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                <div>
+                    <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-muted); margin: 0 0 8px 0;">처리 대기 주문</h3>
+                    <div style="font-size: 2.6rem; font-weight: 900; color: #2563eb; line-height: 1;">5 <span style="font-size: 1.1rem; color: var(--text-muted); font-weight: 600;">건</span></div>
+                </div>
+                <div style="width: 48px; height: 48px; background: #eff6ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #2563eb; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
+                    <i class="fa-solid fa-bell" style="font-size: 1.4rem;"></i>
+                </div>
+            </div>
+            <a href="/admin/platform_ui/salesorder/" style="font-size: 0.9rem; font-weight: 700; color: #2563eb; text-decoration: none; display: flex; align-items: center; gap: 5px; margin-top: 10px;">
+                주문 확인하기 <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+
+        <!-- Metric 2: Inventory Status -->
+        <div style="background: var(--card-bg); padding: 28px; border-radius: 16px; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                <div>
+                    <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-muted); margin: 0 0 8px 0;">재고 경고/주의</h3>
+                    <div style="font-size: 2.6rem; font-weight: 900; color: #ef4444; line-height: 1;">2 <span style="font-size: 1.1rem; color: var(--text-muted); font-weight: 600;">품목</span></div>
+                </div>
+                <div style="width: 48px; height: 48px; background: #fef2f2; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #ef4444; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
+                    <i class="fa-solid fa-triangle-exclamation" style="font-size: 1.4rem;"></i>
+                </div>
+            </div>
+            <a href="/admin/platform_ui/inventory/?status__exact=LOW" style="font-size: 0.9rem; font-weight: 700; color: #ef4444; text-decoration: none; display: flex; align-items: center; gap: 5px; margin-top: 10px;">
+                재고 채우기 <i class="fa-solid fa-arrow-right"></i>
+            </a>
+        </div>
+
+        <!-- Metric 3: Today's Revenue -->
+        <div style="background: var(--card-bg); padding: 28px; border-radius: 16px; border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+                <div>
+                    <h3 style="font-size: 0.95rem; font-weight: 700; color: var(--text-muted); margin: 0 0 8px 0;">오늘 예상 매출</h3>
+                    <div style="font-size: 2.6rem; font-weight: 900; color: #10b981; line-height: 1;">1.2 <span style="font-size: 1.1rem; color: var(--text-muted); font-weight: 600;">백만원</span></div>
+                </div>
+                <div style="width: 48px; height: 48px; background: #ecfdf5; border-radius: 12px; display: flex; align-items: center; justify-content: center; color: #10b981; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);">
+                    <i class="fa-solid fa-chart-pie" style="font-size: 1.4rem;"></i>
+                </div>
+            </div>
+            <div style="font-size: 0.9rem; color: var(--text-muted); display: flex; align-items: center; gap: 5px; margin-top: 10px;">
+                <span style="color: #10b981; font-weight: 700; background: #d1fae5; padding: 2px 6px; border-radius: 4px;">+12%</span> <span style="font-weight:500;">어제 대비 증가</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Dashboard Grid: Quick Actions & Recent Logs -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px;">
+        
+        <!-- Left: Quick Actions -->
+        <div>
+            <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin-bottom: 20px;">자주 사용하는 메뉴</h3>
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+                <a href="/admin/platform_ui/transaction/add/" style="background: var(--card-bg); border: 1px solid var(--border-color); padding: 16px 12px; border-radius: 12px; text-decoration: none; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;">
+                    <div style="width: 40px; height: 40px; background: #f0f9ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #0284c7; font-size: 1rem;">
+                        <i class="fa-solid fa-cash-register"></i>
+                    </div>
+                    <span style="font-weight: 700; color: var(--text-color); font-size: 0.8rem;">매출 수기 등록</span>
+                </a>
+
+                <a href="/admin/platform_ui/inventory/add/" style="background: var(--card-bg); border: 1px solid var(--border-color); padding: 16px 12px; border-radius: 12px; text-decoration: none; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;">
+                    <div style="width: 40px; height: 40px; background: #f0fdf4; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #16a34a; font-size: 1rem;">
+                        <i class="fa-solid fa-box-open"></i>
+                    </div>
+                    <span style="font-weight: 700; color: var(--text-color); font-size: 0.8rem;">신규 품목 등록</span>
+                </a>
+
+                <a href="/dashboard/" style="background: var(--card-bg); border: 1px solid var(--border-color); padding: 16px 12px; border-radius: 12px; text-decoration: none; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center;">
+                    <div style="width: 40px; height: 40px; background: #fae8ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #c026d3; font-size: 1rem;">
+                        <i class="fa-solid fa-network-wired"></i>
+                    </div>
+                    <span style="font-weight: 700; color: var(--text-color); font-size: 0.8rem;">매장 서비스 확인</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Right: Activity Timeline -->
+        <div>
+            <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin-bottom: 20px;">최근 활동</h3>
+            <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; min-height: 120px;">
+                <ul class="actionlist" style="list-style: none; padding: 0; margin: 0;">
+                {% load log %}
+                {% get_admin_log 3 as admin_log for_user user %}
+                {% if admin_log %}
+                    {% for entry in admin_log %}
+                    <li style="position: relative; padding-left: 16px; margin-bottom: 12px; border-left: 2px solid var(--border-color);">
+                        <div style="position: absolute; left: -5px; top: 0; width: 8px; height: 8px; border-radius: 50%; background: {% if entry.is_addition %}#22c55e{% elif entry.is_change %}#3b82f6{% else %}#ef4444{% endif %};"></div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 2px;">
+                            {{ entry.action_time|date:"m/d H:i" }}
+                        </div>
+                        <div style="font-weight: 600; font-size: 0.85rem;">
+                            {{ entry.object_repr|truncatechars:20 }}
+                            <span style="font-weight: 400; color: var(--text-muted); font-size: 0.8rem;">
+                                {% if entry.is_addition %}등록{% elif entry.is_change %}수정{% else %}삭제{% endif %}
+                            </span>
+                        </div>
+                    </li>
+                    {% endfor %}
+                {% else %}
+                    <li style="color: var(--text-muted); text-align: center; font-size: 0.85rem;">활동 내역이 없습니다.</li>
+                {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Full Menu Grid -->
+    <div>
+        <h3 style="font-size: 1.1rem; font-weight: 800; color: var(--text-color); margin-bottom: 20px;">전체 메뉴 바로가기</h3>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+            
+            <!-- Row 1 -->
+            <!-- 영업 + 물류 -->
+            <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; display: flex; gap: 24px;">
+                <div style="flex: 1;">
+                    <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-file-invoice" style="color: #2563eb;"></i> 영업
+                    </div>
+                    <a href="/admin/platform_ui/salesorder/" style="display: block; padding: 6px 0; font-size: 0.85rem; font-weight: 600; color: var(--text-color); text-decoration: none;">수주관리</a>
+                </div>
+                <div style="width: 1px; background: var(--border-color);"></div>
+                <div style="flex: 1;">
+                    <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-truck" style="color: #16a34a;"></i> 물류
+                    </div>
+                    <a href="/admin/platform_ui/inbound/" style="display: block; padding: 6px 0; font-size: 0.85rem; font-weight: 600; color: var(--text-color); text-decoration: none;">입고관리</a>
+                    <a href="/admin/platform_ui/outbound/" style="display: block; padding: 6px 0; font-size: 0.85rem; font-weight: 600; color: var(--text-color); text-decoration: none;">출고관리</a>
+                    <a href="/admin/platform_ui/purchaseorder/" style="display: block; padding: 6px 0; font-size: 0.85rem; font-weight: 600; color: var(--text-color); text-decoration: none;">발주관리</a>
+                </div>
+            </div>
+
+            <!-- 상품/거래 + AI분석 -->
+            <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; display: flex; gap: 24px;">
+                <div style="flex: 1;">
+                    <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-cubes" style="color: #9333ea;"></i> 상품/거래
+                    </div>
+                    <a href="/admin/platform_ui/inventory/" style="display: block; padding: 6px 0; font-size: 0.85rem; font-weight: 600; color: var(--text-color); text-decoration: none;">상품관리</a>
+                    <a href="/admin/platform_ui/transaction/" style="display: block; padding: 6px 0; font-size: 0.85rem; font-weight: 600; color: var(--text-color); text-decoration: none;">거래내역</a>
+                    <a href="/admin/platform_ui/partner/" style="display: block; padding: 6px 0; font-size: 0.85rem; font-weight: 600; color: var(--text-color); text-decoration: none;">거래처</a>
+                </div>
+                <div style="width: 1px; background: var(--border-color);"></div>
+                <div style="flex: 1;">
+                    <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-brain" style="color: #0ea5e9;"></i> AI 분석
+                    </div>
+                    <a href="/admin/sales-forecast/" style="display: block; padding: 6px 0; font-size: 0.85rem; font-weight: 600; color: var(--text-color); text-decoration: none;">매출예측 <span style="font-size: 0.65rem; background: #0ea5e9; color: white; padding: 1px 4px; border-radius: 3px;">AI</span></a>
+                    <a href="/admin/platform_ui/forecastrun/" style="display: block; padding: 6px 0; font-size: 0.85rem; font-weight: 600; color: var(--text-color); text-decoration: none;">배치로그</a>
+                </div>
+            </div>
+
+            <!-- Row 2 -->
+            <!-- 리포트 + 시스템 -->
+            <div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; display: flex; gap: 24px;">
+                <div style="flex: 1;">
+                    <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-chart-line" style="color: #f59e0b;"></i> 리포트
+                    </div>
+                    <a href="/admin/platform_ui/dailysales/" style="display: block; padding: 6px 0; font-size: 0.85rem; font-weight: 600; color: var(--text-color); text-decoration: none;">일별매출</a>
+                    <a href="/admin/platform_ui/posrawsales/" style="display: block; padding: 6px 0; font-size: 0.85rem; font-weight: 600; color: var(--text-color); text-decoration: none;">POS연동</a>
+                </div>
+                <div style="width: 1px; background: var(--border-color);"></div>
+                <div style="flex: 1;">
+                    <div style="font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-gear" style="color: #64748b;"></i> 시스템
+                    </div>
+                    <a href="/admin/platform_ui/member/" style="display: block; padding: 6px 0; font-size: 0.85rem; font-weight: 600; color: var(--text-color); text-decoration: none;">사용자</a>
+                    <a href="/admin/platform_ui/auditlog/" style="display: block; padding: 6px 0; font-size: 0.85rem; font-weight: 600; color: var(--text-color); text-decoration: none;">감사로그</a>
+                    <a href="/admin/platform_ui/adminconfig/" style="display: block; padding: 6px 0; font-size: 0.85rem; font-weight: 600; color: var(--text-color); text-decoration: none;">설정</a>
+                </div>
+            </div>
+
+            <!-- 실시간 알림 (승인 요청) -->
+            <style>
+                .notification-panel {
+                    background: linear-gradient(135deg, #fef3c7 0%, #fef9e7 100%);
+                    border: 1px solid #fcd34d;
+                    border-radius: 12px;
+                    padding: 16px;
+                }
+                [data-theme="dark"] .notification-panel {
+                    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+                    border-color: #475569 !important;
+                }
+                .notification-header {
+                    font-size: 0.7rem;
+                    font-weight: 700;
+                    color: #92400e;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+                [data-theme="dark"] .notification-header {
+                    color: #fcd34d !important;
+                }
+                .notification-refresh {
+                    background: none;
+                    border: none;
+                    cursor: pointer;
+                    color: #d97706;
+                    font-size: 0.75rem;
+                    font-weight: 600;
+                }
+                [data-theme="dark"] .notification-refresh {
+                    color: #fcd34d !important;
+                }
+                .notification-loading {
+                    text-align: center;
+                    color: #92400e;
+                    font-size: 0.8rem;
+                    padding: 20px 0;
+                }
+                [data-theme="dark"] .notification-loading {
+                    color: #e2e8f0 !important;
+                }
+                /* Notification Items */
+                .notification-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                    padding: 10px;
+                    margin-bottom: 6px;
+                    background: rgba(255,255,255,0.7);
+                    border-radius: 8px;
+                    text-decoration: none;
+                    transition: all 0.2s;
+                    border: 1px solid transparent;
+                }
+                .notification-item:hover {
+                    background: #ffffff;
+                    border-color: #fcd34d;
+                }
+                [data-theme="dark"] .notification-item {
+                    background: rgba(255, 255, 255, 0.05);
+                }
+                [data-theme="dark"] .notification-item:hover {
+                    background: rgba(255, 255, 255, 0.1);
+                    border-color: rgba(255, 255, 255, 0.2);
+                }
+
+                .notification-icon-wrapper {
+                    width: 32px;
+                    height: 32px;
+                    background: #fef3c7;
+                    border-radius: 8px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 0.85rem;
+                }
+                [data-theme="dark"] .notification-icon-wrapper {
+                    background: rgba(255, 255, 255, 0.1);
+                }
+
+                .notification-title {
+                    font-size: 0.8rem;
+                    font-weight: 700;
+                    color: #1f2937;
+                }
+                [data-theme="dark"] .notification-title {
+                    color: #e2e8f0;
+                }
+
+                .notification-time {
+                    font-size: 0.7rem;
+                    color: #6b7280;
+                }
+                [data-theme="dark"] .notification-time {
+                    color: #94a3b8;
+                }
+
+                .notification-badge {
+                    font-size: 0.65rem;
+                    background: #fef3c7;
+                    color: #d97706;
+                    padding: 2px 6px;
+                    border-radius: 4px;
+                    font-weight: 600;
+                }
+                [data-theme="dark"] .notification-badge {
+                    background: rgba(217, 119, 6, 0.2);
+                    color: #fbbf24;
+                }
+            </style>
+            <div class="notification-panel">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div class="notification-header">
+                        <i class="fa-solid fa-bell" style="color: #d97706;"></i> 
+                        승인 대기 알림
+                        <span id="notification-count" style="background: #ef4444; color: white; font-size: 0.65rem; padding: 2px 6px; border-radius: 10px; font-weight: 700;">0</span>
+                    </div>
+                    <button onclick="refreshNotifications()" class="notification-refresh">
+                        <i class="fa-solid fa-arrows-rotate"></i> 새로고침
+                    </button>
+                </div>
+                
+                <div id="notification-list" style="max-height: 200px; overflow-y: auto;">
+                    <!-- Notifications will be loaded here -->
+                    <div class="notification-loading">
+                        <i class="fa-solid fa-spinner fa-spin"></i> 불러오는 중...
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+// 알림 데이터 초기화
+document.addEventListener('DOMContentLoaded', () => {
+    refreshNotifications();
+    // 30초마다 자동 갱신
+    setInterval(refreshNotifications, 30000);
+});
+
+function getTypeIcon(type) {
+    const icons = {
+        'inbound': '<i class="fa-solid fa-truck-ramp-box" style="color: #16a34a;"></i>',
+        'outbound': '<i class="fa-solid fa-truck-arrow-right" style="color: #2563eb;"></i>',
+        'order': '<i class="fa-solid fa-file-invoice-dollar" style="color: #9333ea;"></i>',
+        'purchase': '<i class="fa-solid fa-cart-shopping" style="color: #d97706;"></i>',
+    };
+    return icons[type] || '<i class="fa-solid fa-bell" style="color: #6b7280;"></i>';
+}
+
+function renderNotifications(notifications) {
+    const container = document.getElementById('notification-list');
+    const countBadge = document.getElementById('notification-count');
+    
+    if (!notifications || notifications.length === 0) {
+        container.innerHTML = `
+            <div style="text-align: center; color: #92400e; font-size: 0.8rem; padding: 20px 0;">
+                <i class="fa-solid fa-check-circle" style="color: #16a34a; font-size: 1.5rem; margin-bottom: 8px;"></i><br>
+                대기중인 승인 요청이 없습니다.
+            </div>
+        `;
+        countBadge.textContent = '0';
+        countBadge.style.background = '#9ca3af';
+        return;
+    }
+    
+    countBadge.textContent = notifications.length;
+    countBadge.style.background = '#ef4444';
+    
+    container.innerHTML = notifications.map(n => `
+        <a href="${n.url}" class="notification-item">
+            <div class="notification-icon-wrapper">
+                ${getTypeIcon(n.type)}
+            </div>
+            <div style="flex: 1;">
+                <div class="notification-title">${n.title}</div>
+                <div class="notification-time">${n.time}</div>
+            </div>
+            <div class="notification-badge">
+                승인대기
+            </div>
+        </a>
+    `).join('');
+}
+
+function refreshNotifications() {
+    const container = document.getElementById('notification-list');
+    const countBadge = document.getElementById('notification-count');
+    const refreshBtn = document.querySelector('.notification-refresh i');
+    
+    // 로딩 표시
+    if (refreshBtn) refreshBtn.classList.add('fa-spin');
+    
+    fetch('/api/notifications/')
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                renderNotifications(data.notifications);
+            } else {
+                console.error('Notification API Error:', data.message);
+            }
+        })
+        .catch(err => {
+            console.error('Fetch Error:', err);
+            container.innerHTML = `
+                <div style="text-align: center; color: #ef4444; font-size: 0.8rem; padding: 20px 0;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> 알림을 불러올 수 없습니다.
+                </div>
+            `;
+        })
+        .finally(() => {
+            if (refreshBtn) refreshBtn.classList.remove('fa-spin');
+        });
+}
+    // fetch('/api/notifications/pending/')
+    //     .then(res => res.json())
+    //     .then(data => renderNotifications(data))
+    //     .catch(err => console.error(err));
+    
+    // Mock: 1초 후 데이터 렌더링
+    setTimeout(() => {
+        renderNotifications(mockNotifications);
+    }, 500);
+}
+
+// 페이지 로드 시 알림 불러오기
+document.addEventListener('DOMContentLoaded', function() {
+    refreshNotifications();
+    
+    // 30초마다 자동 갱신
+    setInterval(refreshNotifications, 30000);
+});
+</script>
+{% endblock %}
+
+{% block sidebar %}{% endblock %}

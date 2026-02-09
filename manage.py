@@ -19,7 +19,7 @@ def main():
     # cx_Oracle Shim for oracledb
     try:
         import oracledb
-        import sys
+
         oracledb.version = "8.3.0"
         
         # Django's Oracle backend expects these to be types for isinstance()

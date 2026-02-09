@@ -1,0 +1,98 @@
+{% extends 'platform_ui/base.html' %}
+{% load static humanize %}
+
+{% block title %}시간/요일 인사이트 - Forkast{% endblock %}
+
+{% block content %}
+    <section class="pt-24 pb-12 px-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="flex flex-col md:flex-row items-center justify-between mb-12 pb-8 border-b border-white/5">
+                <div class="flex items-center gap-6">
+                    <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 flex items-center justify-center text-3xl shadow-lg shadow-rose-500/20">
+                        <i class="fa-solid fa-stopwatch text-white"></i>
+                    </div>
+                    <div>
+                        <div class="inline-block py-1 px-3 rounded-lg bg-pink-500/10 text-pink-500 text-[10px] font-black uppercase tracking-widest mb-2 border border-pink-500/20">피크 타임 정밀 분석 (Golden Time Analysis)</div>
+                        <h1 class="text-4xl lg:text-5xl font-display font-black text-white tracking-tight">트래픽 <span class="text-pink-500">인사이트</span></h1>
+                        <p class="text-slate-400 mt-2 font-medium">우리 매장의 골든타임을 파악하여 인력 배치와 운영 효율을 최적화하세요.</p>
+                    </div>
+                </div>
+                <div class="text-right mt-6 md:mt-0 p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-xl">
+                    <div class="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">오늘의 예상 피크타임</div>
+                    <div class="text-2xl font-display font-black text-pink-500 tracking-tight">19:00 - 21:00</div>
+                </div>
+            </div>
+
+            <!-- Heatmap Section -->
+            <div class="glass-panel p-10 rounded-[2.5rem] mb-12 group">
+                <h3 class="text-2xl font-display font-black mb-10 text-white flex items-center gap-4 tracking-tight">
+                    <span class="w-2 h-8 bg-pink-500 rounded-full"></span> 주간 시간대별 주문 현황 (Heatmap)
+                </h3>
+                <div class="overflow-x-auto">
+                    <!-- Simple CSS Grid Mockup for Heatmap -->
+                    <div class="min-w-[800px] grid grid-cols-8 gap-2 text-center text-[10px] font-black uppercase tracking-widest text-slate-500 opacity-60">
+                        <div></div> <!-- Corner -->
+                        {% for d in "월화수목금토일" %}<div>{{d}}요일</div>{% endfor %}
+                        
+                        {% for h in "123456" %} <!-- 6 Rows roughly representing time blocks -->
+                        <div class="flex items-center justify-center font-black text-slate-600">1{{h|add:"6"}}:00</div>
+                        {% for col in "1234567" %}
+                            <div class="h-12 rounded-xl hover:scale-105 transition-all duration-300 cursor-pointer border border-white/5" 
+                                style="background-color: rgba(244, 63, 94, {{ forloop.counter0|add:h|stringformat:'f'|slice:':3'|default:'0.1' }});">
+                            </div>
+                        {% endfor %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hourly Analysis -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="glass-panel p-8 rounded-3xl">
+                    <h3 class="text-xl font-display font-black mb-8 text-white flex items-center gap-3 tracking-tight">
+                        <span class="w-1.5 h-6 bg-blue-500 rounded-full"></span> 시간대별 매출 비중
+                    </h3>
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-6">
+                            <span class="w-16 text-[10px] font-black uppercase tracking-widest text-slate-500">점심 (Lunch)</span>
+                            <div class="flex-1 h-3 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                                <div class="h-full bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.5)]" style="width: 30%"></div>
+                            </div>
+                            <span class="text-sm font-black text-white">30%</span>
+                        </div>
+                         <div class="flex items-center gap-6">
+                            <span class="w-16 text-[10px] font-black uppercase tracking-widest text-slate-500">저녁 (Dinner)</span>
+                            <div class="flex-1 h-3 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                                <div class="h-full bg-pink-500 shadow-[0_0_15px_rgba(244,63,94,0.5)]" style="width: 60%"></div>
+                            </div>
+                             <span class="text-sm font-black text-white">60%</span>
+                        </div>
+                         <div class="flex items-center gap-6">
+                            <span class="w-16 text-[10px] font-black uppercase tracking-widest text-slate-500">심야 (Night)</span>
+                            <div class="flex-1 h-3 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                                <div class="h-full bg-purple-500 shadow-[0_0_15px_rgba(168,85,247,0.5)]" style="width: 10%"></div>
+                            </div>
+                             <span class="text-sm font-black text-white">10%</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-panel p-8 rounded-3xl flex flex-col justify-center items-center text-center border-2 border-dashed border-white/5">
+                    <div class="w-16 h-16 bg-pink-500/10 rounded-2xl flex items-center justify-center text-3xl mb-6 border border-pink-500/20 text-pink-500">
+                        <i class="fa-solid fa-lightbulb"></i>
+                    </div>
+                    <h3 class="text-2xl font-display font-black text-white mb-3">AI 인력 최적화 어드바이스</h3>
+                    <p class="text-slate-400 mb-8 font-medium leading-relaxed">
+                        이번주 금요일 19:00에 기록적인 주문 폭주가 예상됩니다.<br>
+                        <span class="text-white font-bold underline decoration-pink-500/50 underline-offset-4 pointer-events-none">파트타이머 1명을 추가 배치</span>하여 서비스 퀄리티를 유지하세요.
+                    </p>
+                    <button class="w-full py-4 bg-white text-slate-950 rounded-2xl font-black text-sm uppercase tracking-widest hover:bg-slate-200 transition-all duration-300 shadow-xl shadow-white/5">
+                        <i class="fa-solid fa-paper-plane mr-2"></i> 즉시 인력 요청하기
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </section>
+{% endblock %}

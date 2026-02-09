@@ -1,0 +1,1481 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>포카스트 AI 컨설팅 대시보드</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#0f172a',
+                        primary: '#3b82f6',
+                        secondary: '#6366f1',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* LIGHT MODE (Default) - Dark fonts on light background */
+        :root {
+            --bg-main: #FAF7F2;
+            --bg-card: #ffffff;
+            --bg-sidebar: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        /* DARK MODE - Light fonts on dark background */
+        body.dark-mode {
+            --bg-main: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.8);
+            --bg-sidebar: #0f172a;
+            --text-primary: #f8fafc;
+            --text-secondary: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body { 
+            font-family: 'Noto Sans KR', sans-serif; 
+            background-color: var(--bg-main); 
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Apply text colors globally */
+        h1, h2, h3, h4, h5, h6 { color: var(--text-primary); }
+        p, span, a, li { color: var(--text-secondary); }
+        .text-muted { color: var(--text-muted) !important; }
+
+        /* LIGHT MODE: Force all text to be dark */
+        body:not(.dark-mode) * {
+            color: inherit;
+        }
+        body:not(.dark-mode) h1, body:not(.dark-mode) h2, body:not(.dark-mode) h3,
+        body:not(.dark-mode) h4, body:not(.dark-mode) h5, body:not(.dark-mode) h6 {
+            color: #0f172a !important;
+        }
+        body:not(.dark-mode) p, body:not(.dark-mode) span, body:not(.dark-mode) div,
+        body:not(.dark-mode) a, body:not(.dark-mode) li, body:not(.dark-mode) label {
+            color: #334155 !important;
+        }
+        
+        /* Override Tailwind text colors for theme compatibility */
+        body:not(.dark-mode) .text-white { color: #0f172a !important; }
+        body:not(.dark-mode) .text-slate-100, 
+        body:not(.dark-mode) .text-slate-200,
+        body:not(.dark-mode) .text-slate-300,
+        body:not(.dark-mode) .text-slate-400,
+        body:not(.dark-mode) .text-slate-500,
+        body:not(.dark-mode) .text-gray-300,
+        body:not(.dark-mode) .text-gray-400,
+        body:not(.dark-mode) .text-gray-500 { color: #475569 !important; }
+
+        /* Preserve colored elements */
+        body:not(.dark-mode) .text-blue-400,
+        body:not(.dark-mode) .text-blue-500,
+        body:not(.dark-mode) .text-blue-600 { color: #2563eb !important; }
+        body:not(.dark-mode) .text-red-400,
+        body:not(.dark-mode) .text-red-500,
+        body:not(.dark-mode) .text-red-600 { color: #dc2626 !important; }
+        body:not(.dark-mode) .text-green-400,
+        body:not(.dark-mode) .text-green-500,
+        body:not(.dark-mode) .text-green-600 { color: #16a34a !important; }
+        body:not(.dark-mode) .text-amber-400,
+        body:not(.dark-mode) .text-amber-500,
+        body:not(.dark-mode) .text-amber-600 { color: #d97706 !important; }
+        
+        /* Button text exceptions */
+        body:not(.dark-mode) .bg-blue-500 a,
+        body:not(.dark-mode) .bg-blue-600 a,
+        body:not(.dark-mode) .bg-blue-600 span,
+        body:not(.dark-mode) .bg-blue-600 *,
+        body:not(.dark-mode) .btn-primary *,
+        body:not(.dark-mode) button[class*="bg-blue"] * { color: white !important; }
+
+        /* Dark mode text overrides - Removed !important to allow local overrides */
+        body.dark-mode .text-slate-600,
+        body.dark-mode .text-slate-700,
+        body.dark-mode .text-slate-800,
+        body.dark-mode .text-slate-900,
+        body.dark-mode .text-gray-600,
+        body.dark-mode .text-gray-700,
+        body.dark-mode .text-gray-800,
+        body.dark-mode .text-gray-900,
+        body.dark-mode [class*="text-slate-400"],
+        body.dark-mode [class*="text-slate-500"],
+        body.dark-mode [class*="text-gray-400"],
+        body.dark-mode [class*="text-gray-500"] { color: #f1f5f9 !important; }
+
+        /* Background overrides for dark mode */
+        body.dark-mode .bg-white { background-color: #1e293b !important; border-color: #334155 !important; }
+        body.dark-mode .bg-slate-50 { background-color: #0f172a !important; border-color: #1e293b !important; }
+        body.dark-mode .bg-gray-50 { background-color: #111827 !important; border-color: #1f2937 !important; }
+
+        /* LIGHT MODE: Override dark backgrounds to light ones */
+        body:not(.dark-mode) .bg-slate-900,
+        body:not(.dark-mode) .bg-gray-900 { background-color: #FAF7F2 !important; }
+        body:not(.dark-mode) .bg-slate-800,
+        body:not(.dark-mode) .bg-gray-800 { background-color: #f1f5f9 !important; }
+        body:not(.dark-mode) .bg-slate-700,
+        body:not(.dark-mode) .bg-gray-700 { background-color: #e2e8f0 !important; }
+        
+        /* Light mode gradient backgrounds */
+        body:not(.dark-mode) .bg-gradient-to-r.from-slate-800,
+        body:not(.dark-mode) [class*="from-slate-800"][class*="to-slate-700"] {
+            background: linear-gradient(to right, #e2e8f0, #f1f5f9) !important;
+        }
+        body:not(.dark-mode) .bg-gradient-to-t { background: linear-gradient(to top, #FAF7F2, transparent) !important; }
+        body:not(.dark-mode) .from-gray-900 { --tw-gradient-from: #FAF7F2 !important; }
+        body:not(.dark-mode) .via-gray-900\/60 { --tw-gradient-via: rgba(250, 247, 242, 0.6) !important; }
+        
+        /* Light mode sidebar and switch button */
+        body:not(.dark-mode) .bg-slate-900\/80,
+        body:not(.dark-mode) .bg-slate-900\/50,
+        body:not(.dark-mode) .bg-slate-900\/95 { 
+            background-color: rgba(255, 255, 255, 0.95) !important;
+        }
+        /* FORCE SIDEBAR DARK IN LIGHT MODE */
+        #sidebar {
+            background-color: #1e293b !important;
+            border-right: 1px solid #334155 !important;
+        }
+        #sidebar * {
+            color: #ffffff !important; /* Force all text inside sidebar to be white */
+        }
+        #sidebar .text-slate-400, #sidebar .text-slate-500 {
+            color: #cbd5e1 !important; /* Slightly dimmed white for secondary text */
+        }
+        body:not(.dark-mode) .border-slate-700,
+        body:not(.dark-mode) .border-slate-600,
+        body:not(.dark-mode) .border-slate-600\/50 { 
+            border-color: #e2e8f0 !important;
+        }
+        
+        /* Light mode card backgrounds */
+        body:not(.dark-mode) .glass-panel,
+        body:not(.dark-mode) .glass,
+        body:not(.dark-mode) .bg-slate-800 { 
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            border-color: #e2e8f0 !important;
+        }
+
+
+        .glass {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+        }
+        .sidebar-active {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-main); }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        /* Global Image & Media Refinements */
+        img, video {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        img:hover, video:hover {
+            transform: scale(1.01);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            filter: brightness(1.05);
+        }
+        .glass-panel img, .glass img {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+
+    
+<style>
+    .gnb-item { padding: 16px 20px; border-radius: 1rem; font-family: 'Outfit', sans-serif; font-weight: 700; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); font-size: 16px; display: flex; align-items: center; gap: 20px; }
+    .gnb-item.active { background-color: #2563eb; color: white; box-shadow: 0 10px 20px -5px rgba(37, 99, 235, 0.4); }
+    .gnb-item:not(.active) { color: #64748b; }
+    .gnb-item:not(.active):hover { background-color: rgba(255, 255, 255, 0.05); color: white; }
+    
+    .status-card { padding: 20px; border-radius: 2.5rem; border: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    .status-deficit { background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(0, 0, 0, 0) 100%); border-color: rgba(239, 68, 68, 0.3); color: #ef4444; }
+    .status-profit { background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(0, 0, 0, 0) 100%); border-color: rgba(16, 185, 129, 0.3); color: #10b981; }
+    
+    .strategy-card { background: rgba(15, 23, 42, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); padding: 16px; border-radius: 1.25rem; transition: all 0.3s; cursor: pointer; }
+    .strategy-card:hover { border-color: rgba(59, 130, 246, 0.4); background: rgba(59, 130, 246, 0.05); transform: translateY(-2px); }
+</style>
+
+</head>
+<body class="overflow-x-hidden leading-[1.6] dark-mode">
+
+
+    <!-- Sidebar -->
+    <aside class="fixed inset-y-0 left-0 w-64 bg-slate-900 border-r border-slate-700 z-50 transition-transform duration-300 transform -translate-x-full lg:translate-x-0" id="sidebar" style="background-color: #1e293b !important;">
+        <div class="p-6 flex items-center justify-between border-b border-slate-700/50">
+            <a href="./index.html" class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500 hover:opacity-80 transition cursor-pointer">
+                Forkast AI
+            </a>
+            <button class="lg:hidden text-gray-400 hover:text-white" onclick="toggleSidebar()">✕</button>
+        </div>
+
+        <nav class="px-4 space-y-2 mt-6 overflow-y-auto h-[calc(100%-140px)]">
+            
+            <!-- Store Dashboard Sidebar -->
+            <a href="./dashboard.html" class="flex items-center gap-4 px-4 py-3.5 rounded-2xl hover:bg-white/5 text-slate-400 hover:text-white transition group sidebar- shadow-lg shadow-blue-500/10">
+                <span class="w-8 h-8 flex items-center justify-center text-lg text-slate-400 transition"><i class="fa-solid fa-chart-pie"></i></span>
+                <span class="font-bold">매장 전체 현황</span>
+            </a>
+
+            <!-- Analytics -->
+            <div class="pt-8 pb-3 text-base font-black text-slate-500 uppercase tracking-[0.2em] px-5 text-center">데이터 심층 분석</div>
+            
+            <a href="/analytics/sales/" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition group ">
+                <span class="w-8 h-8 flex items-center justify-center text-slate-400 group-hover:text-blue-400 transition"><i class="fa-solid fa-chart-line"></i></span>
+                <span class="font-bold">매출 상세 분석</span>
+            </a>
+            
+            <a href="/analytics/forecast/" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition group ">
+                <span class="w-8 h-8 flex items-center justify-center text-slate-400 group-hover:text-indigo-400 transition"><i class="fa-solid fa-brain"></i></span>
+                <span class="font-bold">AI 매출 예측</span>
+            </a>
+            
+            <a href="/analytics/menu/" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition group ">
+                <span class="w-8 h-8 flex items-center justify-center text-slate-400 group-hover:text-emerald-400 transition"><i class="fa-solid fa-utensils"></i></span>
+                <span class="font-bold">메뉴 판매 분석</span>
+            </a>
+            
+            <a href="/analytics/time/" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition group ">
+                <span class="w-8 h-8 flex items-center justify-center text-slate-400 group-hover:text-amber-400 transition"><i class="fa-solid fa-clock-rotate-left"></i></span>
+                <span class="font-bold">방문 시간 분석</span>
+            </a>
+            
+            <a href="/analytics/delivery/" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition group ">
+                <span class="w-8 h-8 flex items-center justify-center text-slate-400 group-hover:text-rose-400 transition"><i class="fa-solid fa-motorcycle"></i></span>
+                <span class="font-bold">배달 성과 분석</span>
+            </a>
+
+            <!-- 관리 메뉴 -->
+            <div class="pt-5 pb-5 text-base font-black text-slate-500 uppercase tracking-[0.2em] px-5 text-center">시스템 통합 관리</div>
+            
+             <a href="/notifications/" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition group ">
+                <span class="w-8 h-8 flex items-center justify-center text-slate-400 group-hover:text-red-400 transition"><i class="fa-solid fa-bell"></i></span>
+                <span class="font-bold">뉴럴 알림 센터</span>
+                <span class="ml-auto bg-red-500 text-slate-400 text-[10px] font-black w-5 h-5 flex items-center justify-center rounded-lg shadow-lg shadow-red-500/30">3</span>
+            </a>
+            
+            <a href="/settings/" class="flex items-center gap-4 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-100 hover:text-white transition group ">
+                <span class="w-8 h-8 flex items-center justify-center text-slate-100 group-hover:text-slate-200 transition"><i class="fa-solid fa-gear"></i></span>
+                <span class="font-bold">환경 설정</span>
+            </a>
+            
+            <a href="./index.html" class="flex items-center gap-5 px-5 py-4 rounded-xl hover:bg-white/5 text-slate-100 hover:text-white transition group">
+                <span class="w-8 h-8 flex items-center justify-center text-slate-100 group-hover:text-blue-500 transition"><i class="fa-solid fa-lock text-xl"></i></span>
+                <span class="font-bold text-base">관리자 대시보드</span>
+            </a>
+            
+        </nav>
+        
+        <script>
+            // Force high contrast for sidebar elements
+            document.addEventListener('DOMContentLoaded', () => {
+                const sidebarLinks = document.querySelectorAll('#sidebar a');
+                sidebarLinks.forEach(link => {
+                    link.classList.remove('text-slate-400');
+                    link.classList.add('text-slate-100');
+                    link.style.color = '#f1f5f9'; // Force via embedded style
+                    link.style.fontWeight = '600';
+                    link.style.textShadow = '0 1px 2px rgba(0,0,0,0.8)'; // Strong shadow
+                });
+                
+                // Headers
+                const headers = document.querySelectorAll('#sidebar .uppercase');
+                headers.forEach(header => {
+                    header.classList.remove('text-slate-500');
+                    header.classList.add('text-white');
+                    header.style.color = '#ffffff';
+                    header.style.opacity = '1';
+                    header.style.textShadow = '0 1px 2px rgba(0,0,0,0.8)';
+                });
+            });
+        </script>
+
+        
+        <div class="absolute bottom-0 w-full p-4 border-t border-slate-700 bg-slate-900/80 backdrop-blur-xl">
+            <!-- Page Switch (Premium Design - 3 Way) -->
+            <div class="relative bg-gradient-to-r from-slate-800 to-slate-700 rounded-2xl p-1.5 mb-4 shadow-lg border border-slate-600/50">
+                <div id="page-switch-bg" 
+                     class="absolute top-1.5 h-[calc(100%-12px)] bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl transition-all duration-300 ease-out shadow-[0_0_20px_rgba(59,130,246,0.5)]" 
+                     style="width: calc(33.33% - 4px); left: calc(33.33% + 2px);"></div>
+                
+                <div class="relative flex text-base font-extrabold">
+                    <a href="./index.html" 
+                       class="flex-1 flex flex-col items-center justify-center gap-4 py-4 rounded-xl transition-all duration-300 z-10 text-slate-400 hover:text-white hover:bg-white/5">
+                        <i class="fa-solid fa-building-columns text-xl"></i>
+                        <span>본사</span>
+                    </a>
+                    <a href="./dashboard.html" 
+                       class="flex-1 flex flex-col items-center justify-center gap-4 py-4 rounded-xl transition-all duration-300 z-10 text-white shadow-sm">
+                        <i class="fa-solid fa-server text-xl"></i>
+                        <span>사이트</span>
+                    </a>
+                    <a href="./index.html" 
+                       class="flex-1 flex flex-col items-center justify-center gap-4 py-4 rounded-xl transition-all duration-300 z-10 text-slate-400 hover:text-white hover:bg-white/5">
+                        <i class="fa-solid fa-store text-xl"></i>
+                        <span>가맹점</span>
+                    </a>
+                </div>
+            </div>
+            
+
+            <!-- Theme Toggle Switch -->
+            <div class="flex items-center justify-between bg-slate-800 rounded-xl px-4 py-3 mb-3">
+                <span class="text-xs font-bold text-slate-400"><i class="fa-solid fa-palette mr-2"></i>테마</span>
+                <button id="theme-toggle" onclick="toggleTheme()" class="relative w-14 h-7 bg-slate-700 rounded-full transition-colors duration-300">
+                    <span id="toggle-knob" class="absolute top-0.5 left-0.5 w-6 h-6 bg-slate-400 rounded-full flex items-center justify-center text-xs transition-all duration-300">
+                        <i id="theme-icon" class="fa-solid fa-moon text-slate-900"></i>
+                    </span>
+                </button>
+            </div>
+            
+             <a href="#" class="flex items-center justify-center gap-2 w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 px-4 py-3 rounded-xl font-bold transition">
+                <span>🛑</span> 업무 종료
+            </a>
+        </div>
+
+    </aside>
+
+
+    <!-- Mobile Header -->
+    <div class="lg:hidden fixed top-0 w-full z-40 glass px-6 py-4 flex justify-between items-center bg-slate-900/90">
+        <a href="./dashboard.html" class="text-xl font-bold text-blue-400 hover:text-blue-300 transition">Forkast AI</a>
+        <button class="text-white text-2xl" onclick="toggleSidebar()">☰</button>
+    </div>
+
+    <!-- 메인 콘텐츠 영역 -->
+    <main class="lg:ml-64 min-h-screen flex flex-col relative z-0 transition-all duration-300 text-base">
+        <div class="flex-1">
+            
+    <!-- 2. Hero Section -->
+
+    <section class="section relative overflow-hidden flex items-end pb-20 min-h-screen">
+        <!-- Main Video -->
+        <video class="hero-video absolute top-0 left-0 w-full h-full object-cover z-[-1]" autoplay muted loop playsinline>
+            <source src="./static/videos/hero.mp4" type="video/mp4">
+            <div class="bg-gray-900 w-full h-full"></div>
+        </video>
+        <!-- Cinematic Gradient Overlay -->
+        <div class="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/60 to-transparent z-0"></div>
+
+        <div class="relative z-10 max-w-7xl mx-auto w-full px-6 flex flex-col lg:flex-row items-end gap-12 animate-fade-in-up">
+
+            <div class="flex-1 text-left lg:mb-10">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 mb-6">
+                    <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+                    <span class="text-base font-display font-black text-blue-400 uppercase tracking-widest">Forkast 뉴럴 분석 엔진</span>
+                </div>
+                <h1 class="text-6xl lg:text-8xl font-display font-black mb-8 text-white tracking-tighter leading-[1.1]">
+                    지능형<br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">매출 예측 엔진</span>
+                </h1>
+                <p class="text-lg text-slate-200 max-w-xl font-light leading-relaxed">
+                    실시간 POS 데이터와 거대 언어 모델이 결합된 하이퍼 스케일 분석 서비스.<br>데이터가 제시하는 명확한 비즈니스 성공 확률을 경험하십시오.
+                </p>
+            </div>
+
+            <!-- Right: Performance Status -->
+            <div class="w-full lg:w-96 flex-none">
+                <div class="status-card status-profit">
+                    <div class="flex justify-between items-start mb-5">
+                        <span class="text-base font-display font-black uppercase tracking-[0.2em] opacity-60">실시간 시스템 상태</span>
+                        <div class="flex items-center gap-4 px-4 py-2 rounded-md bg-white/5 border border-white/10">
+                            <div class="w-2 h-2 rounded-full bg-current animate-pulse"></div>
+                            <span class="text-base font-black tracking-widest uppercase">데이터 실시간 수신 중</span>
+                        </div>
+                    </div>
+                    
+                    <h2 class="text-4xl font-black mb-2">
+                        흑자 달성
+                    </h2>
+                    <p class="text-lg font-medium opacity-80 mb-6">
+                        목표 매출 대비 <span class="font-black">%</span> 달성 중
+                    </p>
+                    
+                    <div class="w-full h-3 bg-black/20 rounded-full overflow-hidden mb-4">
+                        <div class="h-full bg-current" style="width: %"></div>
+                    </div>
+                    
+                    <div class="flex justify-between text-base font-bold opacity-60">
+                        <span>현재 ₩</span>
+                        <span>목표 ₩</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. Service Explanation Video -->
+    <section class="section py-20 bg-gray-800">
+        <div class="max-w-7xl mx-auto w-full flex flex-col md:flex-row items-center gap-16 px-6">
+            <div class="w-full md:w-1/2">
+                <div data-src="./static/videos/service.mp4" onclick="openVideoModal(this.dataset.src)"
+                    class="aspect-video bg-gray-700 rounded-xl overflow-hidden shadow-2xl flex items-center justify-center relative group cursor-pointer hover:ring-4 ring-blue-500/50 transition">
+                    <video class="w-full h-full object-cover pointer-events-none">
+                        <source src="./static/videos/service.mp4" type="video/mp4">
+                    </video>
+                    <div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 flex items-center justify-center transition">
+                        <div class="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:scale-110 transition border border-white/30">
+                            <span class="text-4xl text-white ml-2">▶</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="w-full md:w-1/2 text-left">
+                <div class="inline-block py-2 px-4 rounded-lg bg-blue-500/10 text-blue-400 text-base font-black uppercase tracking-widest mb-6 border border-blue-500/20">데이터 전략 엔진</div>
+                <h2 class="text-4xl lg:text-6xl font-display font-black mb-8 leading-[1.2] tracking-tighter">AI가 설계하는<br><span class="text-blue-500">초개인화</span> 비즈니스 로직</h2>
+                <p class="text-lg text-slate-400 font-light leading-relaxed">Forkast의 AI는 단순한 통계 그 이상입니다. 실시간 시장 변동성과 매장의 고유 특성을 결합하여 오직 당신만을 위한 최적의 경영 전략을 실시간으로 도출합니다.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. Promo Video -->
+    <section class="section py-20 bg-gray-900">
+        <div class="max-w-7xl mx-auto w-full text-center px-6">
+            <h2 class="text-4xl font-bold mb-12">성공하는 사장님들의 비밀</h2>
+            <div data-src="./static/videos/promo.mp4" onclick="openVideoModal(this.dataset.src)"
+                class="aspect-video bg-gray-800 rounded-xl overflow-hidden shadow-2xl mx-auto max-w-5xl flex items-center justify-center relative cursor-pointer group hover:ring-4 ring-blue-500/50 transition">
+                <video class="w-full h-full object-cover pointer-events-none">
+                    <source src="./static/videos/promo.mp4" type="video/mp4">
+                </video>
+                <div class="absolute inset-0 bg-black/40 group-hover:bg-black/20 flex items-center justify-center transition">
+                    <div class="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:scale-110 transition border border-white/30">
+                        <span class="text-5xl text-white ml-2">▶</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. AI Sales Analysis -->
+    <section class="section py-20 bg-gray-800">
+        <div class="max-w-7xl mx-auto w-full px-6">
+            <h2 class="text-4xl font-bold mb-12 text-center">실시간 매출 분석 및 흐름 예측</h2>
+            
+            <div class="mb-5 flex justify-between items-end border-b border-gray-700 pb-5">
+                <div>
+                    <h3 class="text-3xl font-display font-black text-white tracking-tight">실시간 인텔리전스 분석</h3>
+                    <p class="text-slate-300 mt-4 text-base font-medium">데이터 스트림을 통한 AI 매출 가설 검증 및 인사이트 추출</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <input type="file" id="csvUploadInput" accept=".csv" class="hidden" onchange="uploadCSV(this)">
+                    <button onclick="document.getElementById('csvUploadInput').click()" 
+                        class="group relative px-5 py-4 rounded-xl bg-blue-600 hover:bg-blue-500 transition-all shadow-lg hover:shadow-blue-500/30 overflow-hidden">
+                        <div class="absolute inset-0 bg-white/20 group-hover:translate-x-full transition-transform duration-500 ease-out -translate-x-full skew-x-12"></div>
+                        <span class="relative font-bold text-white flex items-center gap-4"><span>📂</span> 데이터 업로드</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-16">
+                <!-- Chart Column -->
+                <div class="flex flex-col gap-8">
+                    <!-- Real-time Chart Area (Upper) -->
+                    <div class="glass p-1 rounded-3xl bg-gradient-to-br from-white/10 to-transparent relative shadow-2xl overflow-hidden group">
+                        <div class="absolute -top-24 -right-24 w-48 h-48 bg-blue-600/10 rounded-full blur-3xl group-hover:bg-blue-600/20 transition-all duration-700"></div>
+                        <div class="bg-gray-900/80 backdrop-blur-xl rounded-[1.4rem] p-6 h-80 flex flex-col relative text-center">
+                            <div class="flex items-center justify-between mb-4 px-2">
+                                <h3 class="text-base font-bold text-blue-400 uppercase tracking-widest flex items-center gap-2">
+                                    <span class="w-2 h-2 bg-blue-500 rounded-full animate-ping"></span>
+                                    실시간 매출 흐름
+                                </h3>
+                                <span class="text-base text-gray-300 font-medium">오늘 00:00 - 현재</span>
+                            </div>
+                            <div id="salesChartContainer" class="w-full h-full"></div>
+                        </div>
+                    </div>
+
+                    <!-- Comparison Chart Area (Lower - New) -->
+                    <div class="glass p-1 rounded-3xl bg-gradient-to-br from-white/10 to-transparent relative shadow-2xl overflow-hidden group">
+                        <div class="absolute -bottom-24 -left-24 w-48 h-48 bg-indigo-600/10 rounded-full blur-3xl group-hover:bg-indigo-600/20 transition-all duration-700"></div>
+                        <div class="bg-gray-900/80 backdrop-blur-xl rounded-[1.4rem] p-5 h-96 flex flex-col relative">
+                            <div class="flex items-center justify-between mb-5 px-1">
+                                <h3 class="text-base font-bold text-indigo-400 uppercase tracking-widest flex items-center gap-4">
+                                    <span>📊</span>
+                                    전주 동기 성과 비교
+                                </h3>
+                                    <div class="flex items-center gap-4"><span class="w-3 h-3 rounded-full bg-blue-500"></span><span class="text-base text-gray-400">오늘</span></div>
+                                    <div class="flex items-center gap-4"><span class="w-3 h-3 rounded-full bg-indigo-500/40"></span><span class="text-base text-gray-400">전주</span></div>
+                                </div>
+                            </div>
+                            <div id="comparisonChartContainer" class="w-full h-full"></div>
+                            <!-- 로딩 오버레이 -->
+                            <div id="comparison-loading" class="absolute inset-0 flex items-center justify-center bg-gray-900/40 backdrop-blur-sm z-10 transition-opacity duration-500 pointer-events-none">
+                                <div class="flex flex-col items-center gap-4">
+                                    <div class="w-8 h-8 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin"></div>
+                                    <span class="text-base text-indigo-300 font-black tracking-widest">패턴 분석 중...</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Consultant Comparative Report -->
+                <div class="flex flex-col gap-6">
+                    <div class="glass p-8 rounded-3xl border border-blue-500/20 bg-blue-900/10 relative overflow-hidden shadow-2xl">
+
+                        
+                        <div class="flex items-center gap-3 mb-8">
+                            <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-500/40">
+                                <i class="fa-solid fa-chart-line text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-black text-white">AI 지능형 비교 분석 리포트</h3>
+                                <div class="mt-1 flex items-center gap-4">
+                                    <span class="px-4 py-1.5 bg-white/10 text-blue-300 text-base font-bold rounded border border-blue-500/20">테이블: PLATFORM_UI_DAILYSALES</span>
+                                    <span class="text-base text-blue-100/40 font-medium">| 가맹점별 일일 매출 실적과 과거 패턴 분석 데이터를 관리하는 테이블</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Comparative Metrics Hub -->
+                        <div class="grid grid-cols-2 gap-4 mb-10 relative">
+                            <!-- Today Card -->
+                            <div class="p-6 bg-white/5 rounded-2xl border border-white/5 text-center">
+                                <p class="text-base font-bold text-gray-300 uppercase mb-2">실시간 (오늘)</p>
+                                <p class="text-2xl font-black text-white">₩</p>
+                            </div>
+                            <!-- Past Card -->
+                            <div class="p-6 bg-white/5 rounded-2xl border border-white/5 text-center">
+                                <p class="text-base font-bold text-gray-300 uppercase mb-2">전주 동기 (과거)</p>
+                                <p class="text-2xl font-black text-white">₩</p>
+                            </div>
+                            
+                            <!-- Delta Indicator -->
+                            <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-gray-900 rounded-full border border-white/10 flex items-center justify-center shadow-xl">
+                                <span class="text-red-400 font-black text-base">
+                                    %
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-8">
+                            <div>
+                                <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                    <span class="w-1 h-3 bg-blue-500 rounded-full"></span> 종합 진단 및 비교 통찰
+                                </h4>
+                                <div class="p-5 bg-blue-500/10 rounded-2xl border border-blue-500/20">
+                                    <p class="text-xl font-bold text-white mb-2"></p>
+                                    <p class="text-sm text-blue-100/70 font-medium leading-relaxed"></p>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                                    <span class="w-1 h-3 bg-purple-500 rounded-full"></span> 주요 원인 분석
+                                </h4>
+                                <p class="text-gray-300 text-sm leading-relaxed pl-3 border-l-2 border-gray-700/50"></p>
+                            </div>
+                            
+                            <div class="pt-6 border-t border-white/5">
+                                <h4 class="text-base font-black text-gray-400 uppercase tracking-widest mb-5">AI 기반 우선 전략 제안</h4>
+                                <div class="grid grid-cols-1 gap-4">
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-2xl font-display font-black mb-8 text-left border-l-4 border-brand-accent pl-6 flex justify-between items-center tracking-tight">
+                <span>시계열 과거 패턴 분석</span>
+                <div class="flex items-center gap-2">
+                    <input type="file" id="pastCsvUploadInput" accept=".csv" class="hidden" onchange="uploadPastCSV(this)">
+                    <button onclick="document.getElementById('pastCsvUploadInput').click()" class="text-sm bg-purple-600 hover:bg-purple-500 px-4 py-2 rounded-lg transition flex items-center gap-2"><span>📂</span> 과거 데이터 업로드</button>
+                </div>
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div class="glass p-8 rounded-xl h-80 flex items-center justify-center bg-gray-900/50 relative">
+                    <div id="pastSalesChart" class="w-full h-full"></div>
+                </div>
+                <div class="space-y-6">
+                    <div class="glass p-8 rounded-xl border-l-4 border-purple-500">
+                        <h3 class="font-bold text-2xl mb-4">📉 AI 과거 분석</h3>
+                        <p id="past-analysis-text" class="text-gray-300 text-lg"><span class="animate-pulse">데이터를 분석하고 있습니다...</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. 의사결정 인포그래픽 -->
+    <section class="section py-5 bg-gray-900">
+        <h2 class="text-3xl font-extrabold mb-5 text-center text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">의사결정 대시보드</h2>
+        
+        <div class="max-w-7xl mx-auto w-full relative group">
+            <!-- 배경 글로우 효과 -->
+            <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-violet-600 rounded-3xl blur opacity-25 group-hover:opacity-40 transition duration-1000 group-hover:duration-200"></div>
+            
+            <div class="relative glass-panel bg-gray-900/90 p-5 rounded-2xl border border-white/10 shadow-2xl">
+                <!-- 헤더 -->
+                <div class="flex flex-col md:flex-row justify-between items-start mb-5 border-b border-gray-700/50 pb-5">
+                    <div>
+                        <div class="flex items-center gap-4 mb-4">
+                            <span class="px-4 py-2 rounded-full bg-blue-500/10 text-blue-400 text-base font-bold border border-blue-500/20">AI 분석 인사이트</span>
+                            <h3 class="text-3xl font-bold text-white">오늘의 추천 운영 전략</h3>
+                        </div>
+                        <p id="ai-analysis-text" class="text-gray-400 font-medium text-base">실시간 데이터를 분석하여 도출된 최적의 운영 가이드입니다.</p>
+                    </div>
+                    <div class="text-right mt-5 md:mt-0 bg-gray-800/50 px-5 py-4 rounded-xl border border-white/5">
+                        <span class="block text-base text-gray-400 uppercase tracking-wider font-bold mb-4">AI 예측 신뢰 지수</span>
+                        <div class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400 flex items-center justify-end gap-4">
+                            92% <span class="text-lg text-emerald-500 animate-pulse">●</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 의사결정 지표 -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-5">
+                    <!-- 1. 매출 -->
+                    <div id="decision-sales" onclick="selectDecision('sales')" 
+                         class="group/item cursor-pointer relative bg-slate-50 p-5 rounded-2xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50 transition-all duration-300 flex flex-col items-center shadow-sm hover:shadow-xl">
+                        <div class="relative w-36 h-36 mb-5">
+                            <div class="absolute inset-0 bg-blue-100 rounded-full opacity-50 blur-xl transition-all"></div>
+                            <div class="relative w-full h-full rounded-full border-[6px] border-blue-100 group-hover/item:border-blue-500 flex items-center justify-center bg-white shadow-xl transition-all">
+                                <div class="text-center">
+                                    <span class="block text-3xl font-black mb-1 tracking-tight" style="color: #0f172a !important;">매출</span>
+                                    <span class="text-base text-blue-600 font-extrabold uppercase tracking-wider" style="color: #2563eb !important;">매출 추이 분석</span>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="text-2xl font-extrabold mb-4" style="color: #1e293b !important;">목표 달성 유력</span>
+                        <p class="text-base font-bold text-center" style="color: #475569 !important;">전주 대비 트래픽 상승세 유지 중</p>
+                    </div>
+
+                    <!-- 2. 이익 -->
+                    <div id="decision-profit" onclick="selectDecision('profit')" 
+                         class="group/item cursor-pointer relative bg-slate-50 p-5 rounded-2xl border border-slate-200 hover:border-amber-500 hover:bg-amber-50 transition-all duration-300 flex flex-col items-center shadow-sm hover:shadow-xl">
+                        <div class="relative w-36 h-36 mb-5">
+                            <div class="absolute inset-0 bg-amber-100 rounded-full opacity-50 blur-xl transition-all"></div>
+                            <div class="relative w-full h-full rounded-full border-[6px] border-amber-100 group-hover/item:border-amber-500 flex items-center justify-center bg-white shadow-xl transition-all">
+                                <div class="text-center">
+                                    <span class="block text-3xl font-black mb-1 tracking-tight" style="color: #0f172a !important;">이익</span>
+                                    <span class="text-base text-amber-600 font-extrabold uppercase tracking-wider" style="color: #d97706 !important;">마진율 최적화</span>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="text-2xl font-extrabold mb-4" style="color: #1e293b !important;">마진율 25% 예상</span>
+                        <p class="text-base font-bold text-center" style="color: #475569 !important;">식자재 로스율 최적화 단계</p>
+                    </div>
+
+                    <!-- 3. 고객 -->
+                    <div id="decision-customer" onclick="selectDecision('customer')" 
+                         class="group/item cursor-pointer relative bg-slate-50 p-5 rounded-2xl border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50 transition-all duration-300 flex flex-col items-center shadow-sm hover:shadow-xl">
+                        <div class="relative w-36 h-36 mb-5">
+                            <div class="absolute inset-0 bg-emerald-100 rounded-full opacity-50 blur-xl transition-all"></div>
+                            <div class="relative w-full h-full rounded-full border-[6px] border-emerald-100 group-hover/item:border-emerald-500 flex items-center justify-center bg-white shadow-xl transition-all">
+                                <div class="text-center">
+                                    <span class="block text-3xl font-black mb-1 tracking-tight" style="color: #0f172a !important;">고객</span>
+                                    <span class="text-base text-emerald-600 font-extrabold uppercase tracking-wider" style="color: #059669 !important;">고객 만족 지수</span>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="text-2xl font-extrabold mb-4" style="color: #1e293b !important;">만족도 최상</span>
+                        <p class="text-base font-bold text-center" style="color: #475569 !important;">최근 리뷰 긍정 비율 98%</p>
+                    </div>
+                </div>
+
+                <!-- 푸터 액션 -->
+                <div class="flex flex-col md:flex-row justify-between items-center gap-5 pt-5 border-t border-gray-700/50">
+                    <button onclick="openAppliedModal()" class="text-gray-400 hover:text-white flex items-center gap-4 font-bold transition text-base">
+                        <i class="fa-regular fa-clipboard"></i> 상세 리포트 보기
+                    </button>
+                    
+                    <div class="flex gap-4 w-full md:w-auto">
+                        <button class="flex-1 md:flex-none px-5 py-4 rounded-xl border border-gray-600 font-bold text-gray-400 hover:bg-gray-800 hover:text-white transition text-base">
+                            보류하기
+                        </button>
+                        <button onclick="executeStrategy()" id="btn-execute-strategy" 
+                                class="flex-1 md:flex-none relative overflow-hidden group px-5 py-4 rounded-xl font-bold text-white bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg shadow-blue-600/30 hover:shadow-blue-600/50 transition-all hover:-translate-y-1 text-base">
+                            <span class="relative z-10 flex items-center justify-center gap-4">
+                                <i class="fa-solid fa-rocket"></i> 전략 승인 및 실행
+                            </span>
+                            <div class="absolute inset-0 bg-white/20 group-hover:translate-x-full transition-transform duration-500 ease-out -translate-x-full skew-x-12"></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 9. Strategy Section -->
+    <section class="section py-24 bg-slate-50 relative overflow-hidden">
+        <!-- Background Decoration -->
+        <div class="absolute inset-0 opacity-30 pointer-events-none">
+            <div class="absolute -top-24 -left-24 w-96 h-96 rounded-full bg-blue-200 blur-3xl mix-blend-multiply"></div>
+            <div class="absolute top-1/2 -right-24 w-80 h-80 rounded-full bg-purple-200 blur-3xl mix-blend-multiply"></div>
+        </div>
+
+        <div class="relative max-w-7xl mx-auto px-6">
+            <h2 class="text-4xl font-extrabold mb-16 text-center text-slate-900 dark:text-slate-900 tracking-tight" style="color: #0f172a !important;">
+                최적 운영 전략 제안 <span class="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent px-2" style="color: transparent !important;">(AI)</span>
+            </h2>
+            
+            <div id="strategy-container" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Hardcoded Mock Cards (Visible even if JS fails) -->
+                <div onclick="openStrategyModal('modal-0')" class="group relative bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border border-slate-200 overflow-hidden cursor-pointer">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="h-16 w-16 bg-blue-50 rounded-2xl mb-6 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform duration-300 shadow-inner">
+                        <span class="filter drop-shadow-sm">🚀</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 group-hover:text-blue-700 transition-colors" style="color: #1e293b !important;">긴급 타임 세일</h3>
+                    <p class="leading-relaxed font-bold text-sm mb-4" style="color: #475569 !important;">오후 2시~4시 15% 할인 적용하여 방문율 극대화</p>
+                    <div class="flex items-center gap-2">
+                        <div class="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-blue-500" style="width:92%"></div></div>
+                        <span class="text-xs font-black text-blue-600" style="color:#2563eb !important;">92점</span>
+                    </div>
+                </div>
+
+                <div onclick="openStrategyModal('modal-1')" class="group relative bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border border-slate-200 overflow-hidden cursor-pointer">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="h-16 w-16 bg-indigo-50 rounded-2xl mb-6 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform duration-300 shadow-inner">
+                        <span class="filter drop-shadow-sm">📦</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 group-hover:text-indigo-700 transition-colors" style="color: #1e293b !important;">재고 최적화</h3>
+                    <p class="leading-relaxed font-bold text-sm mb-4" style="color: #475569 !important;">인기 품목 선제적 발주로 품절 방지</p>
+                    <div class="flex items-center gap-2">
+                        <div class="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-indigo-500" style="width:85%"></div></div>
+                        <span class="text-xs font-black text-indigo-600" style="color:#4f46e5 !important;">85점</span>
+                    </div>
+                </div>
+
+                <div onclick="openStrategyModal('modal-2')" class="group relative bg-white rounded-2xl p-8 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border border-slate-200 overflow-hidden cursor-pointer">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    <div class="h-16 w-16 bg-emerald-50 rounded-2xl mb-6 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform duration-300 shadow-inner">
+                        <span class="filter drop-shadow-sm">👥</span>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 group-hover:text-emerald-700 transition-colors" style="color: #1e293b !important;">인력 효율화</h3>
+                    <p class="leading-relaxed font-bold text-sm mb-4" style="color: #475569 !important;">피크타임 파트타임 배치로 서비스 품질 유지</p>
+                    <div class="flex items-center gap-2">
+                        <div class="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-emerald-500" style="width:88%"></div></div>
+                        <span class="text-xs font-black text-emerald-600" style="color:#059669 !important;">88점</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer (Dashboard Only) -->
+    <footer class="mt-20 border-t border-slate-700/50 bg-slate-900/50 backdrop-blur-sm py-12 px-6 lg:px-12">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            <!-- Brand -->
+            <div class="md:col-span-2">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-500">Forkast AI</span>
+                </div>
+                <p class="text-gray-400 mb-4 max-w-sm">
+                    AI 기반 데일리 매출 예측 및 매장 관리 솔루션.<br>
+                    데이터로 증명하는 성공, 포카스트와 함께하세요.
+                </p>
+                <div class="flex gap-4">
+                    <a href="#" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-gray-400 hover:bg-blue-600 hover:text-white transition">🐦</a>
+                    <a href="#" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-gray-400 hover:bg-blue-600 hover:text-white transition">📘</a>
+                    <a href="#" class="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-gray-400 hover:bg-blue-600 hover:text-white transition">📸</a>
+                </div>
+            </div>
+
+            <!-- Links 1 -->
+            <div>
+                <h4 class="font-bold text-white mb-4">서비스</h4>
+                <ul class="space-y-2 text-gray-400">
+                    <li><a href="/sales/" class="hover:text-blue-400 transition">매출 분석</a></li>
+                    <li><a href="/analytics/forecast/" class="hover:text-blue-400 transition">AI 예측</a></li>
+                    <li><a href="/analytics/menu/" class="hover:text-blue-400 transition">메뉴 인사이트</a></li>
+                    <li><a href="/settings/" class="hover:text-blue-400 transition">요금제 안내</a></li>
+                </ul>
+            </div>
+
+            <!-- Links 2 -->
+            <div>
+                <h4 class="font-bold text-white mb-4">고객 지원</h4>
+                <ul class="space-y-2 text-gray-400">
+                    <li><a href="#" class="hover:text-blue-400 transition">공지사항</a></li>
+                    <li><a href="#" class="hover:text-blue-400 transition">자주 묻는 질문</a></li>
+                    <li><a href="#" class="hover:text-blue-400 transition">1:1 문의하기</a></li>
+                    <li><a href="#" class="hover:text-blue-400 transition">API 문서</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-300">
+            <div class="text-center md:text-left">
+                <p class="mb-2">
+                    (주)포카스트 | 대표이사: 김환희 | 사업자등록번호: 123-45-67890<br>
+                    주소: 서울특별시 강남구 테헤란로 427 위워크타워 3층 | 통신판매업신고: 2026-서울강남-00123
+                </p>
+                <p>Copyright © 2026 Forkast Corp. All rights reserved.</p>
+            </div>
+            <div class="flex gap-6">
+                <a href="#" class="hover:text-white transition">이용약관</a>
+                <a href="#" class="hover:text-white transition font-bold">개인정보처리방침</a>
+                <a href="#" class="hover:text-white transition">운영정책</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modals -->
+    <!-- Strategy Modals (Hardcoded for zero-JS functionality) -->
+    <div id="modal-container">
+        <!-- Modal 0 -->
+        <div id="modal-0" class="fixed inset-0 z-[100] hidden items-center justify-center">
+            <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeStrategyModal('modal-0')"></div>
+            <div class="relative bg-white border border-slate-200 p-10 rounded-3xl max-w-2xl w-full mx-4 shadow-2xl modal-content animate-in zoom-in duration-300">
+                <button onclick="closeStrategyModal('modal-0')" class="absolute top-6 right-6 text-slate-400 hover:text-slate-600 text-2xl font-bold">&times;</button>
+                <div class="h-20 w-20 bg-blue-50 rounded-2xl mb-8 flex items-center justify-center text-5xl">🚀</div>
+                <h3 class="text-3xl font-black mb-6" style="color: #0f172a !important;">긴급 타임 세일</h3>
+                <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100 mb-8">
+                    <p class="leading-relaxed font-bold text-lg" style="color: #334155 !important;">유동 인구가 많은 오후 2시~4시 시간대에 할인을 적용하여 방문율과 객단가를 동시에 극대화하세요.</p>
+                </div>
+                <button onclick="closeStrategyModal('modal-0')" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition shadow-lg">확인</button>
+            </div>
+        </div>
+        <!-- Modal 1 -->
+        <div id="modal-1" class="fixed inset-0 z-[100] hidden items-center justify-center">
+            <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeStrategyModal('modal-1')"></div>
+            <div class="relative bg-white border border-slate-200 p-10 rounded-3xl max-w-2xl w-full mx-4 shadow-2xl modal-content animate-in zoom-in duration-300">
+                <button onclick="closeStrategyModal('modal-1')" class="absolute top-6 right-6 text-slate-400 hover:text-slate-600 text-2xl font-bold">&times;</button>
+                <div class="h-20 w-20 bg-indigo-50 rounded-2xl mb-8 flex items-center justify-center text-5xl">📦</div>
+                <h3 class="text-3xl font-black mb-6" style="color: #0f172a !important;">재고 최적화</h3>
+                <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100 mb-8">
+                    <p class="leading-relaxed font-bold text-lg" style="color: #334155 !important;">주말 대비 수요가 높을 것으로 예상되는 주요 원재료와 인기 품목의 재고를 선제적으로 확보하세요.</p>
+                </div>
+                <button onclick="closeStrategyModal('modal-1')" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition shadow-lg">확인</button>
+            </div>
+        </div>
+        <!-- Modal 2 -->
+        <div id="modal-2" class="fixed inset-0 z-[100] hidden items-center justify-center">
+            <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeStrategyModal('modal-2')"></div>
+            <div class="relative bg-white border border-slate-200 p-10 rounded-3xl max-w-2xl w-full mx-4 shadow-2xl modal-content animate-in zoom-in duration-300">
+                <button onclick="closeStrategyModal('modal-2')" class="absolute top-6 right-6 text-slate-400 hover:text-slate-600 text-2xl font-bold">&times;</button>
+                <div class="h-20 w-20 bg-emerald-50 rounded-2xl mb-8 flex items-center justify-center text-5xl">👥</div>
+                <h3 class="text-3xl font-black mb-6" style="color: #0f172a !important;">인력 효율화</h3>
+                <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100 mb-8">
+                    <p class="leading-relaxed font-bold text-lg" style="color: #334155 !important;">매출 집중 시간대에 숙련된 인력을 재배치하여 서비스 속도와 만족도를 최상으로 유지하세요.</p>
+                </div>
+                <button onclick="closeStrategyModal('modal-2')" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition shadow-lg">확인</button>
+            </div>
+        </div>
+    </div>
+    <div id="applied-modal" class="fixed inset-0 z-[200] hidden items-center justify-center">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeAppliedModal()"></div>
+        <div class="relative glass bg-gray-900 border border-gray-700 p-8 rounded-2xl max-w-2xl w-full mx-4 shadow-2xl transform transition-all scale-95 opacity-0 modal-content">
+            <button onclick="closeAppliedModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">&times;</button>
+            <h3 class="text-2xl font-bold mb-6 flex items-center gap-3"><span>📋</span> 현재 적용된 전략 목록</h3>
+            <div class="bg-gray-800/50 rounded-xl p-6 min-h-[200px] max-h-[400px] overflow-y-auto custom-scrollbar">
+                <ul id="applied-list" class="space-y-4"><li class="text-gray-300 text-center py-8">아직 적용된 전략이 없습니다.</li></ul>
+            </div>
+            <div class="flex justify-end mt-6 gap-3">
+                <button onclick="undoLastStrategy()" class="px-6 py-3 bg-red-600/80 hover:bg-red-500 rounded-lg text-white font-bold transition flex items-center gap-2"><span>↩️</span> 실행 취소</button>
+                <button onclick="closeAppliedModal()" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg text-white font-bold transition">확인</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="decision-modal" class="fixed inset-0 z-[200] hidden items-center justify-center">
+        <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" onclick="closeDecisionModal()"></div>
+        <div class="relative glass bg-gray-900 border border-gray-700 p-8 md:p-12 rounded-2xl max-w-2xl w-full mx-4 shadow-2xl transform transition-all scale-95 opacity-0 modal-content">
+            <button onclick="closeDecisionModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-2xl">&times;</button>
+            <div class="flex items-center gap-4 mb-6">
+                <span id="dm-icon" class="text-6xl"></span>
+                <div><span id="dm-category" class="text-blue-400 font-bold uppercase tracking-wider text-sm"></span><h3 id="dm-title" class="text-3xl font-bold mt-1"></h3></div>
+            </div>
+            <div id="dm-content" class="bg-gray-800/50 p-6 rounded-xl border border-gray-700/50 mb-8 text-gray-300 text-lg leading-relaxed whitespace-pre-line"></div>
+            <div class="flex justify-end gap-4">
+                <button onclick="closeDecisionModal()" class="px-6 py-3 bg-gray-700 hover:bg-gray-600 rounded-lg text-white font-bold transition">닫기</button>
+                <button id="btn-apply-decision" onclick="applyDecisionStrategy()" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 rounded-lg text-white font-bold transition flex items-center gap-2"><span>🚀</span> 전략 적용하기</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="video-modal" class="fixed inset-0 z-[300] hidden items-center justify-center bg-black/90">
+         <div class="absolute inset-0" onclick="closeVideoModal()"></div>
+         <div class="relative w-full max-w-5xl aspect-video bg-black rounded-xl overflow-hidden shadow-2xl">
+             <button onclick="closeVideoModal()" class="absolute top-4 right-4 text-white text-3xl z-50 hover:text-red-500 transition">&times;</button>
+             <video id="modal-video-player" class="w-full h-full" controls>
+                 <source src="" type="video/mp4">
+             </video>
+         </div>
+    </div>
+
+        </div>
+
+        <!-- Footer Removed (Moved to Dashboard-only) -->
+    </main>
+
+    <!-- Scripts -->
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+            }
+        }
+
+        // Theme Toggle Function
+        function toggleTheme() {
+            const body = document.body;
+            const toggleBtn = document.getElementById('theme-toggle');
+            const knob = document.getElementById('toggle-knob');
+            const icon = document.getElementById('theme-icon');
+            
+            body.classList.toggle('dark-mode');
+            const isDark = body.classList.contains('dark-mode');
+            
+            // Sync data-theme attribute for CSS compatibility
+            body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+            
+            // Update toggle appearance
+            if (isDark) {
+                toggleBtn.classList.remove('bg-blue-500');
+                toggleBtn.classList.add('bg-slate-700');
+                knob.classList.remove('left-7', 'bg-white');
+                knob.classList.add('left-0.5', 'bg-slate-400');
+                icon.className = 'fa-solid fa-moon text-slate-900';
+            } else {
+                toggleBtn.classList.remove('bg-slate-700');
+                toggleBtn.classList.add('bg-blue-500');
+                knob.classList.remove('left-0.5', 'bg-slate-400');
+                knob.classList.add('left-7', 'bg-white');
+                icon.className = 'fa-solid fa-sun text-amber-500';
+            }
+            
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+
+        // Initialize theme on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            const body = document.body;
+            const toggleBtn = document.getElementById('theme-toggle');
+            const knob = document.getElementById('toggle-knob');
+            const icon = document.getElementById('theme-icon');
+            
+            // Default is dark mode
+            if (savedTheme === 'light') {
+                body.classList.remove('dark-mode');
+                body.setAttribute('data-theme', 'light');
+                toggleBtn.classList.remove('bg-slate-700');
+                toggleBtn.classList.add('bg-blue-500');
+                knob.classList.remove('left-0.5', 'bg-slate-400');
+                knob.classList.add('left-7', 'bg-white');
+                icon.className = 'fa-solid fa-sun text-amber-500';
+            } else {
+                // Ensure dark mode set if null or dark
+                body.classList.add('dark-mode');
+                body.setAttribute('data-theme', 'dark');
+            }
+            
+            // 전역 숫자 포맷팅 (천 단위 쉼표)
+            formatAllNumbers();
+        });
+        
+        // 숫자 포맷팅 함수
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+        
+        // .format-number 클래스가 있는 요소들 자동 포맷팅
+        function formatAllNumbers() {
+            document.querySelectorAll('.format-number').forEach(el => {
+                const num = parseInt(el.textContent.replace(/[^0-9-]/g, ''), 10);
+                if (!isNaN(num)) {
+                    el.textContent = formatNumber(num);
+                }
+            });
+        }
+        
+        // 동적으로 추가된 요소도 지원
+        window.formatNumber = formatNumber;
+        window.formatAllNumbers = formatAllNumbers;
+    </script>
+
+
+    <!-- Chart.js & Highcharts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-3d.js"></script>
+    
+<script>
+    // Video Modal
+    function openVideoModal(src) {
+        const modal = document.getElementById('video-modal');
+        const video = document.getElementById('modal-video-player');
+        video.src = src;
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        video.play();
+    }
+    function closeVideoModal() {
+        const modal = document.getElementById('video-modal');
+        const video = document.getElementById('modal-video-player');
+        video.pause();
+        video.src = '';
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    // --- CSV & Chart Logic (Simplified Copy) ---
+    // (Pasted logic from index_v2.html)
+    
+     function uploadCSV(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // UI Feedback
+            const btn = input.nextElementSibling;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span>⏳</span> 분석 중...';
+            btn.disabled = true;
+
+            fetch('/api/upload-csv/', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    if(document.getElementById('ai-analysis-text')) document.getElementById('ai-analysis-text').innerText = data.analysis;
+                    if(document.getElementById('center-cheer-msg')) document.getElementById('center-cheer-msg').innerText = data.cheer_msg;
+                    
+                    if(document.getElementById('stat-total-revenue')) document.getElementById('stat-total-revenue').innerText = data.total_revenue.toLocaleString() + '원';
+                    if(document.getElementById('stat-total-orders')) document.getElementById('stat-total-orders').innerText = data.total_orders.toLocaleString() + '건';
+
+                    updateSalesChart(data.labels, data.data); 
+                    
+                    const overlay = document.getElementById('chart-overlay-msg');
+                    if(overlay) overlay.style.opacity = '0';
+
+                    alert('분석이 완료되었습니다!');
+                } else {
+                    alert('오류: ' + data.message);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('업로드 중 오류가 발생했습니다.');
+            })
+            .finally(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                input.value = ''; 
+            });
+        }
+
+        function uploadPastCSV(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('file', file);
+            const btn = input.nextElementSibling;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span>⏳</span> 비교 중...';
+            btn.disabled = true;
+
+            fetch('/api/upload-past-csv/', { method: 'POST', body: formData })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    let html = data.analysis.replace(/\*\*(.*?)\*\*/g, '<b class="text-purple-300">$1</b>');
+                    html = html.replace(/\n/g, '<br>');
+                    document.getElementById('past-analysis-text').innerHTML = html;
+                    updatePastChart(data.pie_labels, data.pie_data);
+                    alert('비교 분석이 완료되었습니다.');
+                } else {
+                    alert('오류: ' + data.message);
+                }
+            })
+            .finally(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                input.value = '';
+            });
+        }
+        
+    // Charts
+    function updateSalesChart(labels, data) {
+         // Transform data for Highcharts Area 3D
+         Highcharts.chart('salesChartContainer', {
+             chart: {
+                 type: 'area',
+                 backgroundColor: 'rgba(0,0,0,0)',
+                 options3d: {
+                     enabled: true,
+                     alpha: 12,
+                     beta: 12,
+                     depth: 60,
+                     viewDistance: 22
+                 },
+                 margin: [30, 0, 50, 0],
+                 spacing: [15, 15, 0, 15]
+             },
+             title: { text: null },
+             xAxis: {
+                 categories: labels,
+                 labels: { style: { color: '#9ca3af' } },
+                 gridLineColor: 'rgba(255,255,255,0.1)'
+             },
+             yAxis: {
+                 title: { text: null },
+                 labels: { 
+                     style: { color: '#9ca3af' },
+                     formatter: function() {
+                        return '₩' + Highcharts.numberFormat(this.value, 0, '', ',');
+                     }
+                 },
+                 gridLineColor: 'rgba(255,255,255,0.1)'
+             },
+             plotOptions: {
+                 area: {
+                     depth: 25,
+                     marker: { enabled: false },
+                     states: { hover: { lineWidth: 1 } },
+                     threshold: null
+                 }
+             },
+             series: [{
+                 name: '실시간 매출',
+                 data: data,
+                 color: '#3b82f6',
+                 fillColor: {
+                     linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                     stops: [
+                         [0, 'rgba(59, 130, 246, 0.5)'],
+                         [1, 'rgba(59, 130, 246, 0)']
+                     ]
+                 },
+                 lineColor: '#60a5fa'
+             }],
+             credits: { enabled: false },
+             legend: { enabled: false }
+         });
+    }
+
+    function updatePastChart(labels, data) {
+         Highcharts.chart('pastSalesChart', {
+            chart: { 
+                type: 'pie', 
+                backgroundColor: 'transparent', 
+                options3d: { 
+                    enabled: true, 
+                    alpha: 45, 
+                    beta: 0 
+                } 
+            },
+            title: { text: null },
+            accessibility: { point: { valueSuffix: '%' } },
+            plotOptions: { 
+                pie: { 
+                    allowPointSelect: true, 
+                    cursor: 'pointer', 
+                    depth: 35, 
+                    dataLabels: { 
+                        enabled: true, 
+                        format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                        style: { color: '#e5e7eb' }
+                    } 
+                } 
+            },
+            series: [{ 
+                type: 'pie', 
+                name: '매출 비중', 
+                data: labels.map((l, i) => [l, data[i]]) 
+            }],
+            credits: { enabled: false }
+        });
+    }
+
+    // Decision & Strategy
+    let selectedDecision = null;
+    let appliedStrategies = [];
+    const strategiesData = {
+            'sales': [
+                { icon: '📢', title: '긴급 타임 세일', summary: '오후 2시~4시 해피아워 15% 할인', score: 92, category: '매출 부스팅', detail: '유동 인구가 많지만 방문율이 떨어지는 오후 2시부터 4시 사이에 "해피아워 15% 할인" 이벤트를 진행하세요.' },
+                { icon: '🍰', title: '객단가 상승 세트', summary: '아메리카노 + 케이크 1인 세트 출시', score: 88, category: '메뉴 최적화', detail: '디저트 판매량이 저조합니다. 인기 음료인 아메리카노와 케이크를 묶은 "1인 달콤 세트"를 출시하세요.' },
+                { icon: '🛵', title: '배달 앱 깃발 최적화', summary: '주문 밀집 지역 깃발 재배치', score: 85, category: '배달 마케팅', detail: '효율이 낮은 A구역의 깃발을 주문량이 증가하는 C구역으로 이동시키세요.' }
+            ],
+            'profit': [
+                { icon: '🥛', title: '재고 소진 프로모션', summary: '유통기한 임박 우유 활용 라떼 할인', score: 94, category: '재고 관리', detail: '유통기한 임박 우유 소진을 위해 "오늘의 라떼" 10% 할인을 진행하세요.' },
+                { icon: '👥', title: '인력 효율화', summary: '15:00~16:00 파트타임 휴게 시간', score: 89, category: '인건비 최적화', detail: '해당 시간대 매출 대비 인건비 비중이 높습니다. 브레이크 타임을 활용하세요.' },
+                { icon: '⚡', title: '에너지 절약', summary: '피크타임 전력 제어', score: 82, category: '운영 비용', detail: '피크타임 전력 소모를 막기 위해 AI 자동 제어 시스템을 가동하세요.' }
+            ],
+            'customer': [
+                { icon: '👑', title: '단골 우대 캠페인', summary: '휴면 VIP 쿠폰 발송', score: 95, category: 'CRM 마케팅', detail: '최근 미방문 VIP 고객에게 "웰컴 백 무료 커피" 쿠폰을 발송하세요.' },
+                { icon: '⭐', title: '리뷰 이벤트', summary: '포토 리뷰 시 쿠키 증정', score: 90, category: '바이럴 마케팅', detail: '영수증 포토 리뷰 인증 시 수제 쿠키를 제공하여 리뷰 수를 늘리세요.' },
+                { icon: '🎂', title: '생일 축하', summary: '생일 고객 조각 케이크', score: 88, category: '감동 경영', detail: '이번 주 생일 고객에게 조각 케이크를 선물하세요.' }
+            ]
+    };
+
+    function selectDecision(type) {
+        selectedDecision = type;
+        const types = ['sales', 'profit', 'customer'];
+        const colors = { 'sales': 'blue', 'profit': 'amber', 'customer': 'emerald' };
+        
+        types.forEach(t => {
+            const el = document.getElementById(`decision-${t}`);
+            const color = colors[t];
+            
+            // Classes to REMOVE (Reset state)
+            el.classList.remove('bg-white', 'bg-slate-50', 'border-slate-200', 'shadow-sm', 'shadow-xl', 'scale-105', 'opacity-50');
+            el.classList.remove(`border-${color}-500`, `bg-${color}-50`);
+            
+            if(t === type) {
+                // ACTIVE State
+                el.classList.add('bg-white', `border-${color}-500`, `bg-${color}-50`, 'shadow-xl', 'scale-105');
+                // Ensure circle border is highlighted
+                el.querySelector('div > div.rounded-full').classList.add(`border-${color}-500`);
+                el.querySelector('div > div.rounded-full').classList.remove(`border-${color}-100`);
+            } else {
+                // INACTIVE State
+                el.classList.add('bg-slate-50', 'border-slate-200', 'shadow-sm');
+                // Reset circle border
+                el.querySelector('div > div.rounded-full').classList.remove(`border-${color}-500`);
+                el.querySelector('div > div.rounded-full').classList.add(`border-${color}-100`);
+            }
+        });
+    }
+
+    function executeStrategy() {
+        if(!selectedDecision) { alert('전략을 선택해주세요.'); return; }
+        const btn = document.getElementById('btn-execute-strategy');
+        btn.disabled = true; btn.innerHTML = '분석 중...';
+        setTimeout(() => {
+            btn.disabled = false; btn.innerHTML = '🚀 전략 승인 및 실행';
+            openDecisionModal(selectedDecision);
+        }, 800);
+    }
+    
+    function openDecisionModal(type) {
+         const modal = document.getElementById('decision-modal');
+         const d = strategiesData[type][0]; // Demo: Show first strategy
+         
+         document.getElementById('dm-icon').innerText = {sales:'💰', profit:'⚖️', customer:'💖'}[type];
+         document.getElementById('dm-category').innerText = {sales:'매출 성장', profit:'비용 절감', customer:'고객 만족'}[type];
+         document.getElementById('dm-title').innerText = d.category; 
+         document.getElementById('dm-content').innerText = "AI 추천 전략:\n" + d.title + "\n\n" + d.detail;
+
+         modal.classList.remove('hidden'); modal.classList.add('flex');
+         setTimeout(() => { modal.querySelector('.modal-content').classList.remove('scale-95', 'opacity-0'); modal.querySelector('.modal-content').classList.add('scale-100', 'opacity-100'); }, 10);
+    }
+    function closeDecisionModal() {
+        document.getElementById('decision-modal').classList.add('hidden');
+        document.getElementById('decision-modal').classList.remove('flex');
+    }
+    function applyDecisionStrategy() {
+        closeDecisionModal();
+        alert('전략이 적용되었습니다!');
+        // Ideally update UI here
+    }
+    function openAppliedModal() { document.getElementById('applied-modal').classList.remove('hidden'); document.getElementById('applied-modal').classList.add('flex'); }
+    function closeAppliedModal() { document.getElementById('applied-modal').classList.add('hidden'); document.getElementById('applied-modal').classList.remove('flex'); }
+    function undoLastStrategy() { alert('취소할 내역이 없습니다.'); }
+    
+    function updateOperationalStrategies(type) {
+         // Logic to update strategy container (omitted for brevity, can be added if crucial)
+    }
+
+    function openStrategyModal(id) { document.getElementById(id).classList.remove('hidden'); document.getElementById(id).classList.add('flex'); }
+    function closeStrategyModal(id) { document.getElementById(id).classList.add('hidden'); document.getElementById(id).classList.remove('flex'); }
+
+    // Init Logic
+    
+        Promise.resolve({
+            status: 'success',
+            prediction: 1350000,
+            weather: { condition: '맑음', temp: 24 },
+            analysis: "최근 매출 흐름이 매우 좋습니다. 점심 피크 인력 충원과 재고 점검을 추천합니다.",
+            strategies: [
+                {
+                    icon: '🚀', title: '긴급 타임 세일', summary: '오후 2시~4시 15% 할인', score: 92,
+                    detail: '유동 인구가 많은 시간대에 할인을 적용하여 방문율을 극대화하세요.'
+                },
+                {
+                    icon: '📦', title: '재고 최적화', summary: '인기 품목 선제적 발주', score: 85,
+                    detail: '주말 대비 수요가 높을 것으로 예상되는 원두와 우유를 추가 확보하세요.'
+                },
+                {
+                    icon: '👥', title: '인력 효율화', summary: '피크타임 파트타임 배치', score: 88,
+                    detail: '매출 집중 시간대에 인력을 재배치하여 서비스 품질을 유지하세요.'
+                }
+            ],
+            hourly_sales: [0,0,0,0,0,0,0,150000,320000,450000,680000,950000,420000,300000,0,0,0,0,0,0,0,0,0,0],
+            past_hourly_sales: [0,0,0,0,0,0,0,120000,280000,410000,600000,850000,380000,290000,0,0,0,0,0,0,0,0,0,0]
+        })
+        
+        
+        .then(d=>{
+            if(d.status==='success'){
+                 // Safe updates: check for element existence
+                 const predEl = document.getElementById('prediction-value');
+                 if(predEl) predEl.innerText = '₩ ' + Number(d.prediction).toLocaleString();
+                 
+                 const weatherCondEl = document.getElementById('weather-cond');
+                 const weatherTempEl = document.getElementById('weather-temp');
+                 if(d.weather && d.weather.condition && weatherCondEl && weatherTempEl) {
+                     weatherCondEl.innerText = d.weather.condition;
+                     weatherTempEl.innerText = d.weather.temp + '°';
+                 }
+
+                 const analysisEl = document.getElementById('ai-analysis-text');
+                 if(analysisEl) analysisEl.innerText = d.analysis;
+                 
+                 // Update strategies
+                 const container = document.getElementById('strategy-container');
+                 const modalContainer = document.getElementById('modal-container');
+                 
+                 if (container && d.strategies) {
+                     container.innerHTML = '';
+                     d.strategies.forEach((s,i) => {
+                         const mid = `modal-${i}`;
+                         container.insertAdjacentHTML('beforeend', `
+                            <div onclick="openStrategyModal('${mid}')" 
+                                 class="group relative bg-white rounded-2xl p-5 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 border border-slate-200 overflow-hidden cursor-pointer">
+                                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                
+                                <div class="h-16 w-16 bg-blue-50 rounded-2xl mb-4 flex items-center justify-center text-3xl group-hover:scale-110 transition-transform duration-300 shadow-inner">
+                                    <span class="filter drop-shadow-sm">${s.icon}</span>
+                                </div>
+                                
+                                <h3 class="text-2xl font-bold text-slate-800 dark:text-slate-900 mb-4 group-hover:text-blue-700 transition-colors" style="color: #1e293b !important;">${s.title}</h3>
+                                
+                                <p class="text-slate-600 dark:text-slate-600 leading-relaxed font-bold text-base mb-4" style="color: #475569 !important;">
+                                    ${s.summary}
+                                </p>
+                                
+                                <div class="flex items-center gap-4">
+                                    <div class="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+                                        <div class="h-full bg-gradient-to-r from-blue-500 to-indigo-500" style="width:${s.score}%"></div>
+                                    </div>
+                                    <span class="text-base text-blue-600 font-bold" style="color: #2563eb !important;">${s.score}점</span>
+                                </div>
+                            </div>
+                         `);
+                         if (modalContainer) {
+                             modalContainer.insertAdjacentHTML('beforeend', `
+                                <div id="${mid}" class="fixed inset-0 z-[100] hidden items-center justify-center">
+                                    <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeStrategyModal('${mid}')"></div>
+                                     <div class="relative bg-white border border-slate-200 p-5 rounded-3xl max-w-2xl w-full mx-4 shadow-2xl modal-content animate-in zoom-in duration-300">
+                                        <button onclick="closeStrategyModal('${mid}')" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 text-3xl font-bold">&times;</button>
+                                        <div class="h-20 w-20 bg-blue-50 rounded-2xl mb-5 flex items-center justify-center text-5xl">
+                                            ${s.icon}
+                                        </div>
+                                        <h3 class="text-3xl font-black text-slate-900 mb-5" style="color: #0f172a !important;">${s.title}</h3>
+                                        <div class="p-5 bg-slate-50 rounded-2xl border border-slate-100 mb-5">
+                                            <p class="text-slate-700 leading-relaxed font-bold text-lg" style="color: #334155 !important;">${s.detail}</p>
+                                        </div>
+                                        <button onclick="closeStrategyModal('${mid}')" class="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold hover:bg-slate-800 transition shadow-lg text-lg">확인</button>
+                                    </div>
+                                </div>
+                             `);
+                         }
+                     });
+                 }
+
+                 // Render Comparison Chart
+                 if (d.hourly_sales && d.past_hourly_sales) {
+                     renderComparisonChart(d.hourly_sales, d.past_hourly_sales);
+                     updateSalesChart([...Array(24).keys()].map(h => h.toString().padStart(2, '0') + ':00'), d.hourly_sales);
+                     
+                     // Hide loading
+                     const loading = document.getElementById('comparison-loading');
+                     if(loading) {
+                         loading.style.opacity = '0';
+                         setTimeout(() => loading.classList.add('hidden'), 500);
+                     }
+                 }
+            }
+        });
+
+    function renderComparisonChart(todayData, pastData) {
+        Highcharts.chart('comparisonChartContainer', {
+            chart: {
+                type: 'areaspline',
+                backgroundColor: 'transparent',
+                style: { fontFamily: "'Inter', sans-serif" },
+                spacingBottom: 20
+            },
+            title: { text: null },
+            credits: { enabled: false },
+            xAxis: {
+                categories: [...Array(24).keys()].map(h => h.toString().padStart(2, '0') + ':00'),
+                gridLineWidth: 0,
+                lineWidth: 0,
+                labels: { style: { color: '#64748b', fontSize: '13px' }, step: 3 }
+            },
+            yAxis: {
+                title: { text: null },
+                gridLineColor: 'rgba(255, 255, 255, 0.05)',
+                labels: {
+                    style: { color: '#475569', fontSize: '13px' },
+                    formatter: function() { return (this.value / 10000).toLocaleString() + '만'; }
+                }
+            },
+            tooltip: {
+                shared: true,
+                backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                borderColor: '#6366f1',
+                borderRadius: 12,
+                style: { color: '#f8fafc' },
+                valueSuffix: '원'
+            },
+            plotOptions: {
+                areaspline: {
+                    fillOpacity: 0.1,
+                    marker: { enabled: false, symbol: 'circle', radius: 3, states: { hover: { enabled: true } } },
+                    lineWidth: 2
+                }
+            },
+            series: [{
+                name: '오늘 매출',
+                data: todayData,
+                color: '#3b82f6',
+                zIndex: 2,
+                fillColor: {
+                    linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                    stops: [[0, 'rgba(59, 130, 246, 0.2)'], [1, 'rgba(59, 130, 246, 0)']]
+                }
+            }, {
+                name: '전주 동기 매출',
+                data: pastData,
+                color: '#6366f1',
+                dashStyle: 'ShortDash',
+                fillOpacity: 0.05,
+                zIndex: 1,
+                fillColor: 'transparent'
+            }]
+        });
+    }
+</script>
+
+</body>
+</html>

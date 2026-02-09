@@ -1,0 +1,1292 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCM 통합 관제 콘솔 - Forkast AI</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        dark: '#0f172a',
+                        primary: '#3b82f6',
+                        secondary: '#6366f1',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        /* LIGHT MODE (Default) - Dark fonts on light background */
+        :root {
+            --bg-main: #FAF7F2;
+            --bg-card: #ffffff;
+            --bg-sidebar: #ffffff;
+            --text-primary: #0f172a;
+            --text-secondary: #334155;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+        }
+
+        /* DARK MODE - Light fonts on dark background */
+        body.dark-mode {
+            --bg-main: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.8);
+            --bg-sidebar: #0f172a;
+            --text-primary: #f8fafc;
+            --text-secondary: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body { 
+            font-family: 'Noto Sans KR', sans-serif; 
+            background-color: var(--bg-main); 
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        /* Apply text colors globally */
+        h1, h2, h3, h4, h5, h6 { color: var(--text-primary); }
+        p, span, a, li { color: var(--text-secondary); }
+        .text-muted { color: var(--text-muted) !important; }
+
+        /* LIGHT MODE: Force all text to be dark */
+        body:not(.dark-mode) * {
+            color: inherit;
+        }
+        body:not(.dark-mode) h1, body:not(.dark-mode) h2, body:not(.dark-mode) h3,
+        body:not(.dark-mode) h4, body:not(.dark-mode) h5, body:not(.dark-mode) h6 {
+            color: #0f172a !important;
+        }
+        body:not(.dark-mode) p, body:not(.dark-mode) span, body:not(.dark-mode) div,
+        body:not(.dark-mode) a, body:not(.dark-mode) li, body:not(.dark-mode) label {
+            color: #334155 !important;
+        }
+        
+        /* Override Tailwind text colors for theme compatibility */
+        body:not(.dark-mode) .text-white { color: #0f172a !important; }
+        body:not(.dark-mode) .text-slate-100, 
+        body:not(.dark-mode) .text-slate-200,
+        body:not(.dark-mode) .text-slate-300,
+        body:not(.dark-mode) .text-slate-400,
+        body:not(.dark-mode) .text-slate-500,
+        body:not(.dark-mode) .text-gray-300,
+        body:not(.dark-mode) .text-gray-400,
+        body:not(.dark-mode) .text-gray-500 { color: #475569 !important; }
+
+        /* Preserve colored elements */
+        body:not(.dark-mode) .text-blue-400,
+        body:not(.dark-mode) .text-blue-500,
+        body:not(.dark-mode) .text-blue-600 { color: #2563eb !important; }
+        body:not(.dark-mode) .text-red-400,
+        body:not(.dark-mode) .text-red-500,
+        body:not(.dark-mode) .text-red-600 { color: #dc2626 !important; }
+        body:not(.dark-mode) .text-green-400,
+        body:not(.dark-mode) .text-green-500,
+        body:not(.dark-mode) .text-green-600 { color: #16a34a !important; }
+        body:not(.dark-mode) .text-amber-400,
+        body:not(.dark-mode) .text-amber-500,
+        body:not(.dark-mode) .text-amber-600 { color: #d97706 !important; }
+        
+        /* Button text exceptions */
+        body:not(.dark-mode) .bg-blue-500 a,
+        body:not(.dark-mode) .bg-blue-600 a,
+        body:not(.dark-mode) .bg-blue-600 span,
+        body:not(.dark-mode) .bg-blue-600 *,
+        body:not(.dark-mode) .btn-primary *,
+        body:not(.dark-mode) button[class*="bg-blue"] * { color: white !important; }
+
+        /* Dark mode text overrides - Removed !important to allow local overrides */
+        body.dark-mode .text-slate-600,
+        body.dark-mode .text-slate-700,
+        body.dark-mode .text-slate-800,
+        body.dark-mode .text-slate-900,
+        body.dark-mode .text-gray-600,
+        body.dark-mode .text-gray-700,
+        body.dark-mode .text-gray-800,
+        body.dark-mode .text-gray-900,
+        body.dark-mode [class*="text-slate-400"],
+        body.dark-mode [class*="text-slate-500"],
+        body.dark-mode [class*="text-gray-400"],
+        body.dark-mode [class*="text-gray-500"] { color: #f1f5f9 !important; }
+
+        /* Background overrides for dark mode */
+        body.dark-mode .bg-white { background-color: #1e293b !important; border-color: #334155 !important; }
+        body.dark-mode .bg-slate-50 { background-color: #0f172a !important; border-color: #1e293b !important; }
+        body.dark-mode .bg-gray-50 { background-color: #111827 !important; border-color: #1f2937 !important; }
+
+        /* LIGHT MODE: Override dark backgrounds to light ones */
+        body:not(.dark-mode) .bg-slate-900,
+        body:not(.dark-mode) .bg-gray-900 { background-color: #FAF7F2 !important; }
+        body:not(.dark-mode) .bg-slate-800,
+        body:not(.dark-mode) .bg-gray-800 { background-color: #f1f5f9 !important; }
+        body:not(.dark-mode) .bg-slate-700,
+        body:not(.dark-mode) .bg-gray-700 { background-color: #e2e8f0 !important; }
+        
+        /* Light mode gradient backgrounds */
+        body:not(.dark-mode) .bg-gradient-to-r.from-slate-800,
+        body:not(.dark-mode) [class*="from-slate-800"][class*="to-slate-700"] {
+            background: linear-gradient(to right, #e2e8f0, #f1f5f9) !important;
+        }
+        body:not(.dark-mode) .bg-gradient-to-t { background: linear-gradient(to top, #FAF7F2, transparent) !important; }
+        body:not(.dark-mode) .from-gray-900 { --tw-gradient-from: #FAF7F2 !important; }
+        body:not(.dark-mode) .via-gray-900\/60 { --tw-gradient-via: rgba(250, 247, 242, 0.6) !important; }
+        
+        /* Light mode sidebar and switch button */
+        body:not(.dark-mode) .bg-slate-900\/80,
+        body:not(.dark-mode) .bg-slate-900\/50,
+        body:not(.dark-mode) .bg-slate-900\/95 { 
+            background-color: rgba(255, 255, 255, 0.95) !important;
+        }
+        /* FORCE SIDEBAR DARK IN LIGHT MODE */
+        #sidebar {
+            background-color: #1e293b !important;
+            border-right: 1px solid #334155 !important;
+        }
+        #sidebar * {
+            color: #ffffff !important; /* Force all text inside sidebar to be white */
+        }
+        #sidebar .text-slate-400, #sidebar .text-slate-500 {
+            color: #cbd5e1 !important; /* Slightly dimmed white for secondary text */
+        }
+        body:not(.dark-mode) .border-slate-700,
+        body:not(.dark-mode) .border-slate-600,
+        body:not(.dark-mode) .border-slate-600\/50 { 
+            border-color: #e2e8f0 !important;
+        }
+        
+        /* Light mode card backgrounds */
+        body:not(.dark-mode) .glass-panel,
+        body:not(.dark-mode) .glass,
+        body:not(.dark-mode) .bg-slate-800 { 
+            background-color: rgba(255, 255, 255, 0.95) !important;
+            border-color: #e2e8f0 !important;
+        }
+
+
+        .glass {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+        }
+        .sidebar-active {
+            background: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-main); }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+        /* Global Image & Media Refinements */
+        img, video {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        img:hover, video:hover {
+            transform: scale(1.01);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            filter: brightness(1.05);
+        }
+        .glass-panel img, .glass img {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+
+    
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+    :root {
+        --erp-bg: #f8fafc;
+        --erp-card: #ffffff;
+        --erp-border: #e2e8f0;
+        --erp-primary: #2563eb;
+        --erp-primary-hover: #1d4ed8;
+        --erp-text-main: #0f172a;
+        --erp-text-muted: #64748b;
+        --erp-accent: #3b82f6;
+        --erp-success: #10b981;
+        --erp-warning: #f59e0b;
+        --erp-danger: #ef4444;
+    }
+
+    body.dark-mode {
+        --erp-bg: #0f172a;
+        --erp-card: #1e293b;
+        --erp-border: #334155;
+        --erp-text-main: #f8fafc; /* Slate 50 */
+        --erp-text-muted: #cbd5e1; /* Slate 300 (Much brighter) */
+        --erp-accent: #60a5fa;
+        --erp-table-head: #1e293b;
+        --erp-table-zebra: #1e293b88;
+        --erp-hover: #334155;
+        --erp-input-bg: #0f172a;
+    }
+
+    :root {
+        --erp-table-head: #f1f5f9;
+        --erp-table-zebra: #f8fafc;
+        --erp-hover: #f1f5f9;
+        --erp-input-bg: #ffffff;
+    }
+
+    body {
+        background-color: var(--erp-bg);
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        color: var(--erp-text-main);
+        letter-spacing: -0.01em;
+    }
+
+    .erp-section-title {
+        font-size: 1.5rem; /* ~24px */
+        font-weight: 800;
+        letter-spacing: -0.01em;
+        margin-bottom: 1.25rem; /* 20px */
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .erp-card {
+        background: var(--erp-card);
+        border: 1px solid var(--erp-border);
+        border-radius: 16px;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+        transition: transform 0.2s, box-shadow 0.2s;
+        overflow: hidden;
+    }
+
+    .erp-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.08);
+    }
+
+    .erp-table thead {
+        background-color: var(--erp-table-head);
+        border-bottom: 2px solid var(--erp-border);
+    }
+
+    .erp-table th {
+        color: var(--erp-text-muted);
+        font-weight: 700;
+        font-size: 1rem; /* 16px */
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 1rem; /* 16px */
+        text-align: left;
+    }
+
+    .erp-table td {
+        padding: 1rem; /* 16px */
+        border-bottom: 1px solid var(--erp-border);
+        font-size: 1rem; /* 16px */
+        color: var(--erp-text-main);
+    }
+
+    /* Zebra Striping */
+    .erp-table tbody tr:nth-child(even) {
+        background-color: var(--erp-table-zebra);
+    }
+
+    .erp-table tbody tr:hover {
+        background-color: var(--erp-hover);
+    }
+
+    .erp-btn-primary {
+        background-color: var(--erp-primary);
+        color: white;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        font-weight: 600;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.625rem;
+        box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+    }
+
+    .erp-btn-primary:hover {
+        background-color: var(--erp-primary-hover);
+        transform: translateY(-1px);
+        box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3);
+    }
+
+    .status-badge {
+        padding: 8px 16px;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .status-approved { background-color: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+    .status-pending { background-color: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); }
+    .status-low { background-color: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+
+    /* Custom Forms */
+    .erp-input {
+        width: 100%;
+        padding: 0.875rem 1rem;
+        background-color: var(--erp-input-bg);
+        border: 1px solid var(--erp-border);
+        border-radius: 12px;
+        font-size: 1rem; /* 16px */
+        color: var(--erp-text-main);
+        transition: all 0.2s;
+        outline: none;
+    }
+
+    .erp-input:focus {
+        border-color: var(--erp-primary);
+        box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.4s ease-out forwards;
+    }
+
+    /* Force Layout Constraints */
+    .custom-container {
+        max-width: 1400px !important;
+        width: 90% !important;
+        margin-left: auto !important;
+        margin-right: auto !important;
+        padding-left: 5vw !important; /* Viewport based padding */
+        padding-right: 5vw !important;
+        box-sizing: border-box !important;
+    }
+    
+    @media (min-width: 1536px) { /* 2xl screens */
+        .custom-container {
+            max-width: 1300px !important; /* Slightly wider on huge screens */
+            padding-left: 4rem !important;
+            padding-right: 4rem !important;
+        }
+    }
+
+    /* Dark Mode Overrides for Tailwind Utilities */
+    [data-theme="dark"] .text-slate-900,
+    [data-theme="dark"] .text-slate-800,
+    [data-theme="dark"] .text-slate-700 {
+        color: #f8fafc !important; /* Slate-50 */
+    }
+
+    [data-theme="dark"] .text-slate-600,
+    [data-theme="dark"] .text-slate-500 {
+        color: #cbd5e1 !important; /* Slate-300 */
+    }
+
+    [data-theme="dark"] .text-blue-600 {
+        color: #60a5fa !important; /* Blue-400 */
+    }
+    
+    [data-theme="dark"] .text-indigo-600 {
+        color: #818cf8 !important; /* Indigo-400 */
+    }
+    
+    [data-theme="dark"] .text-rose-600 {
+        color: #fb7185 !important; /* Rose-400 */
+    }
+    
+    [data-theme="dark"] .text-amber-600 {
+        color: #fbbf24 !important; /* Amber-400 */
+    }
+    
+    [data-theme="dark"] .text-emerald-600 {
+        color: #34d399 !important; /* Emerald-400 */
+    }
+
+    [data-theme="dark"] .bg-white {
+        background-color: #1e293b !important; /* Slate-800 */
+        border-color: #334155 !important;
+    }
+
+    [data-theme="dark"] .bg-slate-50 {
+        background-color: #0f172a !important; /* Slate-900 */
+        border-color: #1e293b !important;
+    }
+
+    [data-theme="dark"] .border-slate-100,
+    [data-theme="dark"] .border-slate-200 {
+        border-color: #334155 !important;
+    }
+    
+    /* Section Specific Background Adjustments */
+    [data-theme="dark"] .bg-blue-50\/30,
+    [data-theme="dark"] .bg-blue-50 {
+        background-color: rgba(59, 130, 246, 0.1) !important;
+    }
+    
+    [data-theme="dark"] .bg-indigo-50\/30,
+    [data-theme="dark"] .bg-indigo-50 {
+        background-color: rgba(99, 102, 241, 0.1) !important;
+    }
+    
+    [data-theme="dark"] .bg-rose-50\/30,
+    [data-theme="dark"] .bg-rose-50 {
+        background-color: rgba(244, 63, 94, 0.1) !important;
+    }
+    
+    [data-theme="dark"] .bg-amber-50\/30,
+    [data-theme="dark"] .bg-amber-50 {
+        background-color: rgba(245, 158, 11, 0.1) !important;
+    }
+    
+    [data-theme="dark"] .bg-emerald-50 {
+        background-color: rgba(16, 185, 129, 0.1) !important;
+    }
+    
+    /* Table Stripes */
+    [data-theme="dark"] .hover\:bg-blue-50\/50:hover {
+        background-color: rgba(59, 130, 246, 0.15) !important;
+    }
+    
+    /* AI Recommendation Box Dark Mode Override */
+    [data-theme="dark"] .bg-slate-50 {
+        background-color: #1e293b !important; /* Slate-800 */
+        border-color: #334155 !important;
+    }
+    
+    [data-theme="dark"] .bg-amber-50\/50 {
+        background-color: rgba(245, 158, 11, 0.1) !important;
+        border-color: rgba(245, 158, 11, 0.2) !important;
+    }
+    
+    [data-theme="dark"] .text-amber-800 {
+        color: #fbbf24 !important; /* Amber-400 */
+    }
+    
+    [data-theme="dark"] .bg-amber-200 {
+        background-color: rgba(245, 158, 11, 0.3) !important;
+        color: #fef3c7 !important;
+    }
+    
+    [data-theme="dark"] .bg-amber-100 {
+        background-color: rgba(245, 158, 11, 0.2) !important;
+        color: #fbbf24 !important;
+    }
+</style>
+
+</head>
+<body class="overflow-x-hidden leading-[1.6] dark-mode">
+
+
+    <!-- Sidebar -->
+    <aside class="fixed inset-y-0 left-0 w-64 bg-slate-900 border-r border-slate-700 z-50 transition-transform duration-300 transform -translate-x-full lg:translate-x-0" id="sidebar" style="background-color: #1e293b !important;">
+        <div class="p-6 flex items-center justify-between border-b border-slate-700/50">
+            <a href="./index.html" class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500 hover:opacity-80 transition cursor-pointer">
+                Forkast AI
+            </a>
+            <button class="lg:hidden text-gray-400 hover:text-white" onclick="toggleSidebar()">✕</button>
+        </div>
+
+        <nav class="px-4 space-y-2 mt-6 overflow-y-auto h-[calc(100%-140px)]">
+            
+            <!-- ERP Sidebar (Super Admin) -->
+            
+            <!-- Group 1: Incoming Flow (유입 관리) -->
+            <div class="pt-2 pb-2 text-xs font-black text-blue-500 uppercase tracking-wider px-4 flex items-center gap-2">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i> 유입 관리
+            </div>
+            <div class="space-y-1 mb-6 relative">
+                 <!-- Decorative Line -->
+                 <div class="absolute left-4 top-2 bottom-2 w-0.5 bg-blue-500/20 rounded-full"></div>
+                 
+                 <a href="/admin/platform_ui/salesorder/" class="ml-4 flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition group">
+                    <span class="w-6 h-6 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition"><i class="fa-solid fa-file-invoice-dollar"></i></span>
+                    <span class="font-bold">수주 관리 (Sales Order)</span>
+                </a>
+                <a href="/admin/platform_ui/inbound/" class="ml-4 flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition group">
+                    <span class="w-6 h-6 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-500 group-hover:bg-blue-500 group-hover:text-white transition"><i class="fa-solid fa-boxes-packing"></i></span>
+                    <span class="font-bold">입고 관리 (Inbound)</span>
+                </a>
+            </div>
+
+            <!-- Group 2: Outgoing Flow (유출 관리) -->
+            <div class="pt-2 pb-2 text-xs font-black text-rose-500 uppercase tracking-wider px-4 flex items-center gap-2">
+                <i class="fa-solid fa-arrow-right-from-bracket"></i> 유출 관리
+            </div>
+            <div class="space-y-1 mb-6 relative">
+                 <!-- Decorative Line -->
+                 <div class="absolute left-4 top-2 bottom-2 w-0.5 bg-rose-500/20 rounded-full"></div>
+
+                <a href="/admin/platform_ui/outbound/" class="ml-4 flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition group">
+                    <span class="w-6 h-6 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-500 group-hover:bg-rose-500 group-hover:text-white transition"><i class="fa-solid fa-truck-ramp-box"></i></span>
+                    <span class="font-bold">출고 관리 (Outbound)</span>
+                </a>
+                 <a href="/admin/platform_ui/purchaseorder/" class="ml-4 flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition group">
+                    <span class="w-6 h-6 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-500 group-hover:bg-rose-500 group-hover:text-white transition"><i class="fa-solid fa-cart-shopping"></i></span>
+                    <span class="font-bold">발주 관리 (Purchase Order)</span>
+                </a>
+            </div>
+            
+            <!-- Group 3: Analysis & Settings -->
+            <div class="pt-4 border-t border-slate-700/50 mt-4">
+                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition group">
+                    <span class="w-8 h-8 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 group-hover:bg-indigo-500 group-hover:text-white transition"><i class="fa-solid fa-microchip"></i></span>
+                    <span class="font-bold">AI 분석 터미널</span>
+                </a>
+                 <a href="/settings/" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 text-slate-400 hover:text-white transition group">
+                    <span class="w-8 h-8 rounded-lg bg-slate-500/10 flex items-center justify-center text-slate-400 group-hover:bg-slate-500 group-hover:text-white transition"><i class="fa-solid fa-sliders"></i></span>
+                    <span class="font-bold">설정 / 마스터 관리</span>
+                </a>
+            </div>
+            
+        </nav>
+        
+        <script>
+            // Force high contrast for sidebar elements
+            document.addEventListener('DOMContentLoaded', () => {
+                const sidebarLinks = document.querySelectorAll('#sidebar a');
+                sidebarLinks.forEach(link => {
+                    link.classList.remove('text-slate-400');
+                    link.classList.add('text-slate-100');
+                    link.style.color = '#f1f5f9'; // Force via embedded style
+                    link.style.fontWeight = '600';
+                    link.style.textShadow = '0 1px 2px rgba(0,0,0,0.8)'; // Strong shadow
+                });
+                
+                // Headers
+                const headers = document.querySelectorAll('#sidebar .uppercase');
+                headers.forEach(header => {
+                    header.classList.remove('text-slate-500');
+                    header.classList.add('text-white');
+                    header.style.color = '#ffffff';
+                    header.style.opacity = '1';
+                    header.style.textShadow = '0 1px 2px rgba(0,0,0,0.8)';
+                });
+            });
+        </script>
+
+        
+        <div class="absolute bottom-0 w-full p-4 border-t border-slate-700 bg-slate-900/80 backdrop-blur-xl">
+            <!-- Page Switch (Premium Design - 3 Way) -->
+            <div class="relative bg-gradient-to-r from-slate-800 to-slate-700 rounded-2xl p-1.5 mb-4 shadow-lg border border-slate-600/50">
+                <div id="page-switch-bg" 
+                     class="absolute top-1.5 h-[calc(100%-12px)] bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl transition-all duration-300 ease-out shadow-[0_0_20px_rgba(59,130,246,0.5)]" 
+                     style="width: calc(33.33% - 4px); left: 4px;"></div>
+                
+                <div class="relative flex text-base font-extrabold">
+                    <a href="./index.html" 
+                       class="flex-1 flex flex-col items-center justify-center gap-4 py-4 rounded-xl transition-all duration-300 z-10 text-slate-400 shadow-sm">
+                        <i class="fa-solid fa-building-columns text-xl"></i>
+                        <span>본사</span>
+                    </a>
+                    <a href="./dashboard.html" 
+                       class="flex-1 flex flex-col items-center justify-center gap-4 py-4 rounded-xl transition-all duration-300 z-10 text-slate-400 hover:text-white hover:bg-white/5">
+                        <i class="fa-solid fa-server text-xl"></i>
+                        <span>사이트</span>
+                    </a>
+                    <a href="./index.html" 
+                       class="flex-1 flex flex-col items-center justify-center gap-4 py-4 rounded-xl transition-all duration-300 z-10 text-white hover:text-white hover:bg-white/5">
+                        <i class="fa-solid fa-store text-xl"></i>
+                        <span>가맹점</span>
+                    </a>
+                </div>
+            </div>
+            
+
+            <!-- Theme Toggle Switch -->
+            <div class="flex items-center justify-between bg-slate-800 rounded-xl px-4 py-3 mb-3">
+                <span class="text-xs font-bold text-slate-400"><i class="fa-solid fa-palette mr-2"></i>테마</span>
+                <button id="theme-toggle" onclick="toggleTheme()" class="relative w-14 h-7 bg-slate-700 rounded-full transition-colors duration-300">
+                    <span id="toggle-knob" class="absolute top-0.5 left-0.5 w-6 h-6 bg-slate-400 rounded-full flex items-center justify-center text-xs transition-all duration-300">
+                        <i id="theme-icon" class="fa-solid fa-moon text-slate-900"></i>
+                    </span>
+                </button>
+            </div>
+            
+             <a href="/toggle_work/" class="flex items-center justify-center gap-2 w-full bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/30 px-4 py-3 rounded-xl font-bold transition">
+                <span>🛑</span> 업무 종료
+            </a>
+        </div>
+
+    </aside>
+
+
+    <!-- Mobile Header -->
+    <div class="lg:hidden fixed top-0 w-full z-40 glass px-6 py-4 flex justify-between items-center bg-slate-900/90">
+        <a href="./dashboard.html" class="text-xl font-bold text-blue-400 hover:text-blue-300 transition">Forkast AI</a>
+        <button class="text-white text-2xl" onclick="toggleSidebar()">☰</button>
+    </div>
+
+    <!-- 메인 콘텐츠 영역 -->
+    <main class="lg:ml-64 min-h-screen flex flex-col relative z-0 transition-all duration-300 text-base">
+        <div class="flex-1">
+            
+<div class="min-h-screen py-5 px-6 max-w-[1920px] mx-auto">
+    <div class="w-full">
+        
+        <!-- 상단 시스템 관리 바 (Top Management Bar) -->
+        <div class="flex justify-between items-center mb-5 bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-4 px-4 py-2 bg-slate-900 text-white rounded-xl shadow-lg">
+                    <span class="text-xl">🛡️</span>
+                    <div>
+                        <div class="text-sm text-slate-400 font-bold uppercase leading-none mb-1">시스템 권한</div>
+                        <div class="text-lg font-black tracking-tight">최고 권한 (총괄 관리)</div>
+                    </div>
+                </div>
+                
+                <!-- Oracle DB Status -->
+                <div class="flex items-center gap-4 px-5 py-2 bg-emerald-50 border border-emerald-100 rounded-xl">
+                    <div class="relative flex h-3 w-3">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                    </div>
+                    <div>
+                        <div class="text-sm text-emerald-600 font-bold leading-none mb-1">Oracle DB 가동 상태</div>
+                        <div class="text-base font-black text-emerald-700">실시간 정상 연결 (가동 중)</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-6 select-none">
+                <div class="px-6 border-r border-slate-100 text-right">
+                    <div class="text-sm text-slate-400 font-bold uppercase mb-1">현재 접속 계정</div>
+                    <div class="text-lg font-black text-blue-600">마스터 관리자</div>
+                </div>
+                <a href="/super-admin/logout/" class="flex items-center gap-3 px-5 py-3 bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-all shadow-sm group" title="시스템 로그아웃">
+                    <span class="font-bold text-base">로그아웃</span>
+                    <i class="fa-solid fa-power-off text-xl"></i>
+                </a>
+            </div>
+        </div>
+
+        <section class="animate-fade-in mb-5">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-5 border-b border-gray-700 pb-6 mb-5 mt-5">
+                <div>
+                    <h1 class="text-3xl font-black text-slate-900 flex items-center gap-4">
+                        <span class="p-4 bg-blue-600 rounded-2xl text-white shadow-lg">📡</span>
+                        SCM 통합 관제 시스템
+                    </h1>
+                    <p class="text-slate-400 mt-4 text-xl font-medium">전체 가맹점 물류 흐름 및 재고 현황 실시간 감시</p>
+                </div>
+                <div class="flex gap-4">
+                    <!-- 데이터 동기화 배지 -->
+                    <div class="bg-white px-6 py-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-4">
+                        <div class="w-10 h-10 flex items-center justify-center bg-blue-50 text-blue-600 rounded-full">
+                            <i class="fa-solid fa-sync fa-spin"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm text-slate-400 font-bold leading-none mb-1">데이터 동기화</div>
+                            <div class="text-base font-black text-slate-700">본사-가맹점 실시간 동기화 중</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        </div>
+
+        <!-- KPI Row: ERP Style (Spacious & Balanced) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10"> 
+            <div class="erp-card p-6 border-l-8 border-l-red-500 shadow-xl transition-transform hover:scale-[1.02]">
+                <div class="text-slate-400 text-sm font-black uppercase tracking-widest mb-4">재고 부족 품목 통합</div>
+                <div class="flex items-end justify-between">
+                    <div class="text-4xl font-black text-slate-900 leading-none">0 <span class="text-lg font-bold text-slate-400 ml-1">품목</span></div>
+                    <div class="p-3 bg-red-50 rounded-2xl text-red-600 shadow-inner">
+                        <i class="fa-solid fa-triangle-exclamation text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="erp-card p-6 border-l-8 border-l-blue-500 shadow-xl transition-transform hover:scale-[1.02]">
+                <div class="text-slate-400 text-sm font-black uppercase tracking-widest mb-4">전체 미처리 수주</div>
+                <div class="flex items-end justify-between">
+                    <div class="text-4xl font-black text-slate-900 leading-none">0 <span class="text-lg font-bold text-slate-400 ml-1">주문</span></div>
+                    <div class="p-3 bg-blue-50 rounded-2xl text-blue-600 shadow-inner">
+                        <i class="fa-solid fa-clock-rotate-left text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="erp-card p-6 border-l-8 border-l-indigo-500 shadow-xl transition-transform hover:scale-[1.02]">
+                <div class="text-slate-400 text-sm font-black uppercase tracking-widest mb-4">총 활성 가맹점</div>
+                <div class="flex items-end justify-between">
+                    <div class="text-4xl font-black text-slate-900 leading-none">0 <span class="text-lg font-bold text-slate-400 ml-1">지점</span></div>
+                    <div class="p-3 bg-indigo-50 rounded-2xl text-indigo-600 shadow-inner">
+                        <i class="fa-solid fa-city text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="erp-card p-6 border-l-8 border-l-emerald-500 shadow-xl transition-transform hover:scale-[1.02]">
+                <div class="text-slate-400 text-sm font-black uppercase tracking-widest mb-4">Oracle DB 연동 품질</div>
+                <div class="flex items-end justify-between">
+                    <div class="text-4xl font-black text-emerald-600 leading-none">우수 <span class="text-lg font-bold text-slate-400 ml-1">동기화</span></div>
+                    <div class="p-3 bg-emerald-50 rounded-2xl text-emerald-600 shadow-inner">
+                        <i class="fa-solid fa-database text-2xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 1. Incoming Flow (유입 물류 관리) -->
+        <section class="mb-8">
+            <div class="erp-section-title text-blue-600 flex items-center gap-3 mb-5">
+                <i class="fa-solid fa-arrow-right-to-bracket text-2xl"></i> 
+                <span class="text-2xl font-black">유입 물류 관리</span>
+            </div>
+
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6"> 
+                <!-- 가맹점 수주 관리 -->
+                <div class="erp-card flex flex-col min-h-[420px] border-t-4 border-t-blue-500 shadow-lg">
+                    <div class="p-6 border-b border-slate-100 flex justify-between items-start bg-blue-50/20">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-blue-100 text-blue-600 flex items-center justify-center shadow-sm">
+                                <i class="fa-solid fa-file-invoice-dollar text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-black text-slate-800 text-2xl tracking-tight">가맹점 수주 관리</h3>
+                                <div class="mt-2 flex items-center gap-3">
+                                    <span class="px-3 py-1 bg-slate-900 text-white text-base font-black rounded-lg shadow-sm border border-slate-700">테이블: PLATFORM_UI_ORDER</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-xs text-right max-w-[280px]">
+                            <div class="text-sm text-slate-400 font-bold mb-1">Oracle DB 요약 설명</div>
+                            <div class="text-base text-slate-600 font-medium leading-relaxed">가맹점에서 요청한 원부자재 주문 내역을 실시간으로 관리하는 데이터 테이블</div>
+                        </div>
+                    </div>
+                    <div class="flex-1 overflow-x-auto p-2">
+                        <table class="w-full erp-table">
+                            <thead>
+                                <tr class="bg-slate-50">
+                                    <th class="py-4 px-5 text-base font-black text-slate-700">주문처</th>
+                                    <th class="py-4 px-5 text-base font-black text-slate-700">품목</th>
+                                    <th class="py-4 px-5 text-base font-black text-slate-700 text-center">수량</th>
+                                    <th class="py-4 px-5 text-base font-black text-slate-700 text-center">상태</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                                <tr>
+                                    <td colspan="4" class="py-20 text-center text-slate-400 text-lg font-medium bg-slate-50/30">
+                                        대기중인 수주 내역이 없습니다.
+                                    </td>
+                                </tr>
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 입고 관리 (Inbound) -->
+                <div class="erp-card flex flex-col h-full border-t-4 border-t-indigo-500">
+                    <div class="p-6 border-b border-slate-100 flex justify-between items-start bg-indigo-50/20">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center shadow-sm">
+                                <i class="fa-solid fa-arrow-down-long text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-black text-slate-800 text-2xl tracking-tight">원자재 입고 관리</h3>
+                                <div class="mt-2 flex items-center gap-3">
+                                    <span class="px-3 py-1 bg-slate-900 text-white text-base font-black rounded-lg shadow-sm border border-slate-700">테이블: PLATFORM_UI_INBOUND</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-xs text-right max-w-[280px]">
+                            <div class="text-sm text-slate-400 font-bold mb-1">Oracle DB 요약 설명</div>
+                            <div class="text-base text-slate-600 font-medium leading-relaxed">납품 업체로부터 입고 예정인 자재 리스트와 검수 상태를 관리하는 테이블</div>
+                        </div>
+                    </div>
+                    <div class="flex-1 overflow-x-auto">
+                        <table class="w-full erp-table">
+                            <thead>
+                                <tr>
+                                    <th>입고번호</th>
+                                    <th>공급사</th>
+                                    <th>품목</th>
+                                    <th>예정일</th>
+                                    <th>상태</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Mock Data -->
+                                <tr>
+                                    <td class="font-mono text-base">IN-240204-01</td>
+                                    <td class="text-base">(주)프레시푸드</td>
+                                    <td class="text-base">특제 소스 A</td>
+                                    <td class="text-base">2026-02-04</td>
+                                    <td><span class="badge badge-success text-base">입고완료</span></td>
+                                </tr>
+                                 <tr>
+                                    <td class="font-mono text-base">IN-240204-02</td>
+                                    <td class="text-base">대한농산</td>
+                                    <td class="text-base">양파 (20kg)</td>
+                                    <td class="text-base">2026-02-04</td>
+                                    <td><span class="badge badge-warning text-base">검수중</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Outgoing Flow (유출 물류 관리) -->
+        <section class="mb-10">
+            <div class="erp-section-title text-rose-600 flex items-center gap-3 mb-5">
+                <i class="fa-solid fa-arrow-right-from-bracket text-2xl"></i> 
+                <span class="text-2xl font-black">유출 물류 관리</span>
+            </div>
+
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <!-- 실시간 출고 관리 (배송 관리) -->
+                <div class="erp-card flex flex-col min-h-[460px] border-t-4 border-t-rose-500 shadow-lg">
+                    <div class="p-6 border-b border-slate-100 flex justify-between items-start bg-rose-50/20">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center shadow-sm">
+                                <i class="fa-solid fa-truck-fast text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-black text-slate-800 text-2xl tracking-tight">가맹점 배송 현황</h3>
+                                <div class="mt-2 flex items-center gap-3">
+                                    <span class="px-3 py-1 bg-slate-900 text-white text-base font-black rounded-lg shadow-sm border border-slate-700">테이블: PLATFORM_UI_DELIVERY</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-xs text-right max-w-[280px]">
+                            <div class="text-sm text-slate-400 font-bold mb-1">Oracle DB 요약 설명</div>
+                            <div class="text-base text-slate-600 font-medium leading-relaxed">본사에서 가맹점으로 출고된 물류의 배송 상태를 실시간 추적하는 테이블</div>
+                        </div>
+                    </div>
+                    <div class="flex-1 overflow-x-auto p-2">
+                        <table class="w-full erp-table">
+                            <thead>
+                                <tr class="bg-slate-50">
+                                    <th class="py-4 px-5 text-base font-black text-slate-700">도착지점</th>
+                                    <th class="py-4 px-5 text-base font-black text-slate-700">적재품목</th>
+                                    <th class="py-4 px-5 text-base font-black text-slate-700 text-center">담당배송원</th>
+                                    <th class="py-4 px-5 text-base font-black text-slate-700 text-center">현재상태</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                                <tr>
+                                    <td colspan="4" class="py-20 text-center text-slate-400 text-lg font-medium bg-slate-50/30">
+                                        <div class="flex flex-col items-center gap-4">
+                                            <i class="fa-solid fa-truck-ramp-box text-3xl opacity-20"></i>
+                                            <span>현재 배송 중인 물량이 없습니다.</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 본사 발주 관리 (Purchase Order) -->
+                <div class="erp-card flex flex-col min-h-[460px] border-t-4 border-t-amber-500 shadow-lg">
+                    <div class="p-6 border-b border-slate-100 flex justify-between items-start bg-amber-50/20">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center shadow-sm">
+                                <i class="fa-solid fa-cart-shopping text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-black text-slate-800 text-2xl tracking-tight">본사 자재 발주 관리</h3>
+                                <div class="mt-2 flex items-center gap-3">
+                                    <span class="px-3 py-1 bg-slate-900 text-white text-base font-black rounded-lg shadow-sm border border-slate-700">테이블: PLATFORM_UI_ORDER</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-xs text-right max-w-[280px]">
+                            <div class="text-sm text-slate-400 font-bold mb-1">Oracle DB 요약 설명</div>
+                            <div class="text-base text-slate-600 font-medium leading-relaxed">본사 재고 보충을 목적으로 외부 협력업체에 발주한 내역을 관리하는 테이블</div>
+                        </div>
+                    </div>
+                    
+                    <!-- AI Recommendation -->
+                    <div class="p-5 bg-slate-50/50">
+                        <div class="flex items-center gap-5 bg-white p-5 rounded-2xl border border-amber-200/50 shadow-sm">
+                            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-white flex flex-none items-center justify-center text-2xl shadow-lg">
+                                <i class="fa-solid fa-brain"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="text-sm font-black text-amber-600 mb-1 uppercase tracking-tighter">AI 예측 엔진 권장사항</div>
+                                <p class="text-lg text-slate-700 font-bold leading-tight">닭고기(10호) <span class="text-rose-600">500ea</span> 추가 발주가 시급합니다.</p>
+                            </div>
+                            <button class="bg-amber-500 text-white font-black px-6 py-3 rounded-xl hover:bg-amber-600 transition shadow-lg shadow-amber-500/20">즉시 승인</button>
+                        </div>
+                    </div>
+
+                    <div class="flex-1 overflow-x-auto p-2">
+                        <table class="w-full erp-table">
+                            <thead>
+                                <tr class="bg-slate-50">
+                                    <th class="py-4 px-5 text-base font-black text-slate-700">발주코드</th>
+                                    <th class="py-4 px-5 text-base font-black text-slate-700">품목명</th>
+                                    <th class="py-4 px-5 text-base font-black text-slate-700 text-center">발주수량</th>
+                                    <th class="py-4 px-5 text-base font-black text-slate-700 text-center">승인상태</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                                <tr>
+                                    <td colspan="4" class="py-20 text-center text-slate-400 text-lg font-medium bg-slate-50/30">
+                                        발주 내역이 존재하지 않습니다.
+                                    </td>
+                                </tr>
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="p-6 bg-slate-50/50 border-t border-slate-100">
+                        <button class="bg-white text-slate-800 border-2 border-amber-500/20 py-4 px-6 rounded-xl font-black text-lg hover:bg-amber-50 transition w-full shadow-sm text-amber-700">
+                            <i class="fa-solid fa-file-signature mr-2"></i>신규 외부 발주 작성
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Global Inventory & Members -->
+        <section class="mb-10">
+            <div class="erp-section-title text-slate-700 flex items-center gap-3 mb-5">
+                <i class="fa-solid fa-layer-group text-2xl"></i> 
+                <span class="text-2xl font-black">전체 SCM 자원 통합 현황</span>
+            </div>
+            
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-6"> 
+                 <!-- 통합 재고 현황 -->
+                <div class="xl:col-span-2 erp-card shadow-xl flex flex-col min-h-[500px]">
+                    <div class="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/30">
+                        <div class="flex items-center gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-slate-200 text-slate-600 flex items-center justify-center shadow-sm">
+                                <i class="fa-solid fa-warehouse text-2xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-black text-slate-800 text-2xl tracking-tight">본사 통합 센터 재고 현황</h3>
+                                <div class="mt-2 flex items-center gap-3">
+                                    <span class="px-3 py-1 bg-slate-900 text-white text-base font-black rounded-lg shadow-sm border border-slate-700">테이블: PLATFORM_UI_INVENTORY</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex gap-3">
+                            <div class="relative">
+                                <i class="fa-solid fa-search absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                                <input type="text" placeholder="자재 코드/명 검색..." class="pl-12 pr-6 py-3 text-base border-2 border-slate-100 rounded-2xl bg-white focus:border-blue-500 outline-none w-[280px] transition-all">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex-1 overflow-x-auto p-2">
+                        <table class="w-full erp-table">
+                            <thead>
+                                <tr class="bg-slate-50">
+                                    <th class="py-4 px-5 text-base font-black text-slate-700">자재 정보 (SKU)</th>
+                                    <th class="py-4 px-5 text-base font-black text-slate-700 text-center">현재고</th>
+                                    <th class="py-4 px-5 text-base font-black text-slate-700 text-center">적정재고</th>
+                                    <th class="py-4 px-5 text-base font-black text-slate-700 text-center">수급상태</th>
+                                    <th class="py-4 px-5 text-base font-black text-slate-700 text-center">재고조정</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Right Side: Members & Logs -->
+                <div class="flex flex-col gap-6">
+                    <!-- Members List -->
+                    <div class="erp-card shadow-lg flex flex-col h-[380px]">
+                        <div class="p-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                            <h3 class="font-black text-xl text-slate-800 flex items-center gap-2">
+                                <i class="fa-solid fa-store text-blue-500"></i> 가맹점 마스터 관리
+                            </h3>
+                            <span class="text-sm font-black bg-blue-100 text-blue-700 px-3 py-1 rounded-lg">전체: 0개</span>
+                        </div>
+                        <div class="p-5 flex-1 flex flex-col">
+                            <form method="POST" class="mb-4 flex gap-2">
+                                
+                                <input type="text" name="name" placeholder="신규 가맹점명" class="erp-input flex-1 px-4 py-3 text-base border-2" required>
+                                <button type="submit" name="add_member" class="bg-slate-900 hover:bg-blue-600 text-white px-5 rounded-2xl transition shadow-lg">
+                                    <i class="fa-solid fa-plus text-lg"></i>
+                                </button>
+                            </form>
+                            <div class="flex-1 overflow-y-auto pr-1 space-y-3 custom-scrollbar">
+                                
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Logs Console -->
+                    <div class="erp-card bg-[#0f172a] border-[#1e293b] text-slate-400 shadow-2xl flex flex-col flex-1 min-h-[220px]">
+                        <div class="px-5 py-4 border-b border-[#1e293b] flex justify-between items-center bg-[#1e293b]/30">
+                            <h4 class="font-black text-sm uppercase tracking-[0.2em] text-blue-500">실시간 시스템 콘솔</h4>
+                            <div class="flex items-center gap-3">
+                                <span class="text-[10px] font-bold text-slate-600">오라클 DB 동기화: 활성화</span>
+                                <span class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.5)]"></span>
+                            </div>
+                        </div>
+                        <div class="p-5 text-sm font-mono space-y-3 flex-1 overflow-y-auto custom-scrollbar-dark leading-relaxed">
+                            <div class="flex gap-4"><span class="text-slate-600 shrink-0 font-bold">[10:42:51]</span> <span class="text-blue-500 font-bold">정보</span> <span class="text-slate-300">오라클 DB 스냅샷 인스턴스가 성공적으로 생성되었습니다. (ID: snp_240204)</span></div>
+                            <div class="flex gap-4"><span class="text-slate-600 shrink-0 font-bold">[10:45:12]</span> <span class="text-emerald-500 font-bold">성공</span> <span class="text-slate-300">신규 수주 주문이 처리되었습니다 (ID: GANGNAM_01). 재고 무결성 검증 완료.</span></div>
+                            <div class="flex gap-4"><span class="text-slate-600 shrink-0 font-bold">[10:51:33]</span> <span class="text-blue-500 font-bold">정보</span> <span class="text-slate-300">124개 품목에 대한 재고 대조가 완료되었습니다. 불일치 없음.</span></div>
+                            <div class="flex gap-4"><span class="text-slate-600 shrink-0 font-bold">[11:00:05]</span> <span class="text-rose-500 font-bold">경고</span> <span class="text-rose-300 font-bold">심각한 재고 부족 감지: 원자재 '양파 (20kg)'. 즉시 보충 권장.</span></div>
+                            <div class="flex gap-4"><span class="text-slate-600 shrink-0 font-bold">[11:15:42]</span> <span class="text-slate-500 font-bold">디버그</span> <span class="text-slate-500">유지보수 데몬 하트비트 신호 수신됨. 시스템 정상 가동 중.</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+</main>
+
+<!-- Inventory Update Modal -->
+<div id="inventoryModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden items-center justify-center opacity-0 transition-opacity duration-300">
+    <div class="bg-white w-full max-w-md p-8 rounded-2xl shadow-2xl transform scale-95 transition-transform duration-300" id="invModalContent">
+        <h3 class="text-xl font-extrabold text-slate-900 mb-2">재고 조정</h3>
+        <p class="text-sm text-slate-500 mb-6" id="invModalItemName">품목: -</p>
+        
+        <form method="POST">
+            
+            <input type="hidden" name="update_inventory" value="true">
+            <input type="hidden" name="item_id" id="invModalItemId">
+            
+            <label class="block text-xs font-bold text-slate-500 uppercase mb-2">변경할 실재고 수량 (Update Quantity)</label>
+            <input type="number" name="current_stock" id="invModalStock" class="erp-input mb-6 font-mono font-bold text-lg" required>
+            
+            <div class="flex gap-3">
+                <button type="button" onclick="closeInventoryModal()" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold transition">취소</button>
+                <button type="submit" class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition shadow-lg shadow-blue-500/20">변경 저장</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Generic Logistics Modal -->
+<div id="genericLogisticsModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden items-center justify-center opacity-0 transition-opacity duration-300">
+    <div class="bg-white w-full max-w-lg p-8 rounded-2xl shadow-2xl transform scale-95 transition-transform duration-300" id="logisticModalContent">
+        <h3 class="text-2xl font-black text-slate-900 mb-2" id="logTitle">Title</h3>
+        <p class="text-sm text-slate-500 mb-8" id="logSubtitle">Subtitle</p>
+        
+        <form method="POST">
+            
+            <input type="hidden" name="action_type" id="logActionType">
+            
+            <div class="space-y-6">
+                <div>
+                    <label class="block text-base font-bold text-slate-500 uppercase mb-2">대상 품목 선택 (Select Item)</label>
+                    <select name="item_id" class="erp-input w-full font-bold text-base">
+                        
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-base font-bold text-slate-500 uppercase mb-2">수량 (Quantity)</label>
+                    <input type="number" name="quantity" class="erp-input w-full font-mono font-bold text-xl" value="100" required>
+                </div>
+
+                <div class="p-4 bg-blue-50 border border-blue-100 rounded-xl flex items-center gap-3">
+                    <i class="fa-solid fa-cloud-arrow-up text-blue-600 text-xl"></i>
+                    <p class="text-base text-blue-800 font-medium">저장 시 가맹점 및 통합 인벤토리 DB에 즉시 반영됩니다.</p>
+                </div>
+            </div>
+            
+            <div class="flex gap-3 mt-8">
+                <button type="button" onclick="closeGenericModal()" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold transition">닫기</button>
+                <button type="submit" class="flex-1 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold transition shadow-lg shadow-blue-500/20">데이터 전송</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openGenericModal(type) {
+        const modal = document.getElementById('genericLogisticsModal');
+        const content = document.getElementById('logisticModalContent');
+        const title = document.getElementById('logTitle');
+        const subtitle = document.getElementById('logSubtitle');
+        const actionType = document.getElementById('logActionType');
+
+        if(type === 'inbound') {
+            title.innerText = '신규 입고 등록';
+            subtitle.innerText = '본사 창고로 들어오는 물량을 등록합니다.';
+            actionType.value = 'reg_inbound';
+        } else if(type === 'purchase') {
+            title.innerText = '공급사 발주 등록';
+            subtitle.innerText = '외부 공급업체에 자재 구매를 요청합니다.';
+            actionType.value = 'reg_procure';
+        }
+
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            modal.classList.add('flex');
+            content.classList.remove('scale-95');
+            content.classList.add('scale-100');
+        }, 10);
+    }
+
+    function closeGenericModal() {
+        const modal = document.getElementById('genericLogisticsModal');
+        const content = document.getElementById('logisticModalContent');
+        
+        modal.classList.add('opacity-0');
+        content.classList.remove('scale-100');
+        content.classList.add('scale-95');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }, 300);
+    }
+
+    function openInventoryModal(id, name, stock) {
+        const modal = document.getElementById('inventoryModal');
+        const content = document.getElementById('invModalContent');
+        
+        document.getElementById('invModalItemId').value = id;
+        document.getElementById('invModalItemName').innerText = `품목: ${name}`;
+        document.getElementById('invModalStock').value = stock;
+        
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('opacity-0');
+            modal.classList.add('flex');
+            content.classList.remove('scale-95');
+            content.classList.add('scale-100');
+        }, 10);
+    }
+
+    function closeInventoryModal() {
+        const modal = document.getElementById('inventoryModal');
+        const content = document.getElementById('invModalContent');
+        
+        modal.classList.add('opacity-0');
+        content.classList.remove('scale-100');
+        content.classList.add('scale-95');
+        
+        setTimeout(() => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }, 300);
+    }
+</script>
+
+        </div>
+
+        <!-- Footer Removed (Moved to Dashboard-only) -->
+    </main>
+
+    <!-- Scripts -->
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebar-overlay');
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+            }
+        }
+
+        // Theme Toggle Function
+        function toggleTheme() {
+            const body = document.body;
+            const toggleBtn = document.getElementById('theme-toggle');
+            const knob = document.getElementById('toggle-knob');
+            const icon = document.getElementById('theme-icon');
+            
+            body.classList.toggle('dark-mode');
+            const isDark = body.classList.contains('dark-mode');
+            
+            // Sync data-theme attribute for CSS compatibility
+            body.setAttribute('data-theme', isDark ? 'dark' : 'light');
+            
+            // Update toggle appearance
+            if (isDark) {
+                toggleBtn.classList.remove('bg-blue-500');
+                toggleBtn.classList.add('bg-slate-700');
+                knob.classList.remove('left-7', 'bg-white');
+                knob.classList.add('left-0.5', 'bg-slate-400');
+                icon.className = 'fa-solid fa-moon text-slate-900';
+            } else {
+                toggleBtn.classList.remove('bg-slate-700');
+                toggleBtn.classList.add('bg-blue-500');
+                knob.classList.remove('left-0.5', 'bg-slate-400');
+                knob.classList.add('left-7', 'bg-white');
+                icon.className = 'fa-solid fa-sun text-amber-500';
+            }
+            
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        }
+
+        // Initialize theme on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            const body = document.body;
+            const toggleBtn = document.getElementById('theme-toggle');
+            const knob = document.getElementById('toggle-knob');
+            const icon = document.getElementById('theme-icon');
+            
+            // Default is dark mode
+            if (savedTheme === 'light') {
+                body.classList.remove('dark-mode');
+                body.setAttribute('data-theme', 'light');
+                toggleBtn.classList.remove('bg-slate-700');
+                toggleBtn.classList.add('bg-blue-500');
+                knob.classList.remove('left-0.5', 'bg-slate-400');
+                knob.classList.add('left-7', 'bg-white');
+                icon.className = 'fa-solid fa-sun text-amber-500';
+            } else {
+                // Ensure dark mode set if null or dark
+                body.classList.add('dark-mode');
+                body.setAttribute('data-theme', 'dark');
+            }
+            
+            // 전역 숫자 포맷팅 (천 단위 쉼표)
+            formatAllNumbers();
+        });
+        
+        // 숫자 포맷팅 함수
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+        
+        // .format-number 클래스가 있는 요소들 자동 포맷팅
+        function formatAllNumbers() {
+            document.querySelectorAll('.format-number').forEach(el => {
+                const num = parseInt(el.textContent.replace(/[^0-9-]/g, ''), 10);
+                if (!isNaN(num)) {
+                    el.textContent = formatNumber(num);
+                }
+            });
+        }
+        
+        // 동적으로 추가된 요소도 지원
+        window.formatNumber = formatNumber;
+        window.formatAllNumbers = formatAllNumbers;
+    </script>
+
+
+    <!-- Chart.js & Highcharts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/highcharts-3d.js"></script>
+    
+</body>
+</html>

@@ -1,0 +1,93 @@
+{% extends 'platform_ui/base.html' %}
+{% load static humanize %}
+
+{% block title %}AI 매출 예측 - Forkast{% endblock %}
+
+{% block content %}
+    <section class="pt-24 pb-12 px-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- AI Header -->
+            <div class="relative rounded-[2.5rem] overflow-hidden bg-slate-900 border border-white/5 p-12 mb-12 shadow-2xl group">
+                <div class="absolute inset-0 bg-gradient-to-tr from-indigo-600/20 via-transparent to-purple-600/10 opacity-60"></div>
+                <div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+                    <div class="text-center md:text-left">
+                        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-black uppercase tracking-widest mb-6">
+                            <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></span> 인공지능 분석 엔진 가동 중
+                        </div>
+                        <h1 class="text-4xl lg:text-6xl font-display font-black text-white mb-6 tracking-tight">AI 매출 <span class="text-indigo-500 text-glow">예측 리포트</span></h1>
+                        <p class="text-slate-400 max-w-xl text-lg font-medium leading-relaxed">
+                            과거 3년의 매장 데이터와 실시간 기상 정보, 지역 이벤트를 통합 분석하여<br> 
+                            <span class="text-white font-bold underline decoration-indigo-500/50 underline-offset-4">98.5%의 정확도</span>로 비즈니스 미래를 설계합니다.
+                        </p>
+                    </div>
+                    <div class="w-48 h-48 bg-white/5 rounded-full flex items-center justify-center border border-white/10 backdrop-blur-3xl relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gradient-to-tr from-indigo-500/30 to-purple-500/30 animate-pulse"></div>
+                        <i class="fa-solid fa-brain text-7xl text-white relative z-10"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Prediction Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-16">
+                {% for i in "1234" %}
+                <div class="glass-panel p-8 rounded-3xl border-t-2 border-indigo-500 hover:-translate-y-2 transition-all duration-500 group">
+                    <div class="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-4 flex justify-between">
+                        <span>{{ forloop.counter }}일 후 예측</span>
+                        <span class="text-indigo-400 opacity-0 group-hover:opacity-100 transition">상세 보기 <i class="fa-solid fa-arrow-right ml-1"></i></span>
+                    </div>
+                    <div class="text-3xl font-display font-black text-white mb-4 tracking-tighter">₩ {{ 1250000|add:forloop.counter0|intcomma }}</div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-black bg-white/5 text-slate-400 px-3 py-1.5 rounded-lg border border-white/10 uppercase">맑음 ☀️</span>
+                        <span class="text-sm font-black text-emerald-400">+ 5.2%</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Forecast Chart -->
+            <div class="glass-panel p-10 rounded-[2.5rem]">
+                <div class="flex justify-between items-center mb-10">
+                    <h3 class="text-2xl font-display font-black text-white tracking-tight flex items-center gap-4">
+                        <span class="w-1.5 h-8 bg-indigo-500 rounded-full"></span> 7일간의 매출 예측 트렌드
+                    </h3>
+                    <div class="flex gap-2">
+                        <span class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10px] font-black text-slate-500 uppercase tracking-widest">시계열 분석 패턴</span>
+                        <span class="px-3 py-1.5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-black text-indigo-400 uppercase tracking-widest">AI 추정치 모델</span>
+                    </div>
+                </div>
+                <div class="h-96 relative">
+                    <div id="forecastChart" class="w-full h-full"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    Highcharts.chart('forecastChart', {
+        chart: { type: 'areaspline', backgroundColor: 'transparent' },
+        title: { text: null },
+        xAxis: { 
+            categories: ['월', '화', '수', '목', '금', '토', '일'],
+            labels: { style: { color: '#94a3b8' } }
+        },
+        yAxis: { 
+            title: { text: null },
+            gridLineColor: 'rgba(255,255,255,0.05)',
+            labels: { style: { color: '#94a3b8' } }
+        },
+        series: [{
+            name: 'AI 예측 매출',
+            data: [1200000, 1350000, 1100000, 1450000, 1800000, 2200000, 1900000],
+            color: {
+                linearGradient: { x1: 0, x2: 0, y1: 0, y2: 1 },
+                stops: [[0, '#6366f1'], [1, 'rgba(99, 102, 241, 0)']]
+            },
+            lineColor: '#6366f1'
+        }],
+        legend: { itemStyle: { color: '#cbd5e1' } },
+        credits: { enabled: false }
+    });
+</script>
+{% endblock %}

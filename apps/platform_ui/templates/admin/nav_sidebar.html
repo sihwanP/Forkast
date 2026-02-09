@@ -1,0 +1,314 @@
+{% load i18n static %}
+
+<!-- Font Awesome CDN -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+    /* ===== ROOT VARIABLES ===== */
+    :root {
+        --sidebar-bg-start: #0a2f26;
+        --sidebar-bg-end: #051a15;
+        --sidebar-hover: rgba(255, 255, 255, 0.08);
+        --sidebar-active: rgba(52, 211, 153, 0.15);
+        --sidebar-active-border: #34d399;
+        --text-primary: #ffffff;
+        --text-secondary: rgba(255, 255, 255, 0.65);
+        --text-muted: rgba(255, 255, 255, 0.4);
+        --accent-green: #34d399;
+        --accent-blue: #60a5fa;
+    }
+
+    /* ===== SIDEBAR CONTAINER ===== */
+    #nav-sidebar {
+        background: linear-gradient(180deg, var(--sidebar-bg-start) 0%, var(--sidebar-bg-end) 100%) !important;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        height: auto !important;
+        min-height: 100% !important;
+        overflow: visible !important;
+        padding-bottom: 60px !important;
+    }
+
+    /* Custom Scrollbar */
+    #nav-sidebar::-webkit-scrollbar {
+        width: 6px;
+    }
+    #nav-sidebar::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.2);
+    }
+    #nav-sidebar::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 3px;
+    }
+    #nav-sidebar::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+    }
+
+    /* ===== FORCE WHITE TEXT ===== */
+    #nav-sidebar,
+    #nav-sidebar * {
+        color: var(--text-primary) !important;
+    }
+
+    /* ===== SIDEBAR HEADER ===== */
+    .erp-sidebar-header {
+        display: none;
+    }
+
+    .erp-sidebar-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        text-decoration: none !important;
+    }
+
+    .erp-sidebar-logo .logo-icon {
+        width: 32px;
+        height: 32px;
+        background: linear-gradient(135deg, var(--accent-green) 0%, #059669 100%);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 800;
+        color: #ffffff !important;
+        box-shadow: 0 2px 8px rgba(52, 211, 153, 0.3);
+    }
+
+    .erp-sidebar-logo .logo-text {
+        font-size: 18px;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        color: var(--text-primary) !important;
+    }
+
+    /* ===== SECTION LABEL ===== */
+    .erp-section-label {
+        font-size: 12px !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1.2px !important;
+        color: var(--text-muted) !important;
+        padding: 28px 24px 14px 24px !important;
+        margin: 0 !important;
+    }
+
+    /* ===== NAV ITEM ===== */
+    .erp-nav-item {
+        display: flex !important;
+        align-items: center !important;
+        gap: 14px !important;
+        padding: 16px 24px !important;
+        margin: 4px 12px !important;
+        border-radius: 10px !important;
+        color: var(--text-secondary) !important;
+        text-decoration: none !important;
+        font-size: 18px !important;
+        font-weight: 500 !important;
+        transition: all 0.2s ease !important;
+        border-left: 4px solid transparent !important;
+        cursor: pointer !important;
+    }
+
+    .erp-nav-item:hover {
+        background: var(--sidebar-hover) !important;
+        color: var(--text-primary) !important;
+    }
+
+    .erp-nav-item.active {
+        background: var(--sidebar-active) !important;
+        color: var(--text-primary) !important;
+        border-left-color: var(--accent-green) !important;
+        font-weight: 600 !important;
+    }
+
+    .erp-nav-item .nav-icon {
+        width: 24px !important;
+        height: 24px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        font-size: 18px !important;
+        color: var(--text-secondary) !important;
+        transition: color 0.2s ease !important;
+    }
+
+    .erp-nav-item:hover .nav-icon,
+    .erp-nav-item.active .nav-icon {
+        color: var(--accent-green) !important;
+    }
+
+    .erp-nav-item .nav-label {
+        flex: 1 !important;
+        white-space: nowrap !important;
+    }
+
+    /* ===== SUB ITEM ===== */
+    .erp-nav-subitem {
+        padding-left: 56px !important;
+        font-size: 16px !important;
+        color: var(--text-muted) !important;
+    }
+
+    .erp-nav-subitem:hover {
+        color: var(--text-secondary) !important;
+    }
+
+    /* ===== AI SECTION SPECIAL ===== */
+    .erp-section-ai {
+        background: linear-gradient(90deg, rgba(59, 130, 246, 0.1) 0%, transparent 100%);
+        border-radius: 12px;
+        margin: 8px 10px;
+        padding: 4px 0;
+    }
+
+    .erp-section-ai .erp-nav-item.active {
+        background: linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.05) 100%) !important;
+        border-left-color: var(--accent-blue) !important;
+    }
+
+    .erp-section-ai .erp-nav-item:hover .nav-icon,
+    .erp-section-ai .erp-nav-item.active .nav-icon {
+        color: var(--accent-blue) !important;
+    }
+
+    /* ===== DIVIDER ===== */
+    .erp-divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.06);
+        margin: 12px 20px;
+    }
+
+    /* ===== BADGE ===== */
+    .erp-badge {
+        font-size: 10px;
+        font-weight: 700;
+        padding: 2px 6px;
+        border-radius: 4px;
+        background: var(--accent-green);
+        color: #051a15 !important;
+    }
+
+    .erp-badge.ai {
+        background: var(--accent-blue);
+        color: #ffffff !important;
+    }
+</style>
+
+<div id="nav-sidebar" class="module">
+    <!-- HEADER -->
+    <div class="erp-sidebar-header">
+        <a href="/admin/" class="erp-sidebar-logo">
+            <span class="logo-icon">F</span>
+            <span class="logo-text">Forkast ERP</span>
+        </a>
+    </div>
+
+    <!-- MAIN -->
+    <a href="/dashboard/" class="erp-nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-chart-pie"></i></span>
+        <span class="nav-label">대시보드</span>
+    </a>
+
+    <!-- 영업 -->
+    <div class="erp-section-label">영업</div>
+    <a href="/admin/platform_ui/salesorder/" class="erp-nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-file-invoice"></i></span>
+        <span class="nav-label">수주관리</span>
+    </a>
+
+    <!-- 자재 / 물류 -->
+    <div class="erp-section-label">자재 / 물류</div>
+    <a href="/admin/platform_ui/inbound/" class="erp-nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-boxes-stacked"></i></span>
+        <span class="nav-label">입고관리</span>
+    </a>
+
+    <div class="erp-divider"></div>
+
+    <a href="/admin/platform_ui/outbound/" class="erp-nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-truck-fast"></i></span>
+        <span class="nav-label">출고관리</span>
+    </a>
+    <a href="/admin/platform_ui/purchaseorder/" class="erp-nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-file-signature"></i></span>
+        <span class="nav-label">발주관리</span>
+    </a>
+
+    <!-- 상품 / 거래 -->
+    <div class="erp-section-label">상품 / 거래</div>
+    <a href="/admin/platform_ui/inventory/" class="erp-nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-cubes"></i></span>
+        <span class="nav-label">상품관리</span>
+    </a>
+    <a href="/admin/platform_ui/transaction/" class="erp-nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-receipt"></i></span>
+        <span class="nav-label">거래내역</span>
+    </a>
+    <a href="/admin/platform_ui/partner/" class="erp-nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-handshake"></i></span>
+        <span class="nav-label">거래처</span>
+    </a>
+
+    <!-- AI 분석 -->
+    <div class="erp-section-label">AI 분석</div>
+    <div class="erp-section-ai">
+        <a href="/admin/sales-forecast/" class="erp-nav-item">
+            <span class="nav-icon"><i class="fa-solid fa-brain"></i></span>
+            <span class="nav-label">매출예측</span>
+            <span class="erp-badge ai">AI</span>
+        </a>
+        <a href="/admin/platform_ui/forecastrun/" class="erp-nav-item erp-nav-subitem">
+            <span class="nav-icon"><i class="fa-solid fa-clock-rotate-left"></i></span>
+            <span class="nav-label">배치로그</span>
+        </a>
+        <a href="#" class="erp-nav-item erp-nav-subitem">
+            <span class="nav-icon"><i class="fa-solid fa-bell"></i></span>
+            <span class="nav-label">알림규칙</span>
+        </a>
+    </div>
+
+    <!-- 리포트 -->
+    <div class="erp-section-label">리포트</div>
+    <a href="/admin/platform_ui/dailysales/" class="erp-nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-calendar-days"></i></span>
+        <span class="nav-label">일별매출</span>
+    </a>
+    <a href="/admin/platform_ui/posrawsales/" class="erp-nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-plug"></i></span>
+        <span class="nav-label">POS연동</span>
+    </a>
+
+    <!-- 시스템 -->
+    <div class="erp-section-label">시스템</div>
+    <a href="/admin/platform_ui/member/" class="erp-nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-user-gear"></i></span>
+        <span class="nav-label">사용자</span>
+    </a>
+    <a href="/admin/platform_ui/auditlog/" class="erp-nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-shield-halved"></i></span>
+        <span class="nav-label">감사로그</span>
+    </a>
+    <a href="/admin/platform_ui/adminconfig/" class="erp-nav-item">
+        <span class="nav-icon"><i class="fa-solid fa-gear"></i></span>
+        <span class="nav-label">설정</span>
+    </a>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const path = window.location.pathname;
+        const links = document.querySelectorAll('.erp-nav-item');
+        
+        links.forEach(link => {
+            const href = link.getAttribute('href');
+            if (href === path || (href && href !== '#' && path.startsWith(href))) {
+                link.classList.add('active');
+            }
+        });
+    });
+</script>

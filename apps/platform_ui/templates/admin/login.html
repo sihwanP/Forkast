@@ -1,0 +1,263 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 로그인 - Forkast</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'Pretendard', 'Noto Sans KR', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        body { 
+            font-family: 'Inter', 'Pretendard', 'Noto Sans KR', sans-serif !important; 
+            margin: 0;
+            padding: 0;
+            background-color: #022c22; /* Emerald-950 Base */
+        }
+        
+        /* 
+         * ULTRA-SMOOTH SVG STROKE ANIMATION
+         * Method: Direct SVG background with stroke-dashoffset animation.
+         * This ensures light follows the exact path of the hexagon lines.
+         * Performance: High (runs on compositor thread if optimized, lightweight vector).
+         */
+
+        .hex-flow-animation {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            opacity: 0.6;
+            
+            /* 
+             * SVG Data URI with Internal Animation 
+             * - Pattern: Seamless Hexagon
+             * - Animation: Stroke Dashoffset (Light running along the line)
+             * - Color: Emerald/Teal (#34d399)
+             * - Speed: 3s (Fast and Smooth)
+             */
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='104' viewBox='0 0 30 52' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%2310b981' stop-opacity='0'/%3E%3Cstop offset='50%25' stop-color='%2334d399' stop-opacity='1'/%3E%3Cstop offset='100%25' stop-color='%2310b981' stop-opacity='0'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M15 0 L30 8.66 L30 25.98 L15 34.64 L0 25.98 L0 8.66 Z' fill='none' stroke='url(%23g)' stroke-width='1.5' stroke-dasharray='40 120' stroke-linecap='round'%3E%3Canimate attributeName='stroke-dashoffset' from='160' to='0' dur='2s' repeatCount='indefinite' /%3E%3C/path%3E%3C/svg%3E");
+            
+            background-size: 60px 104px;
+            
+            /* Add a second layer shifted slightly for density */
+            /* Using a pseudo-element logic via multiple background images if needed, 
+               but for now single layer clean smooth speed is prioritized. */
+        }
+        
+        .hex-static-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 9;
+            opacity: 0.15;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='104' viewBox='0 0 30 52'%3E%3Cpath d='M15 0 L30 8.66 L30 25.98 L15 34.64 L0 25.98 L0 8.66 Z' fill='none' stroke='%2334d399' stroke-width='1'/%3E%3C/svg%3E");
+            background-size: 60px 104px;
+        }
+
+        @keyframes rotateFlow {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .animate-shake { animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10% { transform: translateX(-4px); } 
+            30% { transform: translateX(4px); } 
+            50% { transform: translateX(-4px); } 
+            70% { transform: translateX(4px); } 
+            90% { transform: translateX(-2px); }
+        }
+    </style>
+</head>
+<body class="overflow-hidden">
+
+<div class="min-h-screen relative overflow-hidden bg-emerald-950">
+    
+    <!-- 1. FULL SCREEN BACKGROUND -->
+    <div class="absolute inset-0 z-0 bg-emerald-950">
+        <!-- Base Background Image (Texture only, reduced opacity to avoid grid double-vision) -->
+        <div class="absolute inset-0 bg-cover bg-center" 
+             style="background-image: url('{% static 'platform_ui/img/admin_login_bg.png' %}'); 
+                    opacity: 0.3; filter: grayscale(50%) brightness(0.7);">
+        </div>
+        
+        <!-- 
+             MULTI-COLOR POLYCHROMATIC HEXAGON SYSTEM (OPTIMIZED)
+             Implementation:
+             - Uses a "Super-Tile" SVG that contains 4 distinct hexagons.
+             - PERFORMANCE FIX: Removed SVG 'Glow' filters which cause severe lag on large screens.
+             - Colors: Neon Pink, Cyan, Purple, Yellow.
+        -->
+        <style>
+            .hex-led-grid {
+                position: absolute;
+                inset: 0;
+                z-index: 10;
+                
+                /* 
+                   Multi-Color Cluster SVG (No Filters)
+                   - ViewBox: 0 0 64 112
+                   - Removed <filter> for performance (Fixes "Lag/Stutter").
+                   - Colors: #f472b6 (Pink), #22d3ee (Cyan), #c084fc (Purple), #facc15 (Yellow)
+                */
+                --poly-hex: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='112' viewBox='0 0 64 112'%3E%3C!-- Hex 1 (Top Left, Pink) --%3E%3Cpath d='M16 1.5 L29.5 9.25 L29.5 24.75 L16 32.5 L2.5 24.75 L2.5 9.25 Z' fill='none' stroke='%23f472b6' stroke-width='2' stroke-dasharray='25 75' stroke-linecap='round'%3E%3Canimate attributeName='stroke-dashoffset' from='100' to='0' dur='5s' repeatCount='indefinite' /%3E%3C/path%3E%3C!-- Hex 2 (Top Right, Cyan) --%3E%3Cpath d='M48 1.5 L61.5 9.25 L61.5 24.75 L48 32.5 L34.5 24.75 L34.5 9.25 Z' fill='none' stroke='%2322d3ee' stroke-width='2' stroke-dasharray='30 70' stroke-linecap='round'%3E%3Canimate attributeName='stroke-dashoffset' from='0' to='100' dur='7s' repeatCount='indefinite' /%3E%3C/path%3E%3C!-- Hex 3 (Bottom Offset Left, Purple) --%3E%3Cpath d='M32 29.5 L45.5 37.25 L45.5 52.75 L32 60.5 L18.5 52.75 L18.5 37.25 Z' fill='none' stroke='%23c084fc' stroke-width='2' stroke-dasharray='20 80' stroke-linecap='round'%3E%3Canimate attributeName='stroke-dashoffset' from='100' to='0' dur='6s' repeatCount='indefinite' /%3E%3C/path%3E%3C!-- Hex 4 (Bottom Offset Right/Wrap, Yellow) --%3E%3Cpath d='M32 85.5 L45.5 93.25 L45.5 108.75 L32 116.5 L18.5 108.75 L18.5 93.25 Z' fill='none' stroke='%23facc15' stroke-width='2' stroke-dasharray='35 65' stroke-linecap='round'%3E%3Canimate attributeName='stroke-dashoffset' from='0' to='100' dur='8s' repeatCount='indefinite' /%3E%3C/path%3E%3C/svg%3E");
+
+                background-image: var(--poly-hex);
+                background-size: 64px 112px;
+                opacity: 0.9;
+                /* GPU Acceleration Hints */
+                will-change: content; 
+                transform: translateZ(0);
+            }
+            
+            /* Vignette for focus */
+            .vignette {
+                background: radial-gradient(circle at center, transparent 30%, #022c22 90%);
+            }
+        </style>
+        
+        <div class="hex-led-grid"></div>
+        <div class="absolute inset-0 z-20 vignette pointer-events-none"></div>
+    </div>
+
+    <!-- 2. CONTENT CONTAINER -->
+    <div class="relative z-30 min-h-screen flex flex-col lg:flex-row-reverse items-center justify-center p-6 lg:p-20 gap-12 lg:gap-24">
+        
+        <!-- Branding / Visual Text (Right Side for Standard Admin) -->
+        <div class="text-center lg:text-right max-w-2xl text-white drop-shadow-lg hidden lg:block">
+             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 backdrop-blur-sm text-emerald-300 text-xs font-bold uppercase tracking-wider mb-6 ml-auto">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                Site Management
+            </div>
+            <h1 class="text-5xl lg:text-7xl font-black leading-tight tracking-tight mb-6 text-white">
+                Operational <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-400">Excellence</span>
+            </h1>
+            <p class="text-lg lg:text-xl text-slate-200 font-medium leading-relaxed opacity-90">
+                현장 운영부터 고객 관리까지.<br>
+                안정적인 시스템으로 비즈니스를 지원합니다.
+            </p>
+        </div>
+
+        <!-- Login Form Card -->
+        <div class="w-full max-w-md bg-emerald-950/60 backdrop-blur-xl border border-emerald-700/50 rounded-3xl p-8 lg:p-10 shadow-2xl">
+            <div class="mb-8 text-center lg:text-left">
+                 <h2 class="text-3xl font-black text-white tracking-tight mb-2">Site Admin</h2>
+                 <p class="text-emerald-200/80 font-medium">사이트 관리자/가맹점주 로그인</p>
+            </div>
+
+            <form action="{{ app_path }}" method="post" id="login-form" class="space-y-6">
+                {% csrf_token %}
+                
+                {% if form.errors and not form.non_field_errors %}
+                <div class="p-4 rounded-xl bg-red-500/10 text-red-300 text-sm font-bold border border-red-500/20 flex items-center gap-3 animate-shake">
+                    <i class="fa-solid fa-circle-exclamation text-lg"></i>
+                    아이디 또는 비밀번호를 확인해주세요.
+                </div>
+                {% endif %}
+                
+                {% if form.non_field_errors %}
+                <div class="p-4 rounded-xl bg-red-500/10 text-red-300 text-sm font-bold border border-red-500/20 flex items-center gap-3 animate-shake">
+                    <i class="fa-solid fa-circle-exclamation text-lg"></i>
+                    {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                </div>
+                {% endif %}
+
+                <div class="space-y-5">
+                    <div>
+                        <label for="{{ form.username.id_for_label }}" class="block text-sm font-bold text-emerald-100/90 mb-2">Username</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-id-badge absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500/70"></i>
+                            <input type="text" name="{{ form.username.name }}" id="{{ form.username.id_for_label }}" required
+                                class="w-full pl-11 pr-4 py-4 bg-emerald-900/40 border border-emerald-600/50 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all font-medium text-white placeholder-emerald-500/50"
+                                placeholder="관리자 아이디">
+                        </div>
+                    </div>
+
+                    <div>
+                         <label for="{{ form.password.id_for_label }}" class="block text-sm font-bold text-emerald-100/90 mb-2">Password</label>
+                        <div class="relative">
+                            <i class="fa-solid fa-key absolute left-4 top-1/2 -translate-y-1/2 text-emerald-500/70"></i>
+                            <input type="password" name="{{ form.password.name }}" id="{{ form.password.id_for_label }}" required
+                                class="w-full pl-11 pr-4 py-4 bg-emerald-900/40 border border-emerald-600/50 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-transparent outline-none transition-all font-medium text-white placeholder-emerald-500/50"
+                                placeholder="비밀번호">
+                            <input type="hidden" name="next" value="{{ next }}">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Remember Me Checkbox -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <input id="id_remember_id" type="checkbox" class="w-4 h-4 text-emerald-500 rounded border-emerald-700 bg-emerald-900/50 focus:ring-emerald-500 cursor-pointer">
+                        <label for="id_remember_id" class="text-sm font-medium text-emerald-300 cursor-pointer select-none">아이디 저장</label>
+                    </div>
+                </div>
+
+                <button type="submit" 
+                    class="w-full py-4 px-6 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-900/40 transition-all hover:-translate-y-1 active:scale-95 text-lg flex items-center justify-center gap-2 border border-emerald-500/20">
+                    <span>접속하기</span>
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                </button>
+            </form>
+
+            <div class="mt-8 pt-6 border-t border-emerald-800/50 text-center">
+                <a href="/" class="inline-flex items-center gap-2 text-emerald-400 hover:text-white transition-colors font-bold text-sm">
+                    <i class="fa-solid fa-house"></i>
+                    <span>홈으로 이동</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="absolute bottom-6 w-full text-center z-30 text-emerald-500/60 text-xs font-medium">
+        &copy; 2026 Forkast AI Solution. All rights reserved.
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const usernameField = document.getElementById('{{ form.username.id_for_label }}');
+        const rememberCheckbox = document.getElementById('id_remember_id');
+
+        // 로컬 스토리지에서 저장된 아이디 불러오기
+        const savedId = localStorage.getItem('remembered_admin_id');
+        if (savedId && usernameField) {
+            usernameField.value = savedId;
+            if (rememberCheckbox) rememberCheckbox.checked = true;
+        }
+
+        // 로그인 시 저장 로직
+        const loginForm = document.getElementById('login-form');
+        if (loginForm) {
+            loginForm.addEventListener('submit', function() {
+                if (rememberCheckbox && rememberCheckbox.checked && usernameField.value) {
+                    localStorage.setItem('remembered_admin_id', usernameField.value);
+                } else {
+                    localStorage.removeItem('remembered_admin_id');
+                }
+            });
+        }
+    });
+</script>
+</body>
+</html>

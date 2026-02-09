@@ -1,0 +1,269 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block bodyclass %}{{ block.super }} app-{{ app_label }}{% endblock %}
+
+{% block content %}
+<style>
+    :root {
+        --neon-blue: #00f3ff;
+        --neon-purple: #bc13fe;
+        --glass-bg: rgba(255, 255, 255, 0.05);
+        --glass-border: rgba(255, 255, 255, 0.1);
+        --card-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    }
+
+    /* Container Animation */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    #content-main {
+        perspective: 1000px;
+        padding: 40px 0;
+        animation: fadeInUp 0.6s ease-out;
+    }
+    
+    .app-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--text-color) 0%, var(--text-muted) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 10px;
+        letter-spacing: -0.03em;
+    }
+
+    [data-theme="dark"] .app-title {
+        background: linear-gradient(to right, #fff, #a5f3fc);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 0 20px rgba(255, 255, 255, 0.5); /* Stronger glow for text */
+    }
+
+    .app-desc {
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        margin-bottom: 50px;
+        font-weight: 500;
+    }
+
+    .model-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 30px;
+    }
+
+    /* 3D Glass Card */
+    .model-card {
+        background: var(--card-bg, #fff);
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 20px;
+        padding: 30px;
+        position: relative;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transform-style: preserve-3d;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        height: 200px;
+        overflow: hidden;
+    }
+
+    [data-theme="dark"] .model-card {
+        background: rgba(30, 41, 59, 0.4);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    .model-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
+        opacity: 0;
+        transition: opacity 0.3s;
+        z-index: 0;
+    }
+    
+    .model-card:hover {
+        transform: translateY(-10px) rotateX(5deg) rotateY(5deg);
+        box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.2);
+        border-color: var(--primary-color);
+    }
+
+    [data-theme="dark"] .model-card:hover {
+        box-shadow: 0 0 30px rgba(0, 243, 255, 0.15);
+        border-color: var(--neon-blue);
+    }
+
+    .model-card:hover::before {
+        opacity: 1;
+    }
+
+    .card-content {
+        transform: translateZ(20px); /* Parallax Effect */
+        z-index: 1;
+    }
+
+    .model-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        color: var(--text-color);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .model-name a {
+        color: inherit;
+        text-decoration: none;
+    }
+    
+    .model-name a:hover {
+        text-decoration: none;
+    }
+
+    /* Action buttons contrast boost */
+    .action-row {
+        margin-top: auto;
+        display: flex;
+        gap: 10px;
+        transform: translateZ(30px);
+    }
+
+    .action-btn {
+        flex: 1;
+        padding: 10px;
+        border-radius: 12px;
+        text-align: center;
+        text-decoration: none !important;
+        font-weight: 600;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+        backdrop-filter: blur(4px);
+    }
+
+    .btn-view {
+        background: rgba(59, 130, 246, 0.1);
+        color: #3b82f6;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+    .btn-view:hover {
+        background: #3b82f6;
+        color: white;
+        transform: scale(1.05);
+    }
+
+    [data-theme="dark"] .btn-view {
+        background: rgba(0, 243, 255, 0.1);
+        color: var(--neon-blue);
+        border: 1px solid rgba(0, 243, 255, 0.2);
+    }
+    [data-theme="dark"] .btn-view:hover {
+        background: var(--neon-blue);
+        color: #000;
+        box-shadow: 0 0 15px var(--neon-blue);
+    }
+
+    .btn-add {
+        background: rgba(16, 185, 129, 0.1);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+    .btn-add:hover {
+        background: #10b981;
+        color: white;
+        transform: scale(1.05);
+    }
+
+    /* Floating Decor */
+    .orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.3; /* Subtle in light mode */
+        animation: float 10s infinite ease-in-out;
+        z-index: -1;
+    }
+    
+    [data-theme="dark"] .orb { opacity: 0.5; }
+
+    .orb-1 { width: 300px; height: 300px; background: #3b82f6; top: -100px; right: -50px; }
+    .orb-2 { width: 200px; height: 200px; background: #8b5cf6; bottom: 50px; left: -50px; animation-delay: -5s; }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-20px); }
+    }
+</style>
+
+<div id="content-main">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    {% for app in app_list %}
+    <div class="app-header">
+        <h1 class="app-title">{{ app.name }} 차세대 컨트롤 타워</h1>
+        <p class="app-desc">데이터 모델을 선택하여 AI 분석 및 관리를 수행하세요.</p>
+    </div>
+
+    <div class="model-grid">
+        {% for model in app.models %}
+        <div class="model-card" onclick="location.href='{{ model.admin_url }}'">
+            <div class="card-content">
+                <div class="model-name">
+                    <span style="opacity: 0.7;">🔹</span>
+                    <a href="{{ model.admin_url }}">{{ model.name }}</a>
+                </div>
+                <div style="font-size: 0.85rem; color: var(--text-muted, #94a3b8); margin-top: 5px;">
+                    {{ model.name }}의 데이터 흐름을 실시간으로 제어합니다.
+                </div>
+            </div>
+            
+            <div class="action-row">
+                {% if model.admin_url %}
+                <a href="{{ model.admin_url }}" class="action-btn btn-view">
+                    데이터 조회
+                </a>
+                {% endif %}
+                {% if model.add_url %}
+                <a href="{{ model.add_url }}" class="action-btn btn-add">
+                    + 신규 등록
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    // Simple 3D Tilt Effect Script
+    document.querySelectorAll('.model-card').forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            
+            const rotateX = ((y - centerY) / centerY) * -10; // Max 10deg rotation
+            const rotateY = ((x - centerX) / centerX) * 10;
+
+            card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+        });
+
+        card.addEventListener('mouseleave', () => {
+            card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
+        });
+    });
+</script>
+{% endblock %}

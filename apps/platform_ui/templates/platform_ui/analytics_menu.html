@@ -1,0 +1,124 @@
+{% extends 'platform_ui/base.html' %}
+{% load static humanize %}
+
+{% block title %}메뉴 성과 분석 - Forkast{% endblock %}
+
+{% block content %}
+    <section class="pt-24 pb-12 px-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="flex flex-col md:flex-row items-end justify-between mb-12 pb-8 border-b border-white/5">
+                <div>
+                    <div class="inline-block py-1 px-3 rounded-lg bg-orange-500/10 text-orange-500 text-[10px] font-black uppercase tracking-widest mb-4 border border-orange-500/20">상품 성과 분석 (Product Performance)</div>
+                    <h1 class="text-4xl lg:text-5xl font-display font-black text-white tracking-tight">메뉴 <span class="text-orange-500">인텔리전스</span></h1>
+                    <p class="text-slate-400 mt-3 font-medium">실시간 판매 성과와 수익 기여도를 분석하여 최적의 메뉴 전략을 도출합니다.</p>
+                </div>
+                <div class="flex gap-3">
+                    <div class="flex items-center gap-2 p-1.5 bg-orange-500/5 border border-orange-500/10 rounded-2xl text-[11px] font-black uppercase tracking-tight">
+                        <span class="px-3 py-1.5 rounded-xl bg-orange-600 text-white shadow-lg shadow-orange-600/20">🔥 HOT: 치즈볼</span>
+                        <span class="px-3 py-1.5 text-slate-500">❄️ COOL: 매운 윙</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Menu Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Top Performers -->
+                <div class="glass-panel p-8 rounded-3xl group">
+                    <h3 class="text-xl font-display font-black mb-8 text-white flex items-center gap-3 tracking-tight">
+                        <span class="w-2 h-8 bg-orange-500 rounded-full"></span> 베스트 성과 메뉴 (Top 5)
+                    </h3>
+                    <div class="space-y-4">
+                        {% for i in "12345" %}
+                        <div class="flex items-center justify-between p-5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all duration-300 group cursor-pointer">
+                            <div class="flex items-center gap-5">
+                                <div class="w-10 h-10 rounded-xl bg-orange-500/20 text-orange-500 flex items-center justify-center font-black text-lg border border-orange-500/30 group-hover:scale-110 transition">{{ forloop.counter }}</div>
+                                <div>
+                                    <div class="font-bold text-white text-lg tracking-tight">황금 올리브 치킨</div>
+                                    <div class="text-[10px] text-slate-500 font-black uppercase tracking-widest mt-1">주문량: {{ 150|add:forloop.counter }} 개</div>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="font-display font-black text-white text-lg">₩ 3,500,000</div>
+                                <div class="text-[11px] font-black text-emerald-400 mt-1 flex items-center justify-end gap-1"><i class="fa-solid fa-chart-line"></i> +12%</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Analysis Chart -->
+                <div class="glass-panel p-8 rounded-3xl">
+                     <h3 class="text-xl font-display font-black mb-8 text-white flex items-center gap-3 tracking-tight">
+                        <span class="w-2 h-8 bg-blue-500 rounded-full"></span> 메뉴별 판매 비중 (Portfolio Mix)
+                    </h3>
+                    <div class="bg-slate-900/30 rounded-2xl p-6 border border-white/5">
+                        <div id="menuPieChart" class="h-80 w-full"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Detailed Table Section -->
+            <div class="mt-8 glass p-8 rounded-2xl">
+                <h3 class="text-xl font-bold mb-6 text-white">상세 메뉴 분석표</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-gray-400 text-sm border-b border-gray-700">
+                                <th class="py-3 px-4">순위</th>
+                                <th class="py-3 px-4">메뉴명</th>
+                                <th class="py-3 px-4">카테고리</th>
+                                <th class="py-3 px-4">판매량</th>
+                                <th class="py-3 px-4">매출액</th>
+                                <th class="py-3 px-4">AI 추천</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-sm">
+                            <tr class="border-b border-white/5 hover:bg-white/5 transition group">
+                                <td class="py-5 px-4 font-black text-slate-500">1</td>
+                                <td class="py-5 px-4 font-bold text-white">치즈볼 세트</td>
+                                <td class="py-5 px-4"><span class="px-3 py-1 bg-white/5 border border-white/5 rounded-lg text-[10px] font-black uppercase tracking-widest text-slate-400">사이드 메뉴</span></td>
+                                <td class="py-5 px-4 text-white font-medium">450 개</td>
+                                <td class="py-5 px-4 font-display font-black text-blue-400">₩ 2,250,000</td>
+                                <td class="py-5 px-4"><span class="px-3 py-1.5 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-xl text-xs font-black">가격 인상 가능 (Optimal)</span></td>
+                            </tr>
+                            <tr class="border-b border-gray-800 hover:bg-white/5 transition">
+                                <td class="py-4 px-4 font-bold">2</td>
+                                <td class="py-4 px-4">양념치킨</td>
+                                <td class="py-4 px-4"><span class="px-2 py-0.5 bg-gray-700 rounded text-xs">메인</span></td>
+                                <td class="py-4 px-4">320</td>
+                                <td class="py-4 px-4 font-bold">₩ 5,400,000</td>
+                                <td class="py-4 px-4 text-yellow-400 font-bold">세트 구성 추천</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    Highcharts.chart('menuPieChart', {
+        chart: { type: 'pie', backgroundColor: 'transparent' },
+        title: { text: null },
+        series: [{
+            name: '매출 비중',
+            data: [
+                { name: '치킨 (메인)', y: 65, color: '#f97316' },
+                { name: '사이드', y: 20, color: '#eab308' },
+                { name: '음료/주류', y: 15, color: '#3b82f6' }
+            ]
+        }],
+        plotOptions: {
+            pie: {
+                dataLabels: { enabled: true, color: 'white', format: '{point.name}: {point.percentage:.1f}%' },
+                borderWidth: 0
+            }
+        },
+        credits: { enabled: false }
+    });
+</script>
+{% endblock %}

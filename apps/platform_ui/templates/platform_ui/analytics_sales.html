@@ -1,0 +1,382 @@
+{% extends 'platform_ui/base.html' %}
+{% load static humanize %}
+
+{% block title %}상세 매출 분석 - Forkast{% endblock %}
+
+{% block content %}
+    <section class="pt-24 pb-12 px-4 md:px-8">
+        <div class="max-w-7xl mx-auto space-y-4">
+            <!-- Header Section -->
+            <div class="glass-panel p-4 rounded-3xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <div class="inline-block py-1 px-3 rounded-lg bg-blue-500/10 text-blue-400 text-[10px] font-black uppercase tracking-widest mb-2 border border-blue-500/20">시장 지능 분석 (Market Intelligence)</div>
+                    <h1 class="text-3xl font-display font-black text-white tracking-tight">
+                        상세 매출 <span class="text-blue-500">인텔리전스</span>
+                    </h1>
+                </div>
+                
+                <form id="date-range-form" class="flex flex-wrap items-center gap-2 p-1.5 bg-white/5 border border-white/10 rounded-2xl w-full md:w-auto">
+                    <div class="flex items-center gap-2 bg-slate-800/50 rounded-xl px-3 py-1 border border-white/5">
+                        <i class="fa-solid fa-calendar-day text-slate-500 text-xs"></i>
+                        <input type="date" id="start-date" class="bg-transparent text-white border-none p-1 text-xs focus:ring-0">
+                    </div>
+                    <span class="text-slate-600 text-[10px] font-black uppercase">To</span>
+                    <div class="flex items-center gap-2 bg-slate-800/50 rounded-xl px-3 py-1 border border-white/5">
+                        <i class="fa-solid fa-calendar-day text-slate-500 text-xs"></i>
+                        <input type="date" id="end-date" class="bg-transparent text-white border-none p-1 text-xs focus:ring-0">
+                    </div>
+                    <button type="submit" class="flex-1 md:flex-none bg-blue-600 hover:bg-blue-500 px-6 py-2.5 rounded-xl text-xs font-black transition shadow-lg shadow-blue-600/20 text-white">
+                        <i class="fa-solid fa-magnifying-glass mr-1"></i> 조회
+                    </button>
+                    <button type="button" onclick="alert('준비중입니다.')" class="w-10 h-10 flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition text-slate-400">
+                        <i class="fa-solid fa-download"></i>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Summary Stats Row -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="glass-panel p-4 rounded-2xl border-l-4 border-emerald-500 flex flex-col justify-center">
+                    <div class="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">선택 기간 총 매출</div>
+                    <div class="text-2xl font-display font-black text-white tracking-tight" id="stat-total-revenue">₩ 0</div>
+                    <div class="text-[9px] text-slate-500 mt-1 font-bold" id="stat-period-info">기간을 선택해주세요</div>
+                </div>
+                
+                <div class="glass-panel p-4 rounded-2xl border-l-4 border-blue-500 flex flex-col justify-center">
+                    <div class="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">일 평균 매출</div>
+                    <div class="text-2xl font-display font-black text-blue-400 tracking-tight" id="stat-avg-revenue">₩ 0</div>
+                    <div class="text-[9px] text-slate-500 mt-1 font-bold" id="stat-days-count">데이터 없음</div>
+                </div>
+
+                <div class="glass-panel p-4 rounded-2xl border-l-4 border-purple-500 flex flex-col justify-center">
+                    <div class="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">최고 매출 도달일</div>
+                    <div class="text-2xl font-display font-black text-purple-400 tracking-tight" id="stat-peak-date">-</div>
+                    <div class="text-[9px] text-slate-500 mt-1 font-bold">인텔리전스 분석</div>
+                </div>
+
+                <div class="glass-panel p-4 rounded-2xl border-l-4 border-slate-600 flex flex-col justify-center bg-blue-600/5 group cursor-pointer hover:bg-blue-600/10 transition">
+                    <div class="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-1">분석 정확도 점수</div>
+                    <div class="text-2xl font-display font-black text-white tracking-tight">98.4%</div>
+                    <div class="text-[9px] text-blue-400 mt-1 font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                        알고리즘 최적화 상태 <i class="fa-solid fa-arrow-right"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Analysis Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <!-- Main Chart Card -->
+                <div class="lg:col-span-2 glass-panel p-6 rounded-3xl">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-lg font-display font-black text-white tracking-tight flex items-center gap-2">
+                            <i class="fa-solid fa-chart-column text-blue-500"></i> 시간대별 매출 트렌드
+                        </h3>
+                        <div class="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 text-[9px] font-black text-blue-400 uppercase tracking-widest">
+                            <span class="w-1.5 h-1.5 bg-blue-400 rounded-full animate-pulse"></span> 실시간 데이터 스트림
+                        </div>
+                    </div>
+                    
+                    <div class="h-[400px] w-full relative">
+                        <div id="salesTrendsChartContainer" class="w-full h-full"></div>
+                        <div id="chart-loading" class="absolute inset-0 flex items-center justify-center bg-slate-950/20 backdrop-blur-[1px] pointer-events-none opacity-0 transition-opacity">
+                            <div class="flex flex-col items-center gap-3">
+                                <i class="fa-solid fa-circle-notch fa-spin text-blue-500 text-3xl"></i>
+                                <span class="text-[10px] text-slate-400 font-black uppercase tracking-widest">분석 엔진 가동 중...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Sidebar: CSV Upload & Info -->
+                <div class="space-y-4">
+                    <!-- Upload Card -->
+                    <div class="glass-panel p-6 rounded-3xl border-white/10 shadow-2xl" style="background-color: #0f172a !important;">
+                        <h4 class="text-sm font-black text-white uppercase tracking-widest mb-4 flex items-center gap-2" style="color: white !important;">
+                            <i class="fa-solid fa-file-arrow-up text-indigo-400"></i> 데이터 소스 업데이트
+                        </h4>
+                        <div class="space-y-4">
+                            <div class="relative group">
+                                <label for="sales-upload-input" class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed border-white/20 rounded-2xl bg-white/5 hover:bg-white/10 hover:border-indigo-500/50 transition-all cursor-pointer">
+                                    <i class="fa-solid fa-cloud-arrow-up text-3xl text-slate-300 group-hover:text-indigo-400 mb-2 transition" style="color: #cbd5e1 !important;"></i>
+                                    <span class="text-[10px] font-black text-white uppercase tracking-widest" style="color: white !important;">CSV 파일 드래그 또는 클릭</span>
+                                    <input type="file" id="sales-upload-input" accept=".csv" class="hidden" onchange="uploadSalesCSV(this)">
+                                </label>
+                            </div>
+                            <div class="p-4 bg-black/60 rounded-xl border border-white/10">
+                                <p class="text-[11px] text-white font-medium leading-relaxed" style="color: white !important;">
+                                    <span class="text-indigo-300 font-bold" style="color: #a5b4fc !important;">ℹ️ 안내:</span> 업로드 시 해당 날짜의 기존 데이터는 자동으로 덮어쓰기 되며, 누락된 기간은 시스템이 선형 보간하여 예측 모델을 자동 업데이트합니다.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Mini Insights -->
+                    <div class="glass-panel p-6 rounded-3xl flex-1 flex flex-col">
+                        <h4 class="text-sm font-black text-white uppercase tracking-widest mb-4">비즈니스 리마인더</h4>
+                        <div class="space-y-4 flex-1">
+                            <div class="flex gap-4">
+                                <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20"><i class="fa-solid fa-leaf"></i></div>
+                                <div>
+                                    <div class="text-[10px] font-black text-slate-500 uppercase">신선 재료 소진</div>
+                                    <p class="text-xs text-white font-bold mt-0.5">양파 재고가 부족합니다.</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-400 border border-blue-500/20"><i class="fa-solid fa-umbrella"></i></div>
+                                <div>
+                                    <div class="text-[10px] font-black text-slate-500 uppercase">내일 기상 영향</div>
+                                    <p class="text-xs text-white font-bold mt-0.5">오후 비 예보, 배달 비중 상승 예상</p>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="mt-6 w-full py-3 bg-white/5 hover:bg-white/10 text-slate-400 text-[10px] font-black uppercase tracking-widest rounded-xl border border-white/5 transition">
+                            전체 분석 보고서 보기
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Strategy Card (Collapsible/Dynamic) -->
+            <div id="analysis-result-container" class="hidden opacity-0 translate-y-4 transition-all duration-700 ease-out">
+                <div class="glass-panel p-6 rounded-[2.5rem] border border-blue-500/30 bg-gradient-to-r from-blue-900/40 via-blue-950/20 to-transparent relative overflow-hidden group">
+                    <div class="absolute -right-10 -top-10 w-40 h-40 bg-blue-500/10 blur-[80px] rounded-full group-hover:bg-blue-500/20 transition-all duration-1000"></div>
+                    
+                    <div class="flex flex-col md:flex-row items-start md:items-center gap-6 relative z-10">
+                        <div class="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center text-white text-2xl shadow-2xl shadow-blue-500/40 shrink-0">
+                            <i class="fa-solid fa-robot-astromech"></i>
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-2">
+                                <h4 class="text-xl font-display font-black text-white">AI 심층 전략 리포트</h4>
+                                <span class="px-2 py-0.5 bg-blue-500 text-white text-[8px] font-black rounded-md uppercase tracking-widest">Optimized</span>
+                            </div>
+                            <p id="analysis-text" class="text-slate-300 font-medium text-base leading-relaxed mb-4 max-w-4xl"></p>
+                            <div class="inline-flex items-center gap-3 px-4 py-2 bg-slate-900/80 rounded-full border border-white/10">
+                                <i class="fa-solid fa-sparkles text-amber-400 animate-pulse"></i>
+                                <p id="cheer-text" class="text-blue-200 italic text-xs font-bold"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // CSV Upload Logic
+    function uploadSalesCSV(input) {
+        const file = input.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        input.disabled = true;
+        const loader = document.getElementById('chart-loading');
+        if(loader) loader.classList.remove('opacity-0');
+
+        fetch('/api/upload-csv/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                const resultContainer = document.getElementById('analysis-result-container');
+                const resultText = document.getElementById('analysis-text');
+                const cheerText = document.getElementById('cheer-text');
+                
+                if(resultContainer) {
+                    resultContainer.classList.remove('hidden');
+                    setTimeout(() => resultContainer.classList.remove('opacity-0', 'translate-y-4'), 100);
+                    if(resultText) resultText.innerText = data.analysis;
+                    if(cheerText) cheerText.innerText = data.cheer_msg;
+                }
+                
+                if (data.min_date && data.max_date) {
+                    document.getElementById('start-date').value = data.min_date;
+                    document.getElementById('end-date').value = data.max_date;
+                }
+
+                document.getElementById('date-range-form').dispatchEvent(new Event('submit'));
+            } else {
+                alert('업로드 실패: ' + data.message);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('업로드 중 서버 오류가 발생했습니다.');
+        })
+        .finally(() => {
+            input.disabled = false;
+            input.value = '';
+            if(loader) loader.classList.add('opacity-0');
+        });
+    }
+
+    // Highcharts Dual Distribution Chart (Smooth Line + Area)
+    const initChart = (labels = [], mainData = [], compData = []) => {
+        // Ensure data is numeric
+        const numericMain = mainData.map(v => Number(v) || 0);
+        const numericComp = compData.map(v => Number(v) || 0);
+
+        Highcharts.chart('salesTrendsChartContainer', {
+             chart: {
+                 type: 'areaspline',
+                 backgroundColor: {
+                     linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                     stops: [
+                         [0, '#FFFDF7'],
+                         [1, '#FAF7F2']
+                     ]
+                 },
+                 borderRadius: 24,
+                 spacing: [20, 10, 20, 10]
+             },
+             title: { text: null },
+             xAxis: {
+                 categories: labels,
+                 labels: { 
+                     style: { color: '#64748b', fontSize: '10px', fontWeight: 'bold' },
+                     rotation: -45
+                 },
+                 gridLineColor: 'rgba(0,0,0,0.05)',
+                 lineColor: 'rgba(0,0,0,0.1)'
+             },
+             yAxis: {
+                 title: { text: null },
+                 labels: { 
+                     style: { color: '#64748b', fontSize: '10px' }, 
+                     formatter: function() { return '₩' + this.value.toLocaleString(); } 
+                 },
+                 gridLineColor: 'rgba(0,0,0,0.05)'
+             },
+             plotOptions: {
+                 areaspline: {
+                     marker: {
+                         enabled: false,
+                         states: {
+                             hover: {
+                                 enabled: true,
+                                 radius: 6,
+                                 lineWidth: 2
+                             }
+                         }
+                     },
+                     lineWidth: 2.5,
+                     fillOpacity: 0.2, // 20% opacity as requested
+                     states: {
+                         hover: {
+                             lineWidth: 3.5
+                         }
+                     },
+                     threshold: null
+                 }
+             },
+             series: [
+                 {
+                     name: '현재 기간 (Current)',
+                     data: numericMain,
+                     color: '#3b82f6', // Main: Cool ton (Blue)
+                     fillColor: {
+                         linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                         stops: [
+                             [0, 'rgba(59, 130, 246, 0.25)'],
+                             [1, 'rgba(59, 130, 246, 0.05)']
+                         ]
+                     }
+                 },
+                 {
+                     name: '이전 기간 (Previous)',
+                     data: numericComp,
+                     color: '#f59e0b', // Comparison: Warm ton (Orange)
+                     fillColor: {
+                         linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                         stops: [
+                             [0, 'rgba(245, 158, 11, 0.2)'],
+                             [1, 'rgba(245, 158, 11, 0.0)']
+                         ]
+                     }
+                 }
+             ],
+             credits: { enabled: false },
+             legend: { 
+                 enabled: true,
+                 itemStyle: { color: '#64748b', fontSize: '11px', fontWeight: 'bold' },
+                 itemHoverStyle: { color: '#0f172a' }
+             },
+             tooltip: {
+                 backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                 borderColor: '#3b82f6',
+                 borderRadius: 20,
+                 style: { color: '#0f172a', fontSize: '12px' },
+                 headerFormat: '<span style="font-size: 10px; color: #64748b; font-weight: 800; text-transform: uppercase;">{point.key} 비교 리포트</span><br/>',
+                 pointFormat: '<span style="color:{series.color}">●</span> {series.name}: <b style="font-family: monospace; color:#1e40af;">₩{point.y:,.0f}</b><br/>',
+                 shared: true,
+                 useHTML: true
+             }
+         });
+    };
+
+    // Date Handling
+    const today = new Date();
+    const lastWeek = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 6);
+    const todayStr = today.toISOString().split('T')[0];
+    
+    document.getElementById('start-date').max = todayStr;
+    document.getElementById('end-date').max = todayStr;
+    document.getElementById('end-date').valueAsDate = today;
+    document.getElementById('start-date').valueAsDate = lastWeek;
+
+    // Form Submit
+    document.getElementById('date-range-form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const start = document.getElementById('start-date').value;
+        const end = document.getElementById('end-date').value;
+        
+        if(!start || !end) return;
+
+        const btn = this.querySelector('button[type="submit"]');
+        const loader = document.getElementById('chart-loading');
+        btn.disabled = true;
+        if(loader) loader.classList.remove('opacity-0');
+
+        fetch(`/api/analytics/sales-stats/?start_date=${start}&end_date=${end}`)
+            .then(res => res.json())
+            .then(data => {
+                if(data.status === 'success') {
+                    initChart(data.labels, data.data, data.comparison_data);
+                    
+                    // Formatting Numbers with Comma
+                    document.getElementById('stat-total-revenue').innerText = '₩ ' + Number(data.summary.total_revenue || 0).toLocaleString();
+                    document.getElementById('stat-avg-revenue').innerText = '₩ ' + Number(data.summary.avg_revenue || 0).toLocaleString();
+                    document.getElementById('stat-period-info').innerText = `${start} ~ ${end}`;
+                    document.getElementById('stat-days-count').innerText = `${data.summary.days_count}일 데이터 기준`;
+                    
+                    // Logic for peak date
+                    if(data.labels.length > 0) {
+                        let maxVal = -1;
+                        let maxIdx = -1;
+                        data.data.forEach((val, idx) => {
+                            if(val > maxVal) { maxVal = val; maxIdx = idx; }
+                        });
+                        document.getElementById('stat-peak-date').innerText = data.labels[maxIdx];
+                    }
+                }
+            })
+            .catch(err => console.error(err))
+            .finally(() => {
+                btn.disabled = false;
+                if(loader) loader.classList.add('opacity-0');
+            });
+    });
+
+    // Auto load
+    setTimeout(() => document.getElementById('date-range-form').dispatchEvent(new Event('submit')), 100);
+</script>
+{% endblock %}

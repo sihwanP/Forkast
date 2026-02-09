@@ -3,6 +3,8 @@ import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+import sys
+sys.path.insert(0, str(BASE_DIR / 'apps'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -13,7 +15,7 @@ SECRET_KEY = 'django-insecure-forkast-ai-sales-prediction-key-change-in-prod'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['13.125.161.160', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['*']
 
 # Gemini API Configuration
 GEMINI_API_KEY = 'AIzaSyBznbtPndgOqrLqQZaQjKQ_PyRnmKh6fPs'
@@ -21,7 +23,8 @@ GEMINI_API_KEY = 'AIzaSyBznbtPndgOqrLqQZaQjKQ_PyRnmKh6fPs'
 # Application definition
 
 INSTALLED_APPS = [
-    'platform_ui',
+    'apps.platform_ui',
+    'apps.analytics',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -33,6 +36,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -66,12 +70,8 @@ WSGI_APPLICATION = 'forkast_project.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.oracle',
-        'NAME': 'xe',
-        'USER': 'admin',
-        'PASSWORD': '123456',
-        'HOST': 'localhost',
-        'PORT': '1521',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -109,6 +109,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'static'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -117,3 +118,28 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ERP Master-Detail Layout Support (Allow framing from same origin)
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+# [Global Compliance] Anti-Master Prompt v3
+# 1. Session timeout: Move to login after 30 minutes of inactivity
+SESSION_COOKIE_AGE = 1800  # 30 minutes in seconds
+SESSION_SAVE_EVERY_REQUEST = True  # Resets timeout on every user action
+
+# 2. Login Redirect: Redirect to Store Dashboard after successful login
+LOGIN_REDIRECT_URL = 'dashboard'
+LOGIN_URL = '/admin/login/'
+
+# ==========================================
+# Celery & Redis Configuration
+# ==========================================
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = TIME_ZONE
+
+# Beat Scheduler (Optional, necessitates django-celery-beat)
+# INSTALLED_APPS += ['django_celery_beat'] 

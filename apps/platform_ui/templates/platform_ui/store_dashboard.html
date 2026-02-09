@@ -1,0 +1,339 @@
+{% extends 'platform_ui/base.html' %}
+{% load static humanize %}
+
+{% block title %}매장 대시보드 - Forkast{% endblock %}
+
+{% block content %}
+    <section class="pt-24 pb-12 px-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 mb-12">
+                <div>
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">매장 터미널 v1.2</div>
+                    <h1 class="text-4xl font-display font-black text-white tracking-tight">매장 라이브 <span class="text-indigo-500">대시보드</span></h1>
+                    <p class="text-slate-400 text-sm font-medium mt-2">{{ today }}일자 실시간 영업 지표입니다.</p>
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="location.reload()" class="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-slate-400 border border-white/5 hover:bg-white/10 hover:text-white transition">
+                        <i class="fa-solid fa-rotate"></i>
+                    </button>
+                    <a href="{% url 'toggle_work' %}" class="px-8 py-3.5 bg-rose-600 hover:bg-rose-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-rose-600/20 transition flex items-center gap-2">
+                        <i class="fa-solid fa-power-off"></i> 업무 종료
+                    </a>
+                </div>
+            </div>
+
+            <!-- Core Metrics -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+                <div class="glass-panel p-8 rounded-3xl border-t-2 border-indigo-500 bg-slate-900 overflow-hidden relative group transition-all duration-500 hover:-translate-y-1">
+                    <div class="absolute -right-4 -top-4 opacity-10 text-8xl group-hover:scale-110 transition-transform"><i class="fa-solid fa-won-sign"></i></div>
+                    <div class="text-[10px] font-black text-indigo-300 uppercase tracking-widest mb-4">오늘의 총 매출액</div>
+                    <div class="text-3xl font-display font-black text-white tracking-tighter">₩ {{ revenue|intcomma }}</div>
+                    <div class="mt-4 flex items-center gap-2 text-indigo-400 text-[10px] font-black">
+                        <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse"></span> 실시간 동기화 중
+                    </div>
+                </div>
+                <div class="glass-panel p-8 rounded-3xl border-t-2 border-emerald-500 transition-all duration-500 hover:-translate-y-1">
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">현재 운영 재고</div>
+                    <div class="text-3xl font-display font-black text-white tracking-tighter">{{ inventory_items|length }} <span class="text-lg text-slate-400 font-medium">품목</span></div>
+                    <div class="mt-4 flex items-center gap-2 text-emerald-400 text-[10px] font-black">
+                        <i class="fa-solid fa-check-circle"></i> 운영 안정성 양호
+                    </div>
+                </div>
+                <div class="glass-panel p-8 rounded-3xl border-t-2 border-amber-500 transition-all duration-500 hover:-translate-y-1">
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">본사 승인 대기 발주</div>
+                    <div class="text-3xl font-display font-black text-white tracking-tighter">{{ pending_orders|length }} <span class="text-lg text-slate-400 font-medium">건 대기</span></div>
+                    <div class="mt-4 flex items-center gap-2 text-amber-500 text-[10px] font-black">
+                        <i class="fa-solid fa-hourglass-half"></i> 본사 승인 대기 중
+                    </div>
+                </div>
+                <div class="glass-panel p-8 rounded-3xl border-t-2 border-blue-500 transition-all duration-500 hover:-translate-y-1">
+                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">입고 예정 물류</div>
+                    <div class="text-3xl font-display font-black text-white tracking-tighter">{{ active_deliveries|length }} <span class="text-lg text-slate-400 font-medium">건 배송</span></div>
+                    <div class="mt-4 flex items-center gap-2 text-blue-400 text-[10px] font-black">
+                        <i class="fa-solid fa-truck-fast"></i> 배송 프로세스 진행 중
+                    </div>
+                </div>
+            </div>
+
+            <!-- Operations Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- COLUMN 1: INVENTORY & LOGISTICS -->
+                <div class="lg:col-span-2 space-y-8">
+                    <!-- Inventory Overview -->
+                    <div class="glass-panel rounded-[2.5rem] overflow-hidden">
+                        <div class="px-8 py-6 border-b border-white/5 flex flex-col gap-4 bg-white/5 backdrop-blur-3xl">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-3">
+                                    <i class="fa-solid fa-boxes-stacked text-indigo-500"></i>
+                                    <h3 class="font-display font-black text-white text-lg tracking-tight">가맹점 주요 재고 현황</h3>
+                                </div>
+                                <a href="{% url 'inventory' %}" class="text-[10px] font-black text-indigo-400 uppercase tracking-widest hover:text-white transition">전체 재고 보기 <i class="fa-solid fa-arrow-right ml-1"></i></a>
+                            </div>
+                            <div class="flex flex-wrap gap-3 items-center">
+                                <span class="px-3 py-1 bg-slate-900 text-white text-[10px] font-black rounded-lg shadow-sm border border-slate-700">테이블: PLATFORM_UI_INVENTORY</span>
+                                <span class="text-[10px] text-slate-500 font-bold">이 매장의 실시간 자재 및 식재료 재고 수량을 관리하는 테이블입니다.</span>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-white/5 border-b border-white/5 text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                                        <th class="p-6">품목명</th>
+                                        <th class="p-6">현재고</th>
+                                        <th class="p-6">적정재고</th>
+                                        <th class="p-6">상태</th>
+                                        <th class="p-6 text-right">관리</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-white/5">
+                                    {% for item in inventory_items|slice:":5" %}
+                                    <tr class="hover:bg-white/5 transition-colors group">
+                                        <td class="p-6 font-bold text-white tracking-tight">{{ item.item_name }}</td>
+                                        <td class="p-6 font-display font-black text-indigo-400 text-lg tracking-tighter">{{ item.current_stock }}</td>
+                                        <td class="p-6 text-slate-400 font-medium text-sm">{{ item.optimal_stock }}</td>
+                                        <td class="p-6">
+                                            {% if item.status == 'GOOD' %}
+                                            <span class="text-[10px] font-black uppercase text-emerald-400">정상</span>
+                                            {% elif item.status == 'LOW' %}
+                                            <span class="text-[10px] font-black uppercase text-rose-500">부족</span>
+                                            {% else %}
+                                            <span class="text-[10px] font-black uppercase text-amber-500">과다</span>
+                                            {% endif %}
+                                        </td>
+                                        <td class="p-6 text-right">
+                                            <button onclick="openOrderModal('{{ item.id }}', '{{ item.item_name|escapejs }}')" class="w-8 h-8 bg-white/5 rounded-lg flex items-center justify-center text-slate-400 hover:bg-indigo-600 hover:text-white border border-white/5 transition-all">
+                                                <i class="fa-solid fa-cart-shopping text-[10px]"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Logistics Status -->
+                    <div class="glass-panel p-10 rounded-[2.5rem]">
+                        <div class="flex flex-col gap-4 mb-8">
+                            <h3 class="text-2xl font-display font-black text-white flex items-center gap-4 tracking-tight">
+                                <span class="w-1.5 h-8 bg-blue-500 rounded-full"></span> 물류 및 자재 수급 현황
+                            </h3>
+                            <div class="flex flex-wrap gap-3 items-center ml-5">
+                                <span class="px-3 py-1 bg-slate-900 text-white text-[10px] font-black rounded-lg shadow-sm border border-slate-700">테이블: PLATFORM_UI_ORDER, DELIVERY</span>
+                                <span class="text-[10px] text-slate-500 font-bold">본사에 요청한 발주 내역과 현재 배송 중인 물류 상태를 연동하여 표시합니다.</span>
+                            </div>
+                        </div>
+                        {% if not pending_orders and not active_deliveries %}
+                        <div class="text-center py-16 opacity-30">
+                            <i class="fa-solid fa-box-open text-5xl mb-4 block"></i>
+                            <p class="text-[10px] font-black uppercase tracking-widest leading-relaxed">현재 진행 중인 물류 이동이 없습니다</p>
+                        </div>
+                        {% endif %}
+
+                        <div class="space-y-4">
+                            {% for order in pending_orders %}
+                            <div class="flex justify-between items-center p-6 bg-white/5 rounded-3xl border border-white/5 group hover:bg-white/10 transition-all">
+                                <div class="flex items-center gap-6">
+                                    <div class="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center text-amber-500 border border-amber-500/20">
+                                        <i class="fa-solid fa-hourglass-half"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-1">본사 승인 대기 중</div>
+                                        <div class="font-bold text-white text-lg tracking-tight">{{ order.item.item_name }} <span class="text-indigo-400 ml-2 font-black">+{{ order.quantity }}</span></div>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">{{ order.created_at|timesince }} 전</p>
+                                    <button onclick="confirmOrderManual('{{ order.id }}')" class="mt-2 text-[10px] font-black text-indigo-400 uppercase tracking-widest hover:text-white transition">강제 입고 처리</button>
+                                </div>
+                            </div>
+                            {% endfor %}
+
+                            {% for del in active_deliveries %}
+                            <div class="flex justify-between items-center p-6 bg-blue-500/10 rounded-3xl border border-blue-500/20 group hover:bg-blue-500/15 transition-all">
+                                <div class="flex items-center gap-6">
+                                    <div class="w-12 h-12 bg-blue-600 rounded-2xl flex items-center justify-center text-white shadow-lg shadow-blue-600/20 animate-pulse">
+                                        <i class="fa-solid fa-truck-fast"></i>
+                                    </div>
+                                    <div>
+                                        <div class="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-1">배송 중 - {{ del.get_status_badge_text }}</div>
+                                        <div class="font-bold text-white text-lg tracking-tight">배송번호 #{{ del.order.id }} <span class="text-slate-400 font-medium text-sm ml-2">배송기사: {{ del.driver_name|default:"배정 중" }}</span></div>
+                                    </div>
+                                </div>
+                                <button onclick="confirmDelivery('{{ del.order.id }}')" class="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-blue-600/30 transition-all">물품 수령 확인</button>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COLUMN 2: LIVE FEED -->
+                <div class="space-y-8">
+                    <!-- POS Feed -->
+                    <div class="glass-panel bg-slate-900 border-none shadow-2xl rounded-[2.5rem] overflow-hidden flex flex-col min-h-[600px]">
+                        <div class="px-8 py-6 border-b border-white/5 flex flex-col gap-4 bg-white/5">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-1.5 h-1.5 bg-rose-500 rounded-full animate-pulse"></div>
+                                    <h3 class="font-display font-black text-white text-sm tracking-widest uppercase">실시간 주문 피드</h3>
+                                </div>
+                                <i class="fa-solid fa-receipt text-slate-700"></i>
+                            </div>
+                            <div class="flex flex-wrap gap-3 items-center">
+                                <span class="px-3 py-1 bg-slate-900 text-white text-[10px] font-black rounded-lg shadow-sm border border-slate-700">테이블: PLATFORM_UI_TRANSACTION</span>
+                                <span class="text-[10px] text-slate-500 font-bold">매장 포스(POS)에서 발생하는 모든 개별 결제 내역을 기록합니다.</span>
+                            </div>
+                        </div>
+                        <div class="flex-1 overflow-y-auto">
+                            <div class="divide-y divide-white/5">
+                                {% for tx in recent_transactions %}
+                                <div class="px-8 py-6 hover:bg-white/5 transition flex justify-between items-start group">
+                                    <div>
+                                        <p class="text-white font-black mb-1 tracking-tight group-hover:text-indigo-400 transition">Order #{{ tx.id|stringformat:"05d" }}</p>
+                                        <p class="text-slate-600 text-[10px] font-black uppercase tracking-widest">{{ tx.created_at|date:"H:i:s" }}</p>
+                                    </div>
+                                    <div class="text-right">
+                                        <p class="text-emerald-400 font-display font-black text-lg tracking-tighter">₩ {{ tx.final_amount|intcomma }}</p>
+                                        <span class="text-[8px] font-black text-emerald-500 uppercase tracking-widest">결제 완료</span>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <div class="text-center py-32 opacity-20">
+                                    <i class="fa-solid fa-ghost text-5xl mb-4 block"></i>
+                                    <p class="text-[10px] font-black uppercase tracking-widest">첫 주문을 기다리는 중...</p>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="p-8 border-t border-white/5 bg-white/5">
+                            <a href="{% url 'sales_dashboard' %}" class="block w-full text-center py-4 bg-white/5 hover:bg-white/10 text-slate-400 font-black text-[10px] uppercase tracking-widest rounded-2xl border border-white/5 transition-all">전체 판매 일지 보기</a>
+                        </div>
+                    </div>
+
+                    <!-- Side Tools -->
+                    <div class="glass-panel p-8 rounded-[2.5rem] space-y-4">
+                        <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">빠른 도구</div>
+                        <button class="w-full flex items-center justify-between p-5 bg-white/5 hover:bg-white/10 rounded-2xl transition border border-white/5 group">
+                            <div class="flex items-center gap-4">
+                                <i class="fa-solid fa-print text-slate-400 group-hover:text-white transition"></i>
+                                <span class="font-black text-white text-[10px] uppercase tracking-widest">일일 마감 정산</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-slate-700"></i>
+                        </button>
+                        <button class="w-full flex items-center justify-between p-5 bg-white/5 hover:bg-white/10 rounded-2xl transition border border-white/5 group">
+                            <div class="flex items-center gap-4">
+                                <i class="fa-solid fa-headset text-slate-400 group-hover:text-white transition"></i>
+                                <span class="font-black text-white text-[10px] uppercase tracking-widest">본사 직통 고객지원</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-slate-700"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modals (Replenishment) -->
+    <div id="orderModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-950/80 backdrop-blur-md opacity-0 transition-opacity duration-300">
+        <div class="glass-panel w-full max-w-sm p-10 rounded-[2.5rem] transform scale-95 transition-transform duration-300" id="orderModalContent">
+            <div class="w-16 h-16 bg-indigo-500/10 rounded-2xl flex items-center justify-center text-3xl text-indigo-500 border border-indigo-500/20 mb-6 font-black shadow-lg shadow-indigo-500/10">
+                <i class="fa-solid fa-truck-fast"></i>
+            </div>
+            <h2 class="text-3xl font-display font-black mb-2 text-white tracking-tight">본사 수주 발주</h2>
+            <p id="orderItemName" class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-8">품목명</p>
+
+            <form id="orderForm" class="space-y-6">
+                <input type="hidden" id="orderItemId">
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">발주 요청 수량</label>
+                    <input type="number" id="orderQuantity"
+                        class="w-full bg-slate-900/50 border border-indigo-500/30 rounded-2xl px-6 py-4 text-indigo-400 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/5 outline-none transition-all font-display font-black text-3xl tracking-tighter"
+                        placeholder="10" value="10" min="1" required>
+                    <p class="text-[10px] text-slate-600 font-medium mt-4 leading-relaxed">* 발주 요청 시 본사 통합 SCM 시스템에 실시간으로 등록되며 담당 관리자 승인 후 물류 배치가 시작됩니다.</p>
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="closeOrderModal()" class="px-6 py-3 text-sm font-black uppercase tracking-widest text-slate-200 hover:text-white transition">취소</button>
+                    <button type="submit" class="px-10 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-indigo-600/20 transition-all">발주 요청</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const orderModal = document.getElementById('orderModal');
+    const orderModalContent = document.getElementById('orderModalContent');
+
+    function openOrderModal(id, name) {
+        document.getElementById('orderItemId').value = id;
+        document.getElementById('orderItemName').innerText = name;
+        
+        orderModal.classList.remove('hidden');
+        orderModal.classList.add('flex');
+        setTimeout(() => {
+            orderModal.classList.remove('opacity-0');
+            orderModalContent.classList.remove('scale-95');
+        }, 10);
+
+        setTimeout(() => document.getElementById('orderQuantity').select(), 300);
+    }
+
+    function closeOrderModal() {
+        orderModal.classList.add('opacity-0');
+        orderModalContent.classList.add('scale-95');
+        setTimeout(() => {
+            orderModal.classList.add('hidden');
+            orderModal.classList.remove('flex');
+        }, 300);
+    }
+
+    document.getElementById('orderForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const id = document.getElementById('orderItemId').value;
+        const quantity = document.getElementById('orderQuantity').value;
+        
+        try {
+            const response = await fetch("{% url 'order_api' %}", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                body: JSON.stringify({ item_id: id, quantity: quantity })
+            });
+            if (response.ok) {
+                alert('본사로 발주 요청이 정산 전송되었습니다.');
+                location.reload();
+            }
+        } catch (e) {
+            console.error(e);
+            alert('발주 처리 중 오류가 발생했습니다.');
+        }
+    });
+
+    async function confirmOrderManual(orderId) {
+        if (!confirm('본사 승인 없이 강제로 입고 처리하시겠습니까?\n(긴급 상황 발생 시 사용 바랍니다)')) return;
+        try {
+            const response = await fetch("{% url 'order_api' %}", {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                body: JSON.stringify({ order_id: orderId })
+            });
+            if (response.ok) location.reload();
+        } catch (e) { console.error(e); }
+    }
+
+    async function confirmDelivery(orderId) {
+        try {
+            const response = await fetch("{% url 'order_api' %}", {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+                body: JSON.stringify({ order_id: orderId })
+            });
+            if (response.ok) {
+                location.reload();
+            }
+        } catch (e) { console.error(e); }
+    }
+</script>
+{% endblock %}
