@@ -40,92 +40,111 @@ class BaseErpAdmin(admin.ModelAdmin):
 @admin.register(Inventory)
 class ProductAdmin(BaseErpAdmin):
     # High Quality ERP: Product & Inventory Management
-    list_display = ('item_name', 'image_thumbnail', 'category', 'stock_progress', 'price_info', 'value_display', 'status_badge')
-    list_filter = ('category', 'status', 'tax_code')
+    # 체크박스는 기본 action_checkbox가 있으므로 생략, 커스텀 컬럼 위주 구성
+    list_display = ('code_display', 'item_name', 'category_badge', 'sale_status_badge', 'management_icon', 'stock_display', 'price_display', 'updated_at_local', 'actions_display')
+    list_display_links = ('item_name',)
+    list_filter = ('sale_status', 'is_managed', 'status', 'category')
     search_fields = ('item_name', 'code')
-    change_list_template = 'admin/inventory_change_list.html'
+    list_per_page = 25
+    change_list_template = 'admin/inventory_master_list.html'
 
-    def image_thumbnail(self, obj):
-        if obj.image:
-            return format_html('<img src="{}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">', obj.image.url)
-        return format_html('<span style="color: #cbd5e1; font-size: 20px;"><i class="fa-solid fa-box"></i></span>')
-    image_thumbnail.short_description = "이미지"
-
-    def stock_progress(self, obj):
-        # Visual Stock Bar
-        percent = 0
-        if obj.optimal_stock > 0:
-            percent = min(100, int((obj.current_stock / obj.optimal_stock) * 100))
-        
-        color = "#10b981" # Green
-        if percent < 30: color = "#ef4444" # Red
-        elif percent > 100: color = "#f59e0b" # Orange
-        
+    def code_display(self, obj):
+        code = obj.code if obj.code else "-"
         return format_html(
-            '''
-            <div style="width: 100px; background-color: #e2e8f0; border-radius: 4px; height: 8px; overflow: hidden;">
-                <div style="width: {}%; background-color: {}; height: 100%;"></div>
-            </div>
-            <div style="font-size: 11px; color: #64748b; margin-top: 2px;">
-                {} / {} ({}%)
-            </div>
-            ''',
-            percent, color, obj.current_stock, obj.optimal_stock, percent
+            '<div style="font-family:monospace; font-weight:bold; color:#475569; position:relative; cursor:pointer;" onclick="navigator.clipboard.writeText(\'{}\'); alert(\'복사되었습니다: {}\');">'
+            '{} <i class="fa-regular fa-copy" style="font-size:10px; color:#cbd5e1; margin-left:4px;"></i>'
+            '</div>',
+            code, code, code
         )
-    stock_progress.short_description = "재고 현황"
+    code_display.short_description = "상품코드"
 
-    def price_info(self, obj):
-        # Calculation of Margin
-        margin = 0
-        if obj.price > 0:
-            margin = int(((obj.price - obj.cost) / obj.price) * 100)
+    def category_badge(self, obj):
+        return format_html(
+            '<span class="badge-cat">{}</span>',
+            obj.category
+        )
+    category_badge.short_description = "분류"
+
+    def sale_status_badge(self, obj):
+        status_classes = {
+            'ON_SALE': 'badge-sale-on',
+            'STOPPED': 'badge-sale-stopped',
+            'OUT_OF_STOCK': 'badge-sale-out'
+        }
+        css_class = status_classes.get(obj.sale_status, 'badge-sale-stopped')
+        label = dict(Inventory._meta.get_field('sale_status').choices).get(obj.sale_status, obj.sale_status)
+        return format_html(
+            '<span class="badge-sale {}">{}</span>',
+            css_class, label
+        )
+    sale_status_badge.short_description = "판매상태"
+
+    def management_icon(self, obj):
+        if obj.is_managed:
+            return format_html('<i class="fa-solid fa-circle-check" style="color:#10b981; font-size:14px;"></i>')
+        return format_html('<span style="color:#cbd5e1; font-weight:bold;">-</span>')
+    management_icon.short_description = "재고관리"
+
+    def stock_display(self, obj):
+        from django.utils.safestring import mark_safe
+        # Stock Status Classes
+        stock_class = "text-gray-900" # Default
+        status_icon = ""
         
-        return format_html(
-            '''
-            <div>
-                <span style="font-weight:bold;">₩{}</span>
-                <div style="font-size: 11px; color: #64748b;">
-                    Cost: ₩{} <span style="color: #10b981;">(Mg: {}%)</span>
-                </div>
-            </div>
-            ''',
-            format(obj.price, ","), format(obj.cost, ","), margin
-        )
-    price_info.short_description = "가격 및 마진"
+        if obj.current_stock <= 0:
+            stock_class = "text-red-600" # Red
+            status_icon = '<i class="fa-solid fa-circle-exclamation" style="margin-right:2px; font-size:10px;"></i>'
+        elif obj.current_stock < obj.optimal_stock:
+            stock_class = "text-amber-600" # Orange
+        
+        # Safe Stock (Small & Gray)
+        safe_stock_html = format_html('<span class="text-gray-400" style="font-size:11px; font-weight:400;">(안전: {})</span>', obj.optimal_stock) if obj.is_managed else ""
 
-    def value_display(self, obj):
-        total_val = obj.current_stock * obj.cost
-        return format_html('<span style="font-family:monospace; font-weight:bold;">₩{}</span>', format(total_val, ","))
-    value_display.short_description = "재고 자산 가치"
-
-    def status_badge(self, obj):
-        colors = {'GOOD': '#10b981', 'LOW': '#ef4444', 'OVER': '#f59e0b'}
-        labels = {'GOOD': '적정', 'LOW': '부족', 'OVER': '과잉'}
         return format_html(
-            '<span style="color:{}; background-color:rgba(0,0,0,0.05); padding:4px 8px; border-radius:6px; font-weight:bold; border: 1px solid {};">{}</span>',
-            colors.get(obj.status, 'gray'),
-            colors.get(obj.status, 'gray'),
-            labels.get(obj.status, obj.status)
+            '<div style="text-align:right;">'
+            '  <div class="{}" style="font-size:14px; font-weight:800;">{} {}</div>'
+            '  {}'
+            '</div>',
+            stock_class, mark_safe(status_icon), format(obj.current_stock, ","), safe_stock_html
         )
-    status_badge.short_description = "상태"
+    stock_display.short_description = "현재고 (안전재고)"
+
+    def price_display(self, obj):
+        return format_html(
+            '<div style="text-align:right; font-family:monospace; font-weight:600; color:#334155;">₩{}</div>',
+            format(obj.price, ",")
+        )
+    price_display.short_description = "판매가"
+
+    def updated_at_local(self, obj):
+        return obj.updated_at.strftime("%Y-%m-%d %H:%M")
+    updated_at_local.short_description = "수정일"
+
+    def actions_display(self, obj):
+        return format_html(
+            '<a class="button manage-btn" href="{}/change/">관리</a>',
+            obj.id
+        )
+    actions_display.short_description = "관리"
 
     # Override changelist setup to calculate aggregate data for the dashboard
     def changelist_view(self, request, extra_context=None):
         # Aggregate logic
-        from django.db.models import Sum, F
-        # [Inventory 테이블] 상품/자재 마스터 (상품명, 현재고, 적정재고, 상태)
-        total_items = Inventory.objects.count()
-        # [Inventory 테이블] 상품/자재 마스터 (상품명, 현재고, 적정재고, 상태)
-        total_value = Inventory.objects.aggregate(
-            total_val=Sum(F('current_stock') * F('cost'))
-        )['total_val'] or 0
-        # [Inventory 테이블] 상품/자재 마스터 (상품명, 현재고, 적정재고, 상태)
-        low_stock = Inventory.objects.filter(status='LOW').count()
+        from django.db.models import Sum, F, Q
+        qs = self.get_queryset(request)
         
+        # Summary Metrics
+        total_items = qs.count()
+        active_items = qs.filter(sale_status='ON_SALE').count()
+        low_stock_items = qs.filter(status='LOW').count()
+        stopped_items = qs.filter(sale_status='STOPPED').count()
+
         extra_context = extra_context or {}
-        extra_context['erp_total_items'] = total_items
-        extra_context['erp_total_value'] = total_value
-        extra_context['erp_low_stock'] = low_stock
+        extra_context['summary_total'] = total_items
+        extra_context['summary_active'] = active_items
+        extra_context['summary_warning'] = low_stock_items
+        extra_context['summary_stopped'] = stopped_items
+        
         return super().changelist_view(request, extra_context=extra_context)
 
 @admin.register(Partner)

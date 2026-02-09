@@ -45,6 +45,15 @@ class Inventory(models.Model):
     # Visuals
     image = models.ImageField(upload_to='products/', blank=True, null=True, verbose_name="상품 이미지")
     
+    sale_status = models.CharField(
+        max_length=20, 
+        choices=[('ON_SALE', '판매중'), ('STOPPED', '판매중지'), ('OUT_OF_STOCK', '품절')], 
+        default='ON_SALE', 
+        verbose_name="판매 상태"
+    )
+    is_managed = models.BooleanField(default=True, verbose_name="재고 관리 여부")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="최종 수정일")
+
     # Financials
     cost = models.DecimalField(max_digits=10, decimal_places=0, default=0, verbose_name="매입 단가")
     price = models.DecimalField(max_digits=10, decimal_places=0, default=0, verbose_name="판매 단가")

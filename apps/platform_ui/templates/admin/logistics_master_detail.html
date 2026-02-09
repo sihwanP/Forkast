@@ -5,6 +5,9 @@
 {{ block.super }}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+{% block object-tools %}{% endblock %}
+
 <style>
     /* ===== ERP LOGISTICS MASTER-DETAIL ===== */
     :root {
@@ -192,53 +195,103 @@
     .logistics-actions {
         display: flex;
         align-items: center;
-        gap: 10px;
-        padding: 16px 20px;
-        background: var(--erp-card);
-        border-bottom: 1px solid var(--erp-border);
+        gap: 12px;
+        padding: 20px 24px;
+        background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 60%, #f0f9ff 100%);
+        border-bottom: 2px solid var(--erp-border);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    [data-theme="dark"] .logistics-actions {
+        background: linear-gradient(135deg, rgba(13,107,98,0.08) 0%, rgba(30,41,59,1) 100%) !important;
+        border-bottom-color: #334155 !important;
     }
 
     .logistics-actions .action-btn {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        padding: 12px 20px;
-        font-size: 1rem; /* 16px */
-        font-weight: 600;
-        border: 1px solid var(--erp-border);
-        border-radius: 8px;
+        padding: 12px 22px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        border: 1.5px solid var(--erp-border);
+        border-radius: 10px;
         background: var(--erp-card);
         color: var(--erp-text);
         cursor: pointer;
-        transition: all 0.15s;
+        transition: all 0.2s ease;
         text-decoration: none;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        white-space: nowrap;
     }
 
     .logistics-actions .action-btn:hover {
         background: #f3f4f6;
         border-color: #9ca3af;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+    }
+    
+    .logistics-actions .action-btn:active {
+        transform: translateY(0);
+        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
     }
 
     .logistics-actions .action-btn.primary {
         background: var(--erp-primary);
         color: #ffffff;
         border-color: var(--erp-primary);
+        box-shadow: 0 2px 6px rgba(13,107,98,0.3);
     }
 
     .logistics-actions .action-btn.primary:hover {
         background: #0a5a53;
+        box-shadow: 0 4px 12px rgba(13,107,98,0.4);
+    }
+
+    .logistics-actions .action-btn.edit {
+        background: #3b82f6;
+        color: #ffffff;
+        border-color: #3b82f6;
+        box-shadow: 0 2px 6px rgba(59,130,246,0.3);
+    }
+
+    .logistics-actions .action-btn.edit:hover {
+        background: #2563eb;
+        box-shadow: 0 4px 12px rgba(59,130,246,0.4);
     }
 
     .logistics-actions .action-btn.success {
         background: var(--erp-success);
         color: #ffffff;
         border-color: var(--erp-success);
+        box-shadow: 0 2px 6px rgba(5,150,105,0.3);
+    }
+
+    .logistics-actions .action-btn.success:hover {
+        background: #047857;
+        box-shadow: 0 4px 12px rgba(5,150,105,0.4);
     }
 
     .logistics-actions .action-btn.danger {
         background: #fee2e2;
         color: var(--erp-danger);
         border-color: #fca5a5;
+    }
+
+    .logistics-actions .action-btn.danger:hover {
+        background: #fecaca;
+    }
+
+    .logistics-actions .action-divider {
+        width: 1.5px;
+        height: 32px;
+        background: #d1d5db;
+        margin: 0 4px;
+    }
+
+    [data-theme="dark"] .logistics-actions .action-divider {
+        background: #475569;
     }
 
     /* ===== STATUS TIMELINE ===== */
@@ -406,6 +459,76 @@
         font-weight: 700;
         color: var(--erp-text);
     }
+
+    /* ===== TOAST MESSAGE OVERRIDES ===== */
+    ul.messagelist {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10000;
+        width: auto;
+        min-width: 350px;
+        max-width: 80%;
+        padding: 0;
+        margin: 0;
+        list-style: none; /* 리스트 스타일 제거 */
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        border-radius: 8px;
+        overflow: hidden;
+        animation: slideDown 0.4s ease-out;
+    }
+    
+    @keyframes slideDown {
+        from { transform: translate(-50%, -20px); opacity: 0; }
+        to { transform: translate(-50%, 0); opacity: 1; }
+    }
+
+    ul.messagelist li {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 24px;
+        margin: 0;
+        background: #ffffff;
+        color: #1f2937;
+        border-left: 6px solid #059669; /* Default Success */
+        font-weight: 600;
+        font-size: 15px;
+        border-bottom: 1px solid #f3f4f6;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    ul.messagelist li:last-child {
+        border-bottom: none;
+    }
+
+    ul.messagelist li.error {
+        border-left-color: #dc2626;
+        background: #fef2f2;
+        color: #991b1b;
+    }
+    ul.messagelist li.warning {
+        border-left-color: #d97706;
+        background: #fffbeb;
+        color: #92400e;
+    }
+
+    /* 토스트 닫기 버튼 */
+    .toast-close-btn {
+        margin-left: 20px;
+        cursor: pointer;
+        color: #9ca3af;
+        font-size: 20px;
+        background: transparent;
+        border: none;
+        padding: 4px;
+        line-height: 1;
+        transition: color 0.2s;
+    }
+    .toast-close-btn:hover {
+        color: #4b5563;
+    }
 </style>
 {% endblock %}
 
@@ -455,19 +578,42 @@
     </div>
 </div>
 
-<!-- QUICK ACTIONS -->
-<div class="logistics-actions">
-    <a href="{% url 'admin:platform_ui_inbound_add' %}" class="action-btn primary">
-        <i class="fa-solid fa-plus"></i> 신규 등록
-    </a>
-    <button class="action-btn success" onclick="confirmReceiving()">
-        <i class="fa-solid fa-check"></i> 입고 확인
-    </button>
+<!-- QUICK ACTIONS (페이지별 분기) -->
+<div class="logistics-actions" style="margin: 0 20px; border-radius: 8px 8px 0 0; border: 1px solid var(--erp-border); border-bottom: none;">
+    {% if 'inbound' in request.path %}
+        {# 입고관리 전용 버튼 #}
+        <button class="action-btn edit" onclick="editSelected()">
+            <i class="fa-solid fa-pen-to-square"></i> 수정
+        </button>
+        <button class="action-btn success" onclick="confirmReceiving()">
+            <i class="fa-solid fa-circle-check"></i> 입고 확인
+        </button>
+    {% elif 'outbound' in request.path %}
+        {# 출고관리 전용 버튼 #}
+        <button class="action-btn primary" onclick="updateDeliveryStatus()">
+            <i class="fa-solid fa-truck-fast"></i> 배송 상태 변경
+        </button>
+    {% elif 'purchaseorder' in request.path %}
+        {# 발주관리 전용 버튼 #}
+        {# 발주 등록 버튼은 하단 테이블 정보 영역으로 이동됨 #}
+    {% elif 'salesorder' in request.path %}
+        {# 수주관리 전용 버튼 #}
+        <button class="action-btn success" onclick="confirmReceiving()">
+            <i class="fa-solid fa-circle-check"></i> 수주 승인
+        </button>
+    {% else %}
+        <button class="action-btn primary" onclick="confirmReceiving()">
+            <i class="fa-solid fa-check"></i> 확인
+        </button>
+    {% endif %}
+
+    <div class="action-divider"></div>
+
     <button class="action-btn" onclick="exportExcel()">
-        <i class="fa-solid fa-file-excel"></i> 엑셀
+        <i class="fa-solid fa-file-excel" style="color:#16a34a;"></i> 엑셀
     </button>
     <button class="action-btn" onclick="window.print()">
-        <i class="fa-solid fa-print"></i> 인쇄
+        <i class="fa-solid fa-print" style="color:#6366f1;"></i> 인쇄
     </button>
     <button class="action-btn danger" onclick="cancelSelected()">
         <i class="fa-solid fa-xmark"></i> 취소
@@ -475,11 +621,28 @@
 </div>
 
 <!-- 메인 데이터 테이블 -->
-<div style="margin: 20px 20px 0 20px; padding: 16px; background: #f1f5f9; border: 1px solid var(--erp-border); border-radius: 8px 8px 0 0;">
-    <div class="flex items-center gap-4">
-        <span style="font-size: 16px; font-weight: 800; color: #475569; background: #fff; padding: 4px 16px; border-radius: 4px; border: 1px solid #cbd5e1;">테이블: PLATFORM_UI_ORDER / PLATFORM_UI_DELIVERY</span>
-        <span style="font-size: 16px; color: #64748b; font-weight: 500;">| 요약 설명: 가맹점별 주문 내역과 실시간 배송 상태를 통합 관리하는 테이블</span>
+<div style="margin: 0 20px 20px 20px; padding: 16px; background: #f1f5f9; border: 1px solid var(--erp-border); border-top: none; border-radius: 0 0 8px 8px; display: flex; align-items: center; justify-content: space-between;">
+    <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+        <span style="font-size: 14px; font-weight: 800; color: #475569; background: #fff; padding: 4px 14px; border-radius: 4px; border: 1px solid #cbd5e1;">테이블: PLATFORM_UI_ORDER / PLATFORM_UI_DELIVERY</span>
+        <span style="font-size: 14px; color: #64748b; font-weight: 500;">| 요약 설명: 가맹점별 주문 내역과 실시간 배송 상태를 통합 관리하는 테이블</span>
     </div>
+    {% if 'inbound' in request.path %}
+    <a href="{% url 'admin:platform_ui_inbound_add' %}" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; font-size:13px; font-weight:700; color:#fff; background:#0d6b62; border-radius:6px; text-decoration:none; white-space:nowrap; box-shadow:0 1px 3px rgba(0,0,0,0.15);">
+        입고 관리 (INBOUND) 추가 <i class="fa-solid fa-plus" style="font-size:11px;"></i>
+    </a>
+    {% elif 'outbound' in request.path %}
+    <a href="{% url 'admin:platform_ui_outbound_add' %}" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; font-size:13px; font-weight:700; color:#fff; background:#0d6b62; border-radius:6px; text-decoration:none; white-space:nowrap; box-shadow:0 1px 3px rgba(0,0,0,0.15);">
+        출고 관리 (OUTBOUND) 추가 <i class="fa-solid fa-plus" style="font-size:11px;"></i>
+    </a>
+    {% elif 'purchaseorder' in request.path %}
+    <a href="{% url 'admin:platform_ui_purchaseorder_add' %}" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; font-size:13px; font-weight:700; color:#fff; background:#0d6b62; border-radius:6px; text-decoration:none; white-space:nowrap; box-shadow:0 1px 3px rgba(0,0,0,0.15);">
+        발주 관리 추가 <i class="fa-solid fa-plus" style="font-size:11px;"></i>
+    </a>
+    {% elif 'salesorder' in request.path %}
+    <a href="{% url 'admin:platform_ui_salesorder_add' %}" style="display:inline-flex; align-items:center; gap:6px; padding:6px 14px; font-size:13px; font-weight:700; color:#fff; background:#0d6b62; border-radius:6px; text-decoration:none; white-space:nowrap; box-shadow:0 1px 3px rgba(0,0,0,0.15);">
+        수주 관리 추가 <i class="fa-solid fa-plus" style="font-size:11px;"></i>
+    </a>
+    {% endif %}
 </div>
 {{ block.super }}
 
@@ -523,15 +686,30 @@
         return Array.from(checkboxes).map(cb => cb.value);
     }
 
+    // 선택 항목 수정 (Django Admin 수정 페이지로 이동)
+    function editSelected() {
+        const selected = getSelectedIds();
+        if (selected.length === 0) {
+            alert('수정할 항목을 선택해주세요.');
+            return;
+        }
+        if (selected.length > 1) {
+            alert('수정은 한 번에 1개 항목만 가능합니다. 1개만 선택해주세요.');
+            return;
+        }
+        // 현재 URL 기반으로 수정 페이지 URL 생성
+        const changeUrl = window.location.pathname + selected[0] + '/change/';
+        window.location.href = changeUrl;
+    }
+
     // 입고 확인
     function confirmReceiving() {
         const selected = getSelectedIds();
         if (selected.length === 0) {
-            alert('입고 확인할 항목을 선택해주세요.');
+            alert('확인할 항목을 선택해주세요.');
             return;
         }
-        if (confirm(selected.length + '개 항목의 입고를 확인하시겠습니까?')) {
-            // Django admin action 실행
+        if (confirm(selected.length + '개 항목을 확인 처리하시겠습니까?')) {
             const form = document.getElementById('changelist-form');
             if (form) {
                 const actionSelect = form.querySelector('select[name="action"]');
@@ -540,6 +718,28 @@
                     form.submit();
                 }
             }
+        }
+    }
+
+    // 배송 상태 변경 (출고관리 전용)
+    function updateDeliveryStatus() {
+        const selected = getSelectedIds();
+        if (selected.length === 0) {
+            alert('상태를 변경할 배송 항목을 선택해주세요.');
+            return;
+        }
+        const newStatus = prompt('변경할 상태를 입력하세요:\nSCHEDULED (배송예정)\nIN_TRANSIT (배송중)\nDELIVERED (배송완료)', 'IN_TRANSIT');
+        if (newStatus && ['SCHEDULED', 'IN_TRANSIT', 'DELIVERED'].includes(newStatus.toUpperCase())) {
+            const form = document.getElementById('changelist-form');
+            if (form) {
+                const actionSelect = form.querySelector('select[name="action"]');
+                if (actionSelect) {
+                    actionSelect.value = 'update_delivery_status';
+                    form.submit();
+                }
+            }
+        } else if (newStatus) {
+            alert('올바른 상태를 입력해주세요: SCHEDULED, IN_TRANSIT, DELIVERED');
         }
     }
 
@@ -580,6 +780,41 @@
                 document.getElementById('detail-partner').textContent = cells[2]?.textContent || '-';
             }
         });
+    });
+
+    // 토스트 메시지 처리 (자동 닫힘 방지 및 닫기 버튼 추가)
+    document.addEventListener('DOMContentLoaded', function() {
+        // Django Admin 메시지 리스트 찾기
+        const messageList = document.querySelector('ul.messagelist');
+        if (messageList) {
+            const messages = messageList.querySelectorAll('li');
+            messages.forEach(function(msg) {
+                // 이미 닫기 버튼이 있는지 체크
+                if (!msg.querySelector('.toast-close-btn')) {
+                    const closeBtn = document.createElement('button');
+                    closeBtn.innerHTML = '&times;';
+                    closeBtn.className = 'toast-close-btn';
+                    closeBtn.title = '닫기';
+                    closeBtn.onclick = function() {
+                        msg.style.opacity = '0';
+                        msg.style.transform = 'translateY(-10px)';
+                        msg.style.transition = 'all 0.3s ease';
+                        setTimeout(function() {
+                            msg.remove();
+                            // 리스트가 비었으면 컨테이너도 제거
+                            if (messageList.querySelectorAll('li').length === 0) {
+                                messageList.remove();
+                            }
+                        }, 300);
+                    };
+                    msg.appendChild(closeBtn);
+                }
+            });
+            
+            // 기존에 설정되었을 수 있는 자동 닫힘 타이머를 무력화하기 위해
+            // 노드를 복제하여 교체 (옵션: 만약 기존 JS 간섭이 심하다면)
+            // 현재는 CSS override와 추가 JS로 충분할 것으로 판단됨.
+        }
     });
 </script>
 {% endblock %}

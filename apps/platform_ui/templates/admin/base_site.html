@@ -302,31 +302,7 @@
         background: rgba(239, 68, 68, 0.1);
     }
 
-    /* Theme Toggle Upgrade */
-    #theme-toggle {
-        background: var(--card-bg) !important;
-        border: 1px solid var(--border-color) !important;
-        padding: 8px 12px !important;
-        border-radius: 10px !important;
-        cursor: pointer !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 8px !important;
-        font-size: 0.8rem !important;
-        font-weight: 700 !important;
-        color: var(--text-color) !important;
-        transition: all 0.2s !important;
-        margin-left: 10px !important;
-    }
 
-    #theme-toggle:hover {
-        background: var(--body-bg) !important;
-        border-color: var(--primary-color) !important;
-    }
-
-    [data-theme="dark"] #theme-toggle {
-        background: rgba(255, 255, 255, 0.05) !important;
-    }
 
     /* HIDE DEFAULT DJANGO THEME TOGGLE */
     .theme-toggle, 
@@ -491,6 +467,74 @@
     }
     
     .erp-switch-link i { font-size: 0.85rem; margin-bottom: 2px; }
+
+    /* ==========================================
+       [GLOBAL] FORCE WHITE INPUTS (ACCESSIBILITY)
+       - All inputs must be white background
+       - Text must be dark (even in dark mode)
+       - Borders: Light gray with slight contrast
+       ========================================== */
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    input[type="number"],
+    input[type="url"],
+    input[type="search"],
+    textarea,
+    select,
+    .vTextField,
+    .vIntegerField,
+    .vLargeTextField,
+    .vURLField,
+    .vDateField,
+    .vTimeField {
+        background-color: #FFFFFF !important;
+        border: 1px solid #D1D5DB !important; /* Tailwind gray-300 */
+        color: #1F2937 !important; /* Default Light Mode Text */
+        padding: 8px 12px !important;
+        border-radius: 6px !important;
+    }
+    
+    /* Select specific to ensure dropdown arrow/bg is correct */
+    select {
+        background-image: none !important; /* Remove custom arrows if any causing issues */
+    }
+
+    ::placeholder {
+        color: #9CA3AF !important;
+    }
+
+    /* Dark Mode Text Override */
+    @media (prefers-color-scheme: dark) {
+        input[type="text"],
+        input[type="password"],
+        input[type="email"],
+        input[type="number"],
+        input[type="url"],
+        input[type="search"],
+        textarea,
+        select,
+        .vTextField,
+        .vIntegerField,
+        .vLargeTextField,
+        .vURLField,
+        .vDateField,
+        .vTimeField {
+             /* Background stays White */
+            color: #111827 !important; /* Very Dark Grey for White BG */
+            border-color: #9CA3AF !important;
+            background-color: #FFFFFF !important; /* Ensure it stays white */
+        }
+        ::placeholder {
+            color: #6B7280 !important;
+        }
+        
+        /* Select options visibility */
+        select option {
+            background-color: #FFFFFF !important;
+            color: #111827 !important;
+        }
+    }
 </style>
 
 <script>
@@ -507,8 +551,6 @@
     })();
 
     document.addEventListener('DOMContentLoaded', function() {
-        const toggleBtn = document.createElement('button');
-        toggleBtn.id = 'theme-toggle';
         
         function applyTheme(themeName) {
             const isDark = themeName === 'dark';
@@ -521,10 +563,6 @@
             if (header) {
                 header.style.background = isDark ? 'rgba(15, 23, 42, 0.8)' : '#ffffff';
                 header.style.color = isDark ? '#ffffff' : '#0f172a';
-            }
-            
-            if (toggleBtn) {
-                toggleBtn.innerHTML = isDark ? '<i class=\"fa-solid fa-sun\"></i> 라이트 모드' : '<i class=\"fa-solid fa-moon\"></i> 다크 모드';
             }
             
             localStorage.setItem('admin-theme', themeName);
@@ -548,19 +586,6 @@
         });
         
         observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-
-        const userTools = document.getElementById('user-tools');
-        if (userTools) {
-            userTools.prepend(toggleBtn);
-        }
-
-        toggleBtn.addEventListener('click', function() {
-            const current = localStorage.getItem('admin-theme') || 'light';
-            const next = current === 'dark' ? 'light' : 'dark';
-            localStorage.setItem('admin-theme', next);
-            localStorage.setItem('theme', next);
-            applyTheme(next);
-        });
 
         // Breadcrumbs Integration Logic
         const header = document.getElementById('header');
