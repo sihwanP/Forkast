@@ -21,6 +21,7 @@ class Command(BaseCommand):
         
         # Clear existing data? Or just add if missing?
         # Let's clear to ensure clean slate for demo
+        # [Inventory 테이블] 상품/자재 마스터 (상품명, 현재고, 적정재고, 상태)
         Inventory.objects.all().delete()
         
         for item in items:
@@ -36,6 +37,7 @@ class Command(BaseCommand):
             else:
                 status = 'GOOD'
                 
+            # [Inventory 테이블] 상품/자재 마스터 (상품명, 현재고, 적정재고, 상태)
             Inventory.objects.create(
                 item_name=item["name"],
                 current_stock=current,

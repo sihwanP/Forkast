@@ -11,7 +11,9 @@ class Command(BaseCommand):
         
         # 1. Weather (Today)
         today = timezone.now().date()
+        # [Weather 테이블] 날씨 정보 (날짜, 기상상태, 기온)
         Weather.objects.filter(date=today).delete()
+        # [Weather 테이블] 날씨 정보 (날짜, 기상상태, 기온)
         Weather.objects.create(
             date=today,
             condition=random.choice(["맑음", "약간 흐림", "비", "눈"]),
@@ -19,6 +21,7 @@ class Command(BaseCommand):
         )
         
         # 2. Inventory (Reset & Randomize)
+        # [Inventory 테이블] 상품/자재 마스터 (상품명, 현재고, 적정재고, 상태)
         Inventory.objects.all().delete()
         items = [
             ("A세트 (시그니처)", 50, 60), 
@@ -32,6 +35,7 @@ class Command(BaseCommand):
             if current < optimal * 0.5: status = 'LOW'
             elif current > optimal * 1.2: status = 'OVER'
             
+            # [Inventory 테이블] 상품/자재 마스터 (상품명, 현재고, 적정재고, 상태)
             Inventory.objects.create(
                 item_name=name,
                 current_stock=current,
@@ -40,8 +44,10 @@ class Command(BaseCommand):
             )
             
         # 3. Local Events
+        # [LocalEvent 테이블] 지역 행사/이벤트 (행사명, 일시, 영향도)
         LocalEvent.objects.all().delete()
         if random.random() > 0.3: # 70% chance of event
+            # [LocalEvent 테이블] 지역 행사/이벤트 (행사명, 일시, 영향도)
             LocalEvent.objects.create(
                 name="지역 벚꽃 축제",
                 date=today,

@@ -38,6 +38,7 @@ def handle_transaction_confirmation(sender, instance, created, **kwargs):
                 continue
 
             # 1. Create Log
+            # [InventoryMovement 테이블] 재고 수불부/입출고 이력 (상품, 유형, 수량, 사유)
             InventoryMovement.objects.create(
                 product=product,
                 type=move_type,
@@ -59,6 +60,7 @@ def update_daily_sales(target_date):
     Aggregates all CONFIRMED SALES for the day and updates DailySales.
     """
     # 1. Total Daily Revenue
+    # [Transaction 테이블] 거래 내역 (유형: 매출/매입/반품, 상태, 금액)
     daily_total = Transaction.objects.filter(
         type='SALE',
         status='CONFIRMED', 
@@ -66,6 +68,7 @@ def update_daily_sales(target_date):
     ).aggregate(Sum('final_amount'))['final_amount__sum'] or 0
 
     # Update 'All' Item (General Total)
+    # [DailySales 테이블] 일일 매출 집계/리포트 (날짜, 실매출, 예상매출)
     ds, _ = DailySales.objects.get_or_create(date=target_date, item_name='All', defaults={'revenue': 0, 'predicted_revenue': 0})
     ds.revenue = daily_total
     ds.save()
@@ -80,6 +83,7 @@ def handle_order_movement(sender, instance, created, **kwargs):
         if InventoryMovement.objects.filter(reason__icontains=f"수주 완료 (#{instance.id})").exists():
             return
             
+        # [InventoryMovement 테이블] 재고 수불부/입출고 이력 (상품, 유형, 수량, 사유)
         InventoryMovement.objects.create(
             product=instance.item,
             type='IN',

@@ -14,6 +14,7 @@ class Command(BaseCommand):
         start_date = end_date - timedelta(days=29)
         
         # Clear existing data for cleaner demo
+        # [DailySales 테이블] 일일 매출 집계/리포트 (날짜, 실매출, 예상매출)
         DailySales.objects.all().delete()
         
         for i in range(30):
@@ -35,6 +36,7 @@ class Command(BaseCommand):
             
             weather = random.choice(["맑음", "구름조금", "비", "흐림"])
             
+            # [DailySales 테이블] 일일 매출 집계/리포트 (날짜, 실매출, 예상매출)
             DailySales.objects.create(
                 date=current_date,
                 revenue=revenue,

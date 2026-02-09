@@ -113,10 +113,13 @@ class ProductAdmin(BaseErpAdmin):
     def changelist_view(self, request, extra_context=None):
         # Aggregate logic
         from django.db.models import Sum, F
+        # [Inventory 테이블] 상품/자재 마스터 (상품명, 현재고, 적정재고, 상태)
         total_items = Inventory.objects.count()
+        # [Inventory 테이블] 상품/자재 마스터 (상품명, 현재고, 적정재고, 상태)
         total_value = Inventory.objects.aggregate(
             total_val=Sum(F('current_stock') * F('cost'))
         )['total_val'] or 0
+        # [Inventory 테이블] 상품/자재 마스터 (상품명, 현재고, 적정재고, 상태)
         low_stock = Inventory.objects.filter(status='LOW').count()
         
         extra_context = extra_context or {}
@@ -287,6 +290,7 @@ def confirm_delivery_receipt(modeladmin, request, queryset):
         product.save()
         recalculate_inventory_status(product)
         # 입출고 이력 기록
+        # [InventoryMovement 테이블] 재고 수불부/입출고 이력 (상품, 유형, 수량, 사유)
         InventoryMovement.objects.create(
             type='IN',
             product=order.item,
@@ -312,6 +316,7 @@ def cancel_order(modeladmin, request, queryset):
             product.save()
             recalculate_inventory_status(product)
             # 연관 배송 취소
+            # [Delivery 테이블] 배송/물류 관리 (주문참조, 배송주소, 기사명, 상태)
             Delivery.objects.filter(order=order).exclude(status='CANCELLED').update(status='CANCELLED')
         order.status = 'CANCELLED'
         order.save()
@@ -333,6 +338,7 @@ def approve_sales_order(modeladmin, request, queryset):
         product.save()
         recalculate_inventory_status(product)
         # 배송 자동 생성
+        # [Delivery 테이블] 배송/물류 관리 (주문참조, 배송주소, 기사명, 상태)
         Delivery.objects.get_or_create(
             order=order,
             defaults={
@@ -342,6 +348,7 @@ def approve_sales_order(modeladmin, request, queryset):
             }
         )
         # 입출고 이력 기록
+        # [InventoryMovement 테이블] 재고 수불부/입출고 이력 (상품, 유형, 수량, 사유)
         InventoryMovement.objects.create(
             type='OUT',
             product=order.item,

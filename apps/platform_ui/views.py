@@ -30,6 +30,7 @@ def sales_view(request):
     today = timezone.now().date()
     
     # 1. Today's Sales (Hourly) - Simulation based on REAL current revenue
+    # [DailySales 테이블] 일일 매출 집계/리포트 (날짜, 실매출, 예상매출)
     sales_today_obj = DailySales.objects.filter(date=today).first()
     current_revenue = float(sales_today_obj.revenue) if sales_today_obj else 0.0
     current_hour = timezone.now().hour
@@ -65,6 +66,7 @@ def sales_view(request):
         })
     
     # 2. Past Sales History (Real DB Data - 30 Days)
+    # [DailySales 테이블] 일일 매출 집계/리포트 (날짜, 실매출, 예상매출)
     history_qs = DailySales.objects.filter(
         date__lt=today, 
         date__gte=today - timedelta(days=30)
@@ -82,6 +84,7 @@ def sales_view(request):
         })
     
     # 3. Predicted Sales (Next 7 Days - Real DB Data)
+    # [DailySales 테이블] 일일 매출 집계/리포트 (날짜, 실매출, 예상매출)
     prediction_qs = DailySales.objects.filter(
         date__gte=today,
         date__lte=today + timedelta(days=7)
@@ -99,6 +102,7 @@ def sales_view(request):
 
     # 4. Monthly Management (Real Aggregation)
     from django.db.models import Sum
+    # [DailySales 테이블] 일일 매출 집계/리포트 (날짜, 실매출, 예상매출)
     monthly_agg = DailySales.objects.filter(
         date__month=today.month,
         date__year=today.year
@@ -130,15 +134,21 @@ def index(request):
     today = timezone.now().date()
     
     # Fast DB Queries
+    # [DailySales 테이블] 일일 매출 집계/리포트 (날짜, 실매출, 예상매출)
     sales_today = DailySales.objects.filter(date=today).first()
+    # [Inventory 테이블] 상품/자재 마스터 (상품명, 현재고, 적정재고, 상태)
     inventory_items = Inventory.objects.all()
     inventory_status_list = [f"{i.item_name}: {i.current_stock} ({i.status})" for i in inventory_items]
     inventory_ctx = ", ".join(inventory_status_list)
     
     # Basic Context from DB (No API calls)
+    # [Weather 테이블] 날씨 정보 (날짜, 기상상태, 기온)
     weather_obj = Weather.objects.filter(date=today).first() # Only read if exists
+    # [LocalEvent 테이블] 지역 행사/이벤트 (행사명, 일시, 영향도)
     event_obj = LocalEvent.objects.filter(date=today).first()
+    # [OwnerSentiment 테이블] 점주 심리 상태 로그 (기분점수, 응원메시지)
     latest_sentiment = OwnerSentiment.objects.last()
+    # [CommunityPost 테이블] 커뮤니티 게시글 (작성자, 내용, 작성일)
     recent_posts = CommunityPost.objects.order_by('-created_at')[:3]
 
     context = {
@@ -168,6 +178,7 @@ def dashboard_stats_api_v2(request):
             real_cond = weather_result.get('condition', '맑음')
             real_temp = weather_result.get('temperature', 20)
             if real_temp is not None:
+                # [Weather 테이블] 날씨 정보 (날짜, 기상상태, 기온)
                 Weather.objects.update_or_create(
                     date=today,
                     defaults={'condition': real_cond, 'temperature': float(real_temp)}
@@ -178,10 +189,12 @@ def dashboard_stats_api_v2(request):
         
         # 2. Real-time DB Context
         from django.db.models import Sum, Avg
+        # [DailySales 테이블] 일일 매출 집계/리포트 (날짜, 실매출, 예상매출)
         sales_today_agg = DailySales.objects.filter(date=today).aggregate(total_revenue=Sum('revenue'))
         today_revenue = float(sales_today_agg['total_revenue'] or 0.0)
         
         history_start = today - timedelta(days=30)
+        # [DailySales 테이블] 일일 매출 집계/리포트 (날짜, 실매출, 예상매출)
         history_qs = DailySales.objects.filter(date__gte=history_start, date__lt=today).order_by('date')
         
         past_sales_data = [float(s.revenue) for s in history_qs]
@@ -189,10 +202,12 @@ def dashboard_stats_api_v2(request):
         
         sales_history_formatted = [f"{s.date.strftime('%Y-%m-%d')}: {s.revenue}원" for s in history_qs]
         
+        # [Inventory 테이블] 상품/자재 마스터 (상품명, 현재고, 적정재고, 상태)
         inventory_items = Inventory.objects.all()
         inventory_ctx = ", ".join([f"{i.item_name}: {i.current_stock}" for i in inventory_items])
         
         weather_ctx = f"{real_cond}, {real_temp}도" if real_cond else "맑음, 20도"
+        # [LocalEvent 테이블] 지역 행사/이벤트 (행사명, 일시, 영향도)
         event_obj = LocalEvent.objects.filter(date=today).first()
         event_ctx = f"{event_obj.name}" if event_obj else "특이사항 없음"
 
@@ -370,18 +385,22 @@ def super_admin(request):
                 except: pass
         elif 'delete_member' in request.POST:
             member_id = request.POST.get('member_id')
+            # [Member 테이블] 지점/사용자 관리 (지점명, 액세스키, 승인상태)
             Member.objects.filter(id=member_id).delete()
         elif 'approve_member' in request.POST:
             member_id = request.POST.get('member_id')
+            # [Member 테이블] 지점/사용자 관리 (지점명, 액세스키, 승인상태)
             Member.objects.filter(id=member_id).update(is_approved=True)
         elif 'reject_member' in request.POST:
             member_id = request.POST.get('member_id')
+            # [Member 테이블] 지점/사용자 관리 (지점명, 액세스키, 승인상태)
             Member.objects.filter(id=member_id).update(is_approved=False)
         
         # --- NEW: Inventory & Order Management handlers ---
         elif 'update_inventory' in request.POST:
             item_id = request.POST.get('item_id')
             new_stock = int(request.POST.get('current_stock'))
+            # [Inventory 테이블] 상품/자재 마스터 (상품명, 현재고, 적정재고, 상태)
             item = Inventory.objects.get(id=item_id)
             item.current_stock = new_stock
             
@@ -395,6 +414,7 @@ def super_admin(request):
             
         elif 'confirm_order' in request.POST:
             order_id = request.POST.get('order_id')
+            # [Order 테이블] 수주/발주 요청 (품목, 수량, 상태, 유형: SALES/PURCHASE)
             order = Order.objects.get(id=order_id)
             if order.status == 'PENDING':
                 # Mark Sales Order as Completed
@@ -413,6 +433,7 @@ def super_admin(request):
                 product.save()
                 
                 # Auto-create Outbound Delivery record
+                # [Delivery 테이블] 배송/물류 관리 (주문참조, 배송주소, 기사명, 상태)
                 Delivery.objects.get_or_create(
                     order=order,
                     defaults={
@@ -423,6 +444,7 @@ def super_admin(request):
                 )
                 
                 # Create Inventory Movement Audit Log
+                # [InventoryMovement 테이블] 재고 수불부/입출고 이력 (상품, 유형, 수량, 사유)
                 InventoryMovement.objects.create(
                     type='OUT',
                     product=order.item,
@@ -432,6 +454,7 @@ def super_admin(request):
 
         elif 'delete_order' in request.POST:
             order_id = request.POST.get('order_id')
+            # [Order 테이블] 수주/발주 요청 (품목, 수량, 상태, 유형: SALES/PURCHASE)
             Order.objects.filter(id=order_id).delete()
 
         # --- LOGISTICS INTEGRATION HANDLERS ---
@@ -440,6 +463,7 @@ def super_admin(request):
         if cancel_id:
             model_type = request.GET.get('model')
             if model_type == 'order':
+                # [Order 테이블] 수주/발주 요청 (품목, 수량, 상태, 유형: SALES/PURCHASE)
                 order = Order.objects.get(id=cancel_id)
                 if order.status == 'COMPLETED':
                     product = order.item
@@ -452,10 +476,12 @@ def super_admin(request):
                     else: product.status = 'GOOD'
                     product.save()
                     # 연관 배송 취소
+                    # [Delivery 테이블] 배송/물류 관리 (주문참조, 배송주소, 기사명, 상태)
                     Delivery.objects.filter(order=order).exclude(status='CANCELLED').update(status='CANCELLED')
                 order.status = 'CANCELLED'
                 order.save()
             elif model_type == 'inbound':
+                # [InventoryMovement 테이블] 재고 수불부/입출고 이력 (상품, 유형, 수량, 사유)
                 move = InventoryMovement.objects.get(id=cancel_id)
                 product = move.product
                 product.current_stock -= move.quantity
@@ -474,6 +500,7 @@ def super_admin(request):
             item_id = request.POST.get('item_id')
             qty = int(request.POST.get('quantity', 0))
             if item_id and qty > 0:
+                # [Inventory 테이블] 상품/자재 마스터 (상품명, 현재고, 적정재고, 상태)
                 item = Inventory.objects.get(id=item_id)
                 item.current_stock += qty
                 # Status calc
@@ -486,6 +513,7 @@ def super_admin(request):
 
                     
                 # Create Inventory Movement Audit Log
+                # [InventoryMovement 테이블] 재고 수불부/입출고 이력 (상품, 유형, 수량, 사유)
                 InventoryMovement.objects.create(
                     type='IN',
                     product=item,
@@ -499,8 +527,10 @@ def super_admin(request):
             item_id = request.POST.get('item_id')
             qty = int(request.POST.get('quantity', 0))
             if item_id and qty > 0:
+                # [Inventory 테이블] 상품/자재 마스터 (상품명, 현재고, 적정재고, 상태)
                 item = Inventory.objects.get(id=item_id)
                 # 1. Create Purchase Order
+                # [Order 테이블] 수주/발주 요청 (품목, 수량, 상태, 유형: SALES/PURCHASE)
                 Order.objects.create(
                     item=item, 
                     quantity=qty, 
@@ -518,6 +548,7 @@ def super_admin(request):
                 item.save()
 
                 # 3. Log Movement
+                # [InventoryMovement 테이블] 재고 수불부/입출고 이력 (상품, 유형, 수량, 사유)
                 InventoryMovement.objects.create(
                     type='IN',
                     product=item,
@@ -530,7 +561,9 @@ def super_admin(request):
             item_id = request.POST.get('item_id')
             qty = int(request.POST.get('quantity', 0))
             if item_id and qty > 0:
+                # [Inventory 테이블] 상품/자재 마스터 (상품명, 현재고, 적정재고, 상태)
                 item = Inventory.objects.get(id=item_id)
+                # [Order 테이블] 수주/발주 요청 (품목, 수량, 상태, 유형: SALES/PURCHASE)
                 order = Order.objects.create(item=item, quantity=qty, status='PENDING')
                 messages.success(request, f'{item.item_name} {qty}개 수주 등록 완료.')
 
@@ -546,6 +579,7 @@ def super_admin(request):
             new_status = request.POST.get('status')
             driver = request.POST.get('driver_name')
             
+            # [Delivery 테이블] 배송/물류 관리 (주문참조, 배송주소, 기사명, 상태)
             delivery = Delivery.objects.get(id=delivery_id)
             delivery.status = new_status
             if driver:
@@ -558,9 +592,11 @@ def super_admin(request):
         elif action_type == 'assign_delivery':
             order_id = request.POST.get('order_id')
             address = request.POST.get('address', '지점 배송')
+            # [Order 테이블] 수주/발주 요청 (품목, 수량, 상태, 유형: SALES/PURCHASE)
             order = Order.objects.get(id=order_id)
             
             # Create or Update Delivery
+            # [Delivery 테이블] 배송/물류 관리 (주문참조, 배송주소, 기사명, 상태)
             Delivery.objects.update_or_create(
                 order=order,
                 defaults={
@@ -576,6 +612,7 @@ def super_admin(request):
             new_qty = int(request.POST.get('new_quantity', 0))
             
             if model_type == 'order':
+                # [Order 테이블] 수주/발주 요청 (품목, 수량, 상태, 유형: SALES/PURCHASE)
                 order = Order.objects.get(id=item_id)
                 old_qty = order.quantity
                 order.quantity = new_qty
@@ -592,6 +629,7 @@ def super_admin(request):
                     product.save()
                     
             elif model_type == 'inbound': # InventoryMovement (IN)
+                # [InventoryMovement 테이블] 재고 수불부/입출고 이력 (상품, 유형, 수량, 사유)
                 move = InventoryMovement.objects.get(id=item_id)
                 old_qty = move.quantity
                 move.quantity = new_qty
@@ -604,6 +642,7 @@ def super_admin(request):
                 product.save()
                 
             elif model_type == 'delivery':
+                # [Delivery 테이블] 배송/물류 관리 (주문참조, 배송주소, 기사명, 상태)
                 delivery = Delivery.objects.get(id=item_id)
                 # Delivery doesn't have its own quantity, it uses order's quantity
                 order = delivery.order
@@ -617,6 +656,7 @@ def super_admin(request):
             item_id = request.POST.get('item_id')
             
             if model_type == 'order':
+                # [Order 테이블] 수주/발주 요청 (품목, 수량, 상태, 유형: SALES/PURCHASE)
                 order = Order.objects.get(id=item_id)
                 if order.status == 'COMPLETED':
                     # Revert Stock
@@ -630,6 +670,7 @@ def super_admin(request):
                 order.save()
                 
             elif model_type == 'inbound':
+                # [InventoryMovement 테이블] 재고 수불부/입출고 이력 (상품, 유형, 수량, 사유)
                 move = InventoryMovement.objects.get(id=item_id)
                 # Revert Stock
                 product = move.product
@@ -638,6 +679,7 @@ def super_admin(request):
                 move.delete() # Or mark as cancelled if field exists
                 
             elif model_type == 'delivery':
+                # [Delivery 테이블] 배송/물류 관리 (주문참조, 배송주소, 기사명, 상태)
                 delivery = Delivery.objects.get(id=item_id)
                 delivery.status = 'CANCELLED'
                 delivery.save()
@@ -649,11 +691,13 @@ def super_admin(request):
             new_qty = int(request.POST.get('quantity', 0))
             
             if model_type == 'order':
+                # [Order 테이블] 수주/발주 요청 (품목, 수량, 상태, 유형: SALES/PURCHASE)
                 order = Order.objects.get(id=item_id)
                 order.quantity = new_qty
                 order.save()
                 messages.success(request, f'주문 #{order.id} 수량이 {new_qty}개로 수정되었습니다.')
             elif model_type == 'inbound':
+                # [InventoryMovement 테이블] 재고 수불부/입출고 이력 (상품, 유형, 수량, 사유)
                 move = InventoryMovement.objects.get(id=item_id)
                 old_qty = move.quantity
                 move.quantity = new_qty
@@ -666,19 +710,25 @@ def super_admin(request):
         return redirect('super_admin')
 
     # Fetch Data for SCM Console
+    # [Inventory 테이블] 상품/자재 마스터 (상품명, 현재고, 적정재고, 상태)
     inventory = Inventory.objects.all().order_by('item_name')
     
     # 4 Modules Logic
+    # [Order 테이블] 수주/발주 요청 (품목, 수량, 상태, 유형: SALES/PURCHASE)
     sales_orders = Order.objects.filter(type='SALES').order_by('-created_at')
+    # [Order 테이블] 수주/발주 요청 (품목, 수량, 상태, 유형: SALES/PURCHASE)
     purchase_orders = Order.objects.filter(type='PURCHASE').order_by('-created_at')
     
+    # [Order 테이블] 수주/발주 요청 (품목, 수량, 상태, 유형: SALES/PURCHASE)
     all_orders = Order.objects.all().order_by('-created_at')
+    # [Member 테이블] 지점/사용자 관리 (지점명, 액세스키, 승인상태)
     members = Member.objects.all().order_by('-created_at')
     
     # NEW: Fetch Branch Performance Stats
     from django.db.models import Sum, Max
     branch_stats = []
     for member in members:
+        # [DailySales 테이블] 일일 매출 집계/리포트 (날짜, 실매출, 예상매출)
         sales_agg = DailySales.objects.filter(item_name__icontains=member.name).aggregate(
             total_rev=Sum('revenue'),
             last_date=Max('date')
@@ -694,19 +744,25 @@ def super_admin(request):
         })
 
     # KPI Calculations
+    # [Inventory 테이블] 상품/자재 마스터 (상품명, 현재고, 적정재고, 상태)
     low_stock_count = Inventory.objects.filter(status='LOW').count()
+    # [Order 테이블] 수주/발주 요청 (품목, 수량, 상태, 유형: SALES/PURCHASE)
     pending_orders_count = Order.objects.filter(status='PENDING').count()
     
     # Fetch Deliveries
+    # [Delivery 테이블] 배송/물류 관리 (주문참조, 배송주소, 기사명, 상태)
     deliveries = Delivery.objects.all().order_by('-scheduled_at')
     
     # Financial Stats (Payments)
+    # [Transaction 테이블] 거래 내역 (유형: 매출/매입/반품, 상태, 금액)
     total_sales = Transaction.objects.filter(type='SALE', status='CONFIRMED').aggregate(Sum('final_amount'))['final_amount__sum'] or 0
+    # [Partner 테이블] 거래처 관리 (거래처명, 구분: 고객/공급사, 미수금)
     pending_payments = Partner.objects.aggregate(Sum('balance'))['balance__sum'] or 0
 
     # Chart Data (Weekly Trend - REAL)
     from datetime import timedelta
     start_week = today - timedelta(days=6)
+    # [DailySales 테이블] 일일 매출 집계/리포트 (날짜, 실매출, 예상매출)
     weekly_qs = DailySales.objects.filter(date__gte=start_week, date__lte=today).values('date').annotate(total_rev=Sum('revenue')).order_by('date')
     
     weekly_labels = []
@@ -768,6 +824,7 @@ def change_admin_key(request):
         # Runtime DB Fix for Member Table
         from django.db import connection
         try:
+            # [Member 테이블] 지점/사용자 관리 (지점명, 액세스키, 승인상태)
             is_valid_master = Member.objects.filter(master_key=master_key_input).exists()
         except:
              # If Table missing, create it (Self-Healing)
@@ -785,6 +842,7 @@ def change_admin_key(request):
         if is_valid_master and new_key:
             # Use update() to only touch the 'key' column, avoiding 'no such column: master_key' error
             # if the DB schema is out of sync regarding the legacy master_key column.
+            # [AdminConfig 테이블] 관리자 환경 설정 (설정 키, 수정일)
             AdminConfig.objects.update_or_create(id=1, defaults={'key': new_key})
             return redirect('cover')
         else:
@@ -800,6 +858,7 @@ def reset_admin_key(request):
         master_key_input = request.POST.get('master_key')
         
         try:
+            # [Member 테이블] 지점/사용자 관리 (지점명, 액세스키, 승인상태)
             is_valid_master = Member.objects.filter(master_key=master_key_input).exists()
         except:
              # If Table missing, create it
@@ -816,6 +875,7 @@ def reset_admin_key(request):
 
         if is_valid_master:
             # Use update_or_create to safely set the key
+            # [AdminConfig 테이블] 관리자 환경 설정 (설정 키, 수정일)
             AdminConfig.objects.update_or_create(id=1, defaults={'key': "admin"})
             return redirect('cover')
         else:
@@ -863,6 +923,7 @@ def toggle_work_status(request):
         )
         
         # 매출 데이터 조회
+        # [DailySales 테이블] 일일 매출 집계/리포트 (날짜, 실매출, 예상매출)
         sales_today = DailySales.objects.filter(date=today).first()
         
         ws1['A1'] = '날짜'
@@ -901,6 +962,7 @@ def toggle_work_status(request):
             cell.border = thin_border
             cell.alignment = Alignment(horizontal='center')
         
+        # [Inventory 테이블] 상품/자재 마스터 (상품명, 현재고, 적정재고, 상태)
         inventory_items = Inventory.objects.all()
         for row, item in enumerate(inventory_items, 2):
             ws2.cell(row=row, column=1, value=item.item_name).border = thin_border
@@ -924,6 +986,7 @@ def toggle_work_status(request):
             cell.border = thin_border
             cell.alignment = Alignment(horizontal='center')
         
+        # [Transaction 테이블] 거래 내역 (유형: 매출/매입/반품, 상태, 금액)
         transactions = Transaction.objects.filter(created_at__date=today)
         for row, tx in enumerate(transactions, 2):
             ws3.cell(row=row, column=1, value=tx.id).border = thin_border
@@ -948,6 +1011,7 @@ def toggle_work_status(request):
             cell.border = thin_border
             cell.alignment = Alignment(horizontal='center')
         
+        # [Order 테이블] 수주/발주 요청 (품목, 수량, 상태, 유형: SALES/PURCHASE)
         orders = Order.objects.filter(created_at__date=today)
         for row, order in enumerate(orders, 2):
             ws4.cell(row=row, column=1, value=order.id).border = thin_border
@@ -999,20 +1063,25 @@ def store_dashboard(request):
     """
     Store/Branch Manager Dashboard: Focused on POS Sales and Inventory.
     """
+    # [Inventory 테이블] 상품/자재 마스터 (상품명, 현재고, 적정재고, 상태)
     items = Inventory.objects.all().order_by('item_name')
     
     # 1. POS Sales Summary (Today)
     today = timezone.now().date()
+    # [DailySales 테이블] 일일 매출 집계/리포트 (날짜, 실매출, 예상매출)
     sales_today = DailySales.objects.filter(date=today).first()
     revenue = sales_today.revenue if sales_today else 0
     
     # Recent Transactions (POS)
+    # [Transaction 테이블] 거래 내역 (유형: 매출/매입/반품, 상태, 금액)
     recent_transactions = Transaction.objects.filter(type='SALE').order_by('-created_at')[:5]
     
     # 2. HQ Orders (Procurement)
+    # [Order 테이블] 수주/발주 요청 (품목, 수량, 상태, 유형: SALES/PURCHASE)
     pending_orders = Order.objects.filter(status='PENDING').order_by('-created_at')
     
     # 3. Deliveries from HQ
+    # [Delivery 테이블] 배송/물류 관리 (주문참조, 배송주소, 기사명, 상태)
     active_deliveries = Delivery.objects.exclude(status='DELIVERED').order_by('-scheduled_at')
 
     return render(request, 'platform_ui/store_dashboard.html', {
@@ -1044,6 +1113,7 @@ def inventory_api(request):
             else: status = 'GOOD'
 
             if item_id: # Update
+                # [Inventory 테이블] 상품/자재 마스터 (상품명, 현재고, 적정재고, 상태)
                 item = Inventory.objects.get(id=item_id)
                 item.item_name = data['item_name']
                 item.current_stock = current
@@ -1062,6 +1132,7 @@ def inventory_api(request):
                     except Exception as e:
                         print(f"Oracle Sync Error (API Update): {e}")
             else: # Create
+                # [Inventory 테이블] 상품/자재 마스터 (상품명, 현재고, 적정재고, 상태)
                 item = Inventory.objects.create(
                     item_name=data['item_name'],
                     current_stock=current,
@@ -1086,6 +1157,7 @@ def inventory_api(request):
     elif request.method == 'DELETE':
         try:
             data = json.loads(request.body)
+            # [Inventory 테이블] 상품/자재 마스터 (상품명, 현재고, 적정재고, 상태)
             Inventory.objects.get(id=data['id']).delete()
             return JsonResponse({'status': 'success'})
         except Exception as e:
@@ -1108,7 +1180,9 @@ def order_api(request):
             quantity = int(data.get('quantity'))
             
             # 1. Create Order (Pending)
+            # [Inventory 테이블] 상품/자재 마스터 (상품명, 현재고, 적정재고, 상태)
             item = Inventory.objects.get(id=item_id)
+            # [Order 테이블] 수주/발주 요청 (품목, 수량, 상태, 유형: SALES/PURCHASE)
             Order.objects.create(
                 item=item,
                 quantity=quantity,
@@ -1124,6 +1198,7 @@ def order_api(request):
             data = json.loads(request.body)
             order_id = data.get('order_id')
             
+            # [Order 테이블] 수주/발주 요청 (품목, 수량, 상태, 유형: SALES/PURCHASE)
             order = Order.objects.get(id=order_id)
             if order.status != 'PENDING':
                 return JsonResponse({'status': 'error', 'message': '이미 처리된 주문 내역입니다.'})
@@ -1156,6 +1231,7 @@ def logistics_stream_api(request):
     """
     Returns the latest 10 inventory movements for real-time dashboard.
     """
+    # [InventoryMovement 테이블] 재고 수불부/입출고 이력 (상품, 유형, 수량, 사유)
     movements = InventoryMovement.objects.all().order_by('-created_at')[:10]
     data = []
     for m in movements:
@@ -1576,6 +1652,7 @@ def get_notifications_api(request):
     
     try:
         # 1. Pending Orders (수주 승인 대기)
+        # [Order 테이블] 수주/발주 요청 (품목, 수량, 상태, 유형: SALES/PURCHASE)
         pending_orders = Order.objects.filter(status='PENDING').order_by('-created_at')
         for order in pending_orders:
             notifications.append({
@@ -1588,6 +1665,7 @@ def get_notifications_api(request):
             })
 
         # 2. Scheduled Deliveries (출고 대기/예정)
+        # [Delivery 테이블] 배송/물류 관리 (주문참조, 배송주소, 기사명, 상태)
         pending_deliveries = Delivery.objects.filter(status='SCHEDULED').order_by('-scheduled_at')
         for delivery in pending_deliveries:
             notifications.append({
@@ -1627,6 +1705,7 @@ def sales_period_stats_api(request):
 
         # Query Main Database with Aggregation
         from django.db.models import Sum
+        # [DailySales 테이블] 일일 매출 집계/리포트 (날짜, 실매출, 예상매출)
         sales_data = DailySales.objects.filter(date__range=[start_date, end_date])\
             .values('date').annotate(total_revenue=Sum('revenue')).order_by('date')
         
@@ -1638,6 +1717,7 @@ def sales_period_stats_api(request):
         comp_end = start_date - timezone.timedelta(days=1)
         comp_start = comp_end - timezone.timedelta(days=delta - 1)
         
+        # [DailySales 테이블] 일일 매출 집계/리포트 (날짜, 실매출, 예상매출)
         comp_sales_qs = DailySales.objects.filter(date__range=[comp_start, comp_end])\
             .values('date').annotate(total_revenue=Sum('revenue')).order_by('date')
         
@@ -1675,12 +1755,14 @@ def dashboard(request):
     today = timezone.now().date()
     
     # 1. Fetch Today's POS Sales
+    # [DailySales 테이블] 일일 매출 집계/리포트 (날짜, 실매출, 예상매출)
     sales_today = DailySales.objects.filter(date=today).first()
     current_revenue = sales_today.revenue if sales_today else 0
     context['current_revenue'] = current_revenue
     
     # 1-1. Fetch Past POS Sales (7 Days Ago for comparison)
     past_date = today - timezone.timedelta(days=7)
+    # [DailySales 테이블] 일일 매출 집계/리포트 (날짜, 실매출, 예상매출)
     sales_past = DailySales.objects.filter(date=past_date).first()
     past_revenue = sales_past.revenue if sales_past else 0  # Dummy logic if no data: could use a baseline
     if past_revenue == 0: past_revenue = 850000 # Mocking past data if DB empty for professional look
@@ -1744,6 +1826,7 @@ def dashboard(request):
     except:
         context['weather_obj'] = None
     
+    # [Inventory 테이블] 상품/자재 마스터 (상품명, 현재고, 적정재고, 상태)
     inv_count = Inventory.objects.filter(current_stock__lt=10).count()
     context['inventory_ctx'] = f"부족 품목 {inv_count}개" if inv_count > 0 else "재고 상태 양호"
 
