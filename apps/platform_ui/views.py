@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.contrib import messages
 from .models import DailySales, Inventory, OwnerSentiment, CommunityPost, Weather, LocalEvent, AdminConfig, Member, Order, Delivery, Transaction, Partner, InventoryMovement
 from django.utils import timezone
 from datetime import timedelta
@@ -390,6 +391,7 @@ def super_admin(request):
             elif ratio > 1.5: item.status = 'OVER'
             else: item.status = 'GOOD'
             item.save()
+            messages.success(request, f'{item.item_name} 재고가 {new_stock}개로 변경되었습니다.')
             
         elif 'confirm_order' in request.POST:
             order_id = request.POST.get('order_id')
@@ -398,6 +400,7 @@ def super_admin(request):
                 # Mark Sales Order as Completed
                 order.status = 'COMPLETED'
                 order.save()
+                messages.success(request, f'수주 #{order.id} ({order.item.item_name}) 승인 완료. 재고 차감 및 배송 생성됨.')
                 
                 # 재고 차감 (출고)
                 product = order.item
@@ -489,6 +492,7 @@ def super_admin(request):
                     quantity=qty,
                     reason="관리자 수동 입고 등록 (Inbound)"
                 )
+                messages.success(request, f'{item.item_name} {qty}개 입고 등록 완료.')
 
         elif action_type == 'reg_procure':
             # Purchase Order (Bal-ju) Registration
@@ -520,6 +524,7 @@ def super_admin(request):
                     quantity=qty,
                     reason="외부 발주 입고 (Purchase Order)"
                 )
+                messages.success(request, f'{item.item_name} {qty}개 발주 등록 완료.')
         
         elif action_type == 'reg_order':
             item_id = request.POST.get('item_id')
@@ -527,6 +532,7 @@ def super_admin(request):
             if item_id and qty > 0:
                 item = Inventory.objects.get(id=item_id)
                 order = Order.objects.create(item=item, quantity=qty, status='PENDING')
+                messages.success(request, f'{item.item_name} {qty}개 수주 등록 완료.')
 
         elif action_type == 'reg_statement':
             target = request.POST.get('target_name')
@@ -635,6 +641,27 @@ def super_admin(request):
                 delivery = Delivery.objects.get(id=item_id)
                 delivery.status = 'CANCELLED'
                 delivery.save()
+                messages.success(request, '배송 취소 완료.')
+
+        elif action_type == 'edit_logistics':
+            model_type = request.POST.get('model_type')
+            item_id = request.POST.get('item_id')
+            new_qty = int(request.POST.get('quantity', 0))
+            
+            if model_type == 'order':
+                order = Order.objects.get(id=item_id)
+                order.quantity = new_qty
+                order.save()
+                messages.success(request, f'주문 #{order.id} 수량이 {new_qty}개로 수정되었습니다.')
+            elif model_type == 'inbound':
+                move = InventoryMovement.objects.get(id=item_id)
+                old_qty = move.quantity
+                move.quantity = new_qty
+                move.save()
+                product = move.product
+                product.current_stock += (new_qty - old_qty)
+                product.save()
+                messages.success(request, f'입고 #{move.id} 수량이 {new_qty}개로 수정되었습니다.')
 
         return redirect('super_admin')
 
