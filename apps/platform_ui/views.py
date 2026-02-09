@@ -399,6 +399,16 @@ def super_admin(request):
                 order.status = 'COMPLETED'
                 order.save()
                 
+                # 재고 차감 (출고)
+                product = order.item
+                product.current_stock -= order.quantity
+                # 상태 자동 재계산
+                ratio = product.current_stock / product.optimal_stock if product.optimal_stock > 0 else 0
+                if ratio < 0.3: product.status = 'LOW'
+                elif ratio > 1.5: product.status = 'OVER'
+                else: product.status = 'GOOD'
+                product.save()
+                
                 # Auto-create Outbound Delivery record
                 Delivery.objects.get_or_create(
                     order=order,
@@ -433,13 +443,25 @@ def super_admin(request):
                     product = order.item
                     if order.type == 'SALES': product.current_stock += order.quantity
                     else: product.current_stock -= order.quantity
+                    # 상태 재계산
+                    ratio = product.current_stock / product.optimal_stock if product.optimal_stock > 0 else 0
+                    if ratio < 0.3: product.status = 'LOW'
+                    elif ratio > 1.5: product.status = 'OVER'
+                    else: product.status = 'GOOD'
                     product.save()
+                    # 연관 배송 취소
+                    Delivery.objects.filter(order=order).exclude(status='CANCELLED').update(status='CANCELLED')
                 order.status = 'CANCELLED'
                 order.save()
             elif model_type == 'inbound':
                 move = InventoryMovement.objects.get(id=cancel_id)
                 product = move.product
                 product.current_stock -= move.quantity
+                # 상태 재계산
+                ratio = product.current_stock / product.optimal_stock if product.optimal_stock > 0 else 0
+                if ratio < 0.3: product.status = 'LOW'
+                elif ratio > 1.5: product.status = 'OVER'
+                else: product.status = 'GOOD'
                 product.save()
                 move.delete()
             return redirect(request.META.get('HTTP_REFERER', 'super_admin'))
@@ -485,6 +507,11 @@ def super_admin(request):
                 
                 # 2. Update Inventory (Immediate Arrival)
                 item.current_stock += qty
+                # 상태 재계산
+                ratio = item.current_stock / item.optimal_stock if item.optimal_stock > 0 else 1.0
+                if ratio < 0.3: item.status = 'LOW'
+                elif ratio > 1.5: item.status = 'OVER'
+                else: item.status = 'GOOD'
                 item.save()
 
                 # 3. Log Movement
